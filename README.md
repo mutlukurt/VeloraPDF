@@ -21,7 +21,7 @@ Current local build output:
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_0.1.0_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.1_aarch64.dmg
 ```
 
 ## Important
@@ -401,7 +401,7 @@ The current copied desktop installer is:
 ## Current Version
 
 ```text
-0.1.0
+1.0.1
 ```
 
 Bundle identifier:
@@ -433,6 +433,37 @@ Current architecture build:
 ```text
 aarch64
 ```
+
+## Version History
+
+### 1.0.1
+
+Released as the first polish update after the initial v1 desktop build.
+
+Changes:
+
+- Recent files on the home screen can now be reopened directly from their cards.
+- The floating page and zoom control is fixed to the viewer area instead of living inside the scrollable page canvas.
+- macOS trackpad pinch zoom support was added for two-finger zoom gestures.
+- `Ctrl + wheel` zoom handling was added for WebView/browser-style pinch events.
+- App metadata and documentation were updated to version `1.0.1`.
+
+### 1.0.0
+
+Initial Velora PDF v1 desktop release.
+
+Included:
+
+- Local PDF open flow.
+- PDF.js page rendering.
+- Thumbnail navigation.
+- Search panel.
+- Dark and light premium app shell.
+- Eye protection mode.
+- Highlight, pen, shape, text, and sticky-note annotation overlay.
+- JSON sidecar annotation save.
+- Best-effort annotated PDF export.
+- macOS app icon and DMG build.
 
 ## Privacy
 

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { AppShell } from "../components/layout/AppShell";
 import { exportAnnotatedPdf } from "../lib/pdf/exportPdf";
 import { loadPdfDocument } from "../lib/pdf/loadPdf";
-import { pickPdfFile, saveJsonSidecar, savePdfBytes } from "../lib/tauri/fileDialog";
+import { pickPdfFile, readPdfFile, saveJsonSidecar, savePdfBytes } from "../lib/tauri/fileDialog";
 import { registerShortcuts } from "../lib/utils/shortcuts";
 import { useAnnotationStore } from "../stores/useAnnotationStore";
 import { usePdfStore } from "../stores/usePdfStore";
@@ -32,18 +32,37 @@ export function App() {
     try {
       const picked = await pickPdfFile();
       if (!picked) return;
-      const file = { ...picked, openedAt: Date.now() };
-      usePdfStore.getState().setActiveFile(file);
-      useAnnotationStore.getState().setAnnotations([]);
-      const pdf = await loadPdfDocument(picked.data);
-      usePdfStore.getState().setPdf(pdf);
-      usePdfStore.getState().setPageCount(pdf.numPages);
-      usePdfStore.getState().addRecentFile({ name: picked.name, path: picked.path, lastOpened: Date.now(), pageCount: pdf.numPages });
-      useUiStore.getState().setSidebarMode("thumbnails");
+      await openPickedPdf(picked);
     } catch (error) {
       console.error(error);
       usePdfStore.getState().setStatusMessage("Could not open this PDF");
       window.alert("Velora PDF could not open this file.");
+    }
+  };
+
+  const openPickedPdf = async (picked: { name: string; path?: string; data: Uint8Array }) => {
+    const file = { ...picked, openedAt: Date.now() };
+    usePdfStore.getState().setActiveFile(file);
+    useAnnotationStore.getState().setAnnotations([]);
+    const pdf = await loadPdfDocument(picked.data);
+    usePdfStore.getState().setPdf(pdf);
+    usePdfStore.getState().setPageCount(pdf.numPages);
+    usePdfStore.getState().setCurrentPage(1);
+    usePdfStore.getState().addRecentFile({ name: picked.name, path: picked.path, lastOpened: Date.now(), pageCount: pdf.numPages });
+    useUiStore.getState().setSidebarMode("thumbnails");
+  };
+
+  const openRecentPdf = async (path?: string) => {
+    if (!path) {
+      window.alert("This recent file was opened from the browser preview and cannot be reopened by path. Please use Open PDF.");
+      return;
+    }
+
+    try {
+      await openPickedPdf(await readPdfFile(path));
+    } catch (error) {
+      console.error(error);
+      window.alert("Velora PDF could not reopen this recent file. It may have moved or macOS permissions may need to be refreshed.");
     }
   };
 
@@ -86,5 +105,5 @@ export function App() {
     [currentPage, pageCount, redo, setActiveTool, setCurrentPage, setRightPanelOpen, setSidebarMode, setZoom, undo, zoom],
   );
 
-  return <AppShell onOpenPdf={openPdf} onSaveAnnotations={saveAnnotations} onExportPdf={exportPdf} />;
+  return <AppShell onOpenPdf={openPdf} onOpenRecentPdf={openRecentPdf} onSaveAnnotations={saveAnnotations} onExportPdf={exportPdf} />;
 }

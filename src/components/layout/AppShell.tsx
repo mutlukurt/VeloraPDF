@@ -7,11 +7,12 @@ import { usePdfStore } from "../../stores/usePdfStore";
 
 type AppShellProps = {
   onOpenPdf: () => void;
+  onOpenRecentPdf: (path?: string) => void;
   onSaveAnnotations: () => void;
   onExportPdf: () => void;
 };
 
-export function AppShell({ onOpenPdf, onSaveAnnotations, onExportPdf }: AppShellProps) {
+export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExportPdf }: AppShellProps) {
   const pdf = usePdfStore((state) => state.pdf);
 
   return (
@@ -19,7 +20,7 @@ export function AppShell({ onOpenPdf, onSaveAnnotations, onExportPdf }: AppShell
       <TopToolbar onOpenPdf={onOpenPdf} onSaveAnnotations={onSaveAnnotations} onExportPdf={onExportPdf} />
       <div className="flex min-h-0 flex-1">
         <LeftRail />
-        {pdf ? <PdfViewer pdf={pdf} /> : <HomeScreen onOpenPdf={onOpenPdf} />}
+        {pdf ? <PdfViewer pdf={pdf} /> : <HomeScreen onOpenPdf={onOpenPdf} onOpenRecentPdf={onOpenRecentPdf} />}
         <RightInspector />
       </div>
     </div>

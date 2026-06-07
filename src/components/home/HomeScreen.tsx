@@ -4,7 +4,7 @@ import { Button } from "../ui/Button";
 import { RecentFilesGrid } from "./RecentFilesGrid";
 import { usePdfStore } from "../../stores/usePdfStore";
 
-export function HomeScreen({ onOpenPdf }: { onOpenPdf: () => void }) {
+export function HomeScreen({ onOpenPdf, onOpenRecentPdf }: { onOpenPdf: () => void; onOpenRecentPdf: (path?: string) => void }) {
   const recentFiles = usePdfStore((state) => state.recentFiles);
 
   return (
@@ -31,7 +31,7 @@ export function HomeScreen({ onOpenPdf }: { onOpenPdf: () => void }) {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-secondary">Recent files</h2>
           </div>
-          <RecentFilesGrid files={recentFiles} />
+          <RecentFilesGrid files={recentFiles} onOpenRecentPdf={onOpenRecentPdf} />
         </section>
       </div>
     </main>

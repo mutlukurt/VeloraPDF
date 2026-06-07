@@ -45,6 +45,15 @@ export async function pickPdfFile(): Promise<PickedPdf | null> {
   return { name: fileNameFromPath(selected), path: selected, data };
 }
 
+export async function readPdfFile(path: string): Promise<PickedPdf> {
+  if (!isTauriRuntime()) {
+    throw new Error("Recent files with local paths can only be reopened in the Tauri desktop app.");
+  }
+
+  const data = await readFile(path);
+  return { name: fileNameFromPath(path), path, data };
+}
+
 export async function saveJsonSidecar(defaultPath: string | undefined, payload: unknown) {
   const fileName = defaultPath ? `${defaultPath.replace(/\.pdf$/i, "")}.velora.json` : "annotations.velora.json";
 
