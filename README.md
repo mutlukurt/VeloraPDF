@@ -446,6 +446,8 @@ Changes:
 - The floating page and zoom control is fixed to the viewer area instead of living inside the scrollable page canvas.
 - macOS trackpad pinch zoom support was added for two-finger zoom gestures.
 - `Ctrl + wheel` zoom handling was added for WebView/browser-style pinch events.
+- Pinch zoom was optimized to use a smooth GPU preview during the gesture and defer heavy PDF.js re-rendering until the gesture ends.
+- PDF pages now render lazily near the viewport instead of re-rendering every page during zoom changes.
 - App metadata and documentation were updated to version `1.0.1`.
 
 ### 1.0.0
