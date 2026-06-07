@@ -1,0 +1,27 @@
+import { LeftRail } from "./LeftRail";
+import { RightInspector } from "./RightInspector";
+import { TopToolbar } from "./TopToolbar";
+import { HomeScreen } from "../home/HomeScreen";
+import { PdfViewer } from "../pdf/PdfViewer";
+import { usePdfStore } from "../../stores/usePdfStore";
+
+type AppShellProps = {
+  onOpenPdf: () => void;
+  onSaveAnnotations: () => void;
+  onExportPdf: () => void;
+};
+
+export function AppShell({ onOpenPdf, onSaveAnnotations, onExportPdf }: AppShellProps) {
+  const pdf = usePdfStore((state) => state.pdf);
+
+  return (
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-app text-primary">
+      <TopToolbar onOpenPdf={onOpenPdf} onSaveAnnotations={onSaveAnnotations} onExportPdf={onExportPdf} />
+      <div className="flex min-h-0 flex-1">
+        <LeftRail />
+        {pdf ? <PdfViewer pdf={pdf} /> : <HomeScreen onOpenPdf={onOpenPdf} />}
+        <RightInspector />
+      </div>
+    </div>
+  );
+}
