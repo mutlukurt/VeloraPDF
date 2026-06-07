@@ -1,6 +1,6 @@
 # Velora PDF
 
-![Velora PDF brand preview](assets/brand.png)
+![Velora PDF brand preview](assets/brand.webp)
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.1-aarch64.dmg)
 
