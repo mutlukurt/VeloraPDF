@@ -447,6 +447,8 @@ Changes:
 - macOS trackpad pinch zoom support was added for two-finger zoom gestures.
 - `Ctrl + wheel` zoom handling was added for WebView/browser-style pinch events.
 - Pinch zoom was optimized to use a smooth GPU preview during the gesture and defer heavy PDF.js re-rendering until the gesture ends.
+- Zoom preview no longer uses a whole-workspace CSS transform, preventing ghost side panels and unstable scroll bounds during pinch gestures.
+- Zoom now resizes the PDF page layout directly while preserving viewport center, so the document can freely find its natural scroll area.
 - PDF pages now render lazily near the viewport instead of re-rendering every page during zoom changes.
 - App metadata and documentation were updated to version `1.0.1`.
 

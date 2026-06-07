@@ -6,14 +6,15 @@ type PdfPageProps = {
   pdf: PDFDocumentProxy;
   pageNumber: number;
   zoom: number;
+  displayZoom: number;
   onVisible: (page: number) => void;
 };
 
-export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, onVisible }: PdfPageProps) {
+export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoom, onVisible }: PdfPageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);
-  const [size, setSize] = useState({ width: 760 * zoom, height: 980 * zoom });
+  const [size, setSize] = useState({ width: 760 * displayZoom, height: 980 * displayZoom });
   const [shouldRender, setShouldRender] = useState(pageNumber <= 3);
 
   useEffect(() => {
@@ -28,9 +29,9 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, onVisible 
 
   useEffect(() => {
     if (!page || !canvasRef.current) return;
-    const viewport = page.getViewport({ scale: zoom * 1.35 });
+    const viewport = page.getViewport({ scale: displayZoom * 1.35 });
     setSize({ width: viewport.width, height: viewport.height });
-  }, [page, zoom]);
+  }, [displayZoom, page]);
 
   useEffect(() => {
     if (!page || !canvasRef.current || !shouldRender) return;
@@ -50,8 +51,8 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, onVisible 
         if (!visibleContext) return;
         canvas.width = buffer.width;
         canvas.height = buffer.height;
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
         visibleContext.setTransform(1, 0, 0, 1, 0, 0);
         visibleContext.drawImage(buffer, 0, 0);
       })

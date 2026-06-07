@@ -24,10 +24,22 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const previewFrame = useRef<number | null>(null);
   const pendingScrollAnchor = useRef<{ ratio: number; left: number; top: number; width: number; height: number } | null>(null);
   const effectiveZoom = previewZoom ?? zoom;
-  const previewScale = previewZoom ? previewZoom / zoom : 1;
 
   const schedulePreviewZoom = useCallback((nextZoom: number) => {
     const clamped = Math.min(Math.max(nextZoom, 0.45), 2.6);
+    const previousZoom = previewZoomRef.current ?? usePdfStore.getState().zoom;
+    const scroller = scrollerRef.current;
+
+    if (scroller && previousZoom > 0) {
+      pendingScrollAnchor.current = {
+        ratio: clamped / previousZoom,
+        left: scroller.scrollLeft,
+        top: scroller.scrollTop,
+        width: scroller.clientWidth,
+        height: scroller.clientHeight,
+      };
+    }
+
     previewZoomRef.current = clamped;
 
     if (previewFrame.current !== null) return;
@@ -40,17 +52,6 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const commitPreviewZoom = useCallback(() => {
     const nextZoom = previewZoomRef.current;
     if (nextZoom === null) return;
-    const scroller = scrollerRef.current;
-    const currentZoom = usePdfStore.getState().zoom;
-    if (scroller && currentZoom > 0) {
-      pendingScrollAnchor.current = {
-        ratio: nextZoom / currentZoom,
-        left: scroller.scrollLeft,
-        top: scroller.scrollTop,
-        width: scroller.clientWidth,
-        height: scroller.clientHeight,
-      };
-    }
     setZoom(nextZoom);
     previewZoomRef.current = null;
     setPreviewZoom(null);
@@ -59,7 +60,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   useLayoutEffect(() => {
     const anchor = pendingScrollAnchor.current;
     const scroller = scrollerRef.current;
-    if (!anchor || !scroller || previewZoom !== null) return;
+    if (!anchor || !scroller) return;
 
     pendingScrollAnchor.current = null;
     scroller.scrollLeft = Math.max(0, (anchor.left + anchor.width / 2) * anchor.ratio - anchor.width / 2);
@@ -127,14 +128,9 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       >
         <div
           className={`mx-auto flex min-h-full w-fit flex-col items-center px-12 py-12 ${viewSettings.showGaps ? "gap-16" : "gap-4"}`}
-          style={{
-            transform: previewScale !== 1 ? `scale(${previewScale}) translateZ(0)` : undefined,
-            transformOrigin: "top center",
-            willChange: previewZoom ? "transform" : "auto",
-          }}
         >
           {pages.map((page) => (
-            <PdfPage key={page} pdf={pdf} pageNumber={page} zoom={zoom} onVisible={onVisible} />
+            <PdfPage key={page} pdf={pdf} pageNumber={page} zoom={zoom} displayZoom={effectiveZoom} onVisible={onVisible} />
           ))}
         </div>
       </div>
