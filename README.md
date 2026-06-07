@@ -1,16 +1,16 @@
 # Velora PDF
 
+![Velora PDF brand preview](assets/brand.png)
+
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.1-aarch64.dmg)
+
 Velora PDF is a private, local-first desktop PDF reader and lightweight annotation workspace for macOS.
 
 It is designed for people who want a calm, premium PDF reading experience without accounts, subscriptions, cloud sync, tracking, analytics, or external APIs. PDFs are opened from the user’s own device, rendered locally, annotated locally, and exported locally.
 
 ## Download macOS DMG
 
-Download for macOS:
-
-```text
-Velora PDF.dmg
-```
+Download for macOS: [Velora-PDF-1.0.1-aarch64.dmg](downloads/Velora-PDF-1.0.1-aarch64.dmg)
 
 Current local build output:
 

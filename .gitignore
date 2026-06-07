@@ -27,3 +27,4 @@ Thumbs.db
 
 # Local generated installers
 *.dmg
+!downloads/*.dmg
