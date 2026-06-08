@@ -11,6 +11,7 @@ type UiState = {
   eyeProtection: boolean;
   keepScreenAwake: boolean;
   pagesPanelOpen: boolean;
+  readingMode: boolean;
   settingsOpen: boolean;
   searchOpen: boolean;
   hydrate: () => Promise<void>;
@@ -18,6 +19,7 @@ type UiState = {
   setEyeProtection: (enabled: boolean) => Promise<void>;
   setKeepScreenAwake: (enabled: boolean) => Promise<void>;
   setPagesPanelOpen: (open: boolean) => void;
+  setReadingMode: (enabled: boolean) => void;
   setSettingsOpen: (open: boolean) => void;
   setSearchOpen: (open: boolean) => void;
 };
@@ -33,6 +35,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   eyeProtection: false,
   keepScreenAwake: false,
   pagesPanelOpen: false,
+  readingMode: false,
   settingsOpen: false,
   searchOpen: false,
   hydrate: async () => {
@@ -55,6 +58,7 @@ export const useUiStore = create<UiState>((set, get) => ({
     await AsyncStorage.setItem(UI_KEY, JSON.stringify({ theme: get().theme, eyeProtection: get().eyeProtection, keepScreenAwake }));
   },
   setPagesPanelOpen: (pagesPanelOpen) => set({ pagesPanelOpen }),
+  setReadingMode: (readingMode) => set({ readingMode, pagesPanelOpen: false, searchOpen: false, settingsOpen: false }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setSearchOpen: (searchOpen) => set({ searchOpen })
 }));

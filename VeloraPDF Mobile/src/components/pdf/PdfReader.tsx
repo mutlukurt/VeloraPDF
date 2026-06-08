@@ -19,6 +19,8 @@ export function PdfReader() {
   const currentPage = usePdfStore((state) => state.currentPage);
   const setPageCount = usePdfStore((state) => state.setPageCount);
   const activeTool = useAnnotationStore((state) => state.activeTool);
+  const readingMode = useUiStore((state) => state.readingMode);
+  const setReadingMode = useUiStore((state) => state.setReadingMode);
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
   const eyeProtection = useUiStore((state) => state.eyeProtection);
   const theme = getTheme(resolvedTheme, eyeProtection);
@@ -36,7 +38,7 @@ export function PdfReader() {
     const horizontalPadding = 18;
     const verticalPadding = 18;
     const readableMaxWidth =
-      device.isTablet && !device.isLandscape
+      device.isTablet && !device.isLandscape && !readingMode
         ? Math.min(viewport.width - horizontalPadding * 2, 520)
         : viewport.width - horizontalPadding * 2;
     const maxWidth = Math.max(1, readableMaxWidth);
@@ -47,7 +49,7 @@ export function PdfReader() {
       return { width: maxWidth, height: maxWidth / pageRatio };
     }
     return { width: maxHeight * pageRatio, height: maxHeight };
-  }, [device.isLandscape, device.isTablet, pageSize, viewport.height, viewport.width]);
+  }, [device.isLandscape, device.isTablet, pageSize, readingMode, viewport.height, viewport.width]);
 
   const panGesture = useMemo(
     () =>
@@ -84,6 +86,16 @@ export function PdfReader() {
     [savedScale, savedTranslateX, savedTranslateY, scale, translateX, translateY]
   );
 
+  const doubleTapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .enabled(readingMode)
+        .numberOfTaps(2)
+        .runOnJS(true)
+        .onEnd(() => setReadingMode(false)),
+    [readingMode, setReadingMode]
+  );
+
   const animatedPageStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }]
   }));
@@ -111,7 +123,7 @@ export function PdfReader() {
         setViewport((current) => (current.width === width && current.height === height ? current : { width, height }));
       }}
     >
-      <GestureDetector gesture={Gesture.Simultaneous(panGesture, pinchGesture)}>
+      <GestureDetector gesture={Gesture.Simultaneous(panGesture, pinchGesture, doubleTapGesture)}>
         <Animated.View style={[styles.page, { width: pageFrame.width, height: pageFrame.height }, animatedPageStyle]}>
           <Pdf
             ref={pdfRef}

@@ -89,6 +89,7 @@ This release includes:
 - Full multi-page PDF loading and stable page navigation for imported documents.
 - A cleaned tablet PDF reader with the toolbar fixed at the top, a visible back/home control, compact annotation tools, and the redundant left page list removed.
 - Corrected PDF and notebook layering so the reading/writing surface stays below the fixed toolbar on phones and tablets.
+- Added notebook focus mode on phones and tablets, hiding note controls for a larger writing surface and restoring them with a double tap.
 - Responsive PDF reading across portrait and landscape tablet use, with pinch zoom available on the reading surface.
 - A notebook workspace for clean A4 pages, including blank, lined, and grid paper templates.
 - Portrait and landscape notebook pages, with orientation saved per page.

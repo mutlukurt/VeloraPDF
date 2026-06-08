@@ -66,6 +66,7 @@ This release includes:
 - Tablet-aware PDF landscape behavior with more usable page fitting and pinch zoom available in the reading surface.
 - Improved phone and tablet notebook workspace with top-first controls for pen, highlight, eraser, undo, redo, color selection, zoom, page navigation, export, and recording.
 - Corrected PDF and notebook layering so the reading/writing surface stays below the fixed toolbar on phones and tablets.
+- Added notebook focus mode on phones and tablets, hiding note controls for a larger writing surface and restoring them with a double tap.
 - Portrait and landscape A4 notebook pages, with page orientation saved per page and respected during PDF export.
 - Stylus-friendly palm rejection behavior for PDF annotation and notebook writing.
 - Updated all ABI release APKs: `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.

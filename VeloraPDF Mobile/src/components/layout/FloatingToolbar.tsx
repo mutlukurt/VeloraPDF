@@ -1,4 +1,4 @@
-import { Circle, Eraser, Hand, Highlighter, MousePointer2, PenLine, Redo2, Square, StickyNote, Type, Undo2 } from "lucide-react-native";
+import { BookOpen, Circle, Eraser, Hand, Highlighter, MousePointer2, PenLine, Redo2, Square, StickyNote, Type, Undo2 } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 import { IconButton } from "@/components/ui/IconButton";
 import { useAnnotationStore } from "@/stores/useAnnotationStore";
@@ -31,6 +31,8 @@ export function FloatingToolbar({ compact = false }: { compact?: boolean }) {
   const canRedo = useAnnotationStore((state) => state.canRedoForFile(file?.id));
   const undo = useAnnotationStore((state) => state.undo);
   const redo = useAnnotationStore((state) => state.redo);
+  const readingMode = useUiStore((state) => state.readingMode);
+  const setReadingMode = useUiStore((state) => state.setReadingMode);
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
   const eyeProtection = useUiStore((state) => state.eyeProtection);
   const theme = getTheme(resolvedTheme, eyeProtection);
@@ -39,6 +41,9 @@ export function FloatingToolbar({ compact = false }: { compact?: boolean }) {
   return (
     <View style={[styles.toolbar, compact ? styles.compactToolbar : null, { backgroundColor: theme.toolbar, borderColor: theme.border, shadowColor: theme.accent }]}>
       <View style={[styles.row, compact ? styles.compactRow : null]}>
+        <IconButton active={readingMode} onPress={() => setReadingMode(true)} size={compact ? 36 : 42}>
+          <BookOpen color={readingMode ? "#FFFFFF" : iconColor} size={compact ? 17 : 18} />
+        </IconButton>
         <IconButton active={palmRejection} onPress={() => setPalmRejection(!palmRejection)} size={compact ? 36 : 42}>
           <Hand color={palmRejection ? "#FFFFFF" : iconColor} size={compact ? 17 : 18} />
         </IconButton>

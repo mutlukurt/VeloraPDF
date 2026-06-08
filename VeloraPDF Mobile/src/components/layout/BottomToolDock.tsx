@@ -1,4 +1,4 @@
-import { Eraser, Hand, Highlighter, MoreHorizontal, MousePointer2, PenLine, Redo2, Search, StickyNote, Undo2 } from "lucide-react-native";
+import { BookOpen, Eraser, Hand, Highlighter, MoreHorizontal, MousePointer2, PenLine, Redo2, Search, StickyNote, Undo2 } from "lucide-react-native";
 import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { IconButton } from "@/components/ui/IconButton";
 import { useAnnotationStore } from "@/stores/useAnnotationStore";
@@ -21,6 +21,8 @@ export function BottomToolDock() {
   const canRedo = useAnnotationStore((state) => state.canRedoForFile(file?.id));
   const undo = useAnnotationStore((state) => state.undo);
   const redo = useAnnotationStore((state) => state.redo);
+  const readingMode = useUiStore((state) => state.readingMode);
+  const setReadingMode = useUiStore((state) => state.setReadingMode);
   const setPagesPanelOpen = useUiStore((state) => state.setPagesPanelOpen);
   const setSearchOpen = useUiStore((state) => state.setSearchOpen);
   const setSettingsOpen = useUiStore((state) => state.setSettingsOpen);
@@ -28,12 +30,15 @@ export function BottomToolDock() {
   const eyeProtection = useUiStore((state) => state.eyeProtection);
   const theme = getTheme(resolvedTheme, eyeProtection);
   const iconColor = resolvedTheme === "dark" ? "#FFFFFF" : "#0E0E12";
-  const buttonSize = Math.max(28, Math.min(36, Math.floor((width * 0.96 - 58) / 10)));
+  const buttonSize = Math.max(27, Math.min(35, Math.floor((width * 0.96 - 62) / 11)));
   const iconSize = Math.max(16, Math.min(19, buttonSize - 12));
 
   return (
     <View style={[styles.dock, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
       <View style={styles.row}>
+        <IconButton active={readingMode} onPress={() => setReadingMode(true)} size={buttonSize}>
+          <BookOpen color={readingMode ? "#FFFFFF" : iconColor} size={iconSize} />
+        </IconButton>
         <IconButton active={palmRejection} onPress={() => setPalmRejection(!palmRejection)} size={buttonSize}>
           <Hand color={palmRejection ? "#FFFFFF" : iconColor} size={iconSize} />
         </IconButton>

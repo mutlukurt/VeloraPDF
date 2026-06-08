@@ -1,6 +1,6 @@
 import { Audio } from "expo-av";
 import { useRouter } from "expo-router";
-import { ChevronLeft, ChevronRight, Eraser, FileDown, FilePlus2, Hand, Highlighter, Mic, MousePointer2, Pause, PenLine, Play, Redo2, StopCircle, Undo2 } from "lucide-react-native";
+import { BookOpen, ChevronLeft, ChevronRight, Eraser, FileDown, FilePlus2, Hand, Highlighter, Mic, MousePointer2, Pause, PenLine, Play, Redo2, StopCircle, Undo2 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -28,6 +28,8 @@ export function NotebookScreen() {
   const device = useDeviceClass();
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
   const eyeProtection = useUiStore((state) => state.eyeProtection);
+  const readingMode = useUiStore((state) => state.readingMode);
+  const setReadingMode = useUiStore((state) => state.setReadingMode);
   const theme = getTheme(resolvedTheme, eyeProtection);
   const notebook = useNotebookStore((state) => state.currentNotebook);
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +65,8 @@ export function NotebookScreen() {
 
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+    setReadingMode(false);
+  }, [hydrate, setReadingMode]);
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -83,10 +86,10 @@ export function NotebookScreen() {
   const currentPageVoiceNotes = useMemo(() => notebook?.voiceNotes.filter((voiceNote) => (voiceNote.page || 1) === currentPage) ?? [], [currentPage, notebook?.voiceNotes]);
   const toolbarButtonSize = device.isTablet ? 36 : 40;
   const pageButtonSize = device.isTablet ? 34 : 36;
-  const availablePageHeight = Math.max(320, height - (isLandscape ? 230 : device.isTablet ? 330 : 420));
+  const availablePageHeight = Math.max(320, height - (readingMode ? 28 : isLandscape ? 230 : device.isTablet ? 330 : 420));
   const availablePageWidth = Math.max(320, width - 24);
   const pageAspect = currentPageOrientation === "landscape" ? 1.414 : 1 / 1.414;
-  const maxPageWidth = Math.min(availablePageWidth, device.isTablet ? (currentPageOrientation === "landscape" ? 1280 : 860) : availablePageWidth);
+  const maxPageWidth = Math.min(availablePageWidth, device.isTablet && !readingMode ? (currentPageOrientation === "landscape" ? 1280 : 860) : availablePageWidth);
   const pageWidth = Math.min(maxPageWidth, availablePageHeight * pageAspect);
   const pageHeight = pageWidth / pageAspect;
   const panGesture = useMemo(
@@ -121,6 +124,15 @@ export function NotebookScreen() {
           }
         }),
     [savedScale, savedTranslateX, savedTranslateY, scale, translateX, translateY]
+  );
+  const doubleTapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .enabled(readingMode)
+        .numberOfTaps(2)
+        .runOnJS(true)
+        .onEnd(() => setReadingMode(false)),
+    [readingMode, setReadingMode]
   );
   const pageTransformStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }]
@@ -304,6 +316,7 @@ export function NotebookScreen() {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: theme.app }]}>
+      {!readingMode ? (
       <View style={styles.controlsLayer}>
         <View style={[styles.header, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
           <IconButton onPress={() => router.replace("/")}>
@@ -328,6 +341,9 @@ export function NotebookScreen() {
         </View>
         <View style={[styles.dock, device.isTablet ? styles.dockTablet : null, isLandscape ? styles.dockLandscape : null, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
           <View style={styles.pageRow}>
+            <IconButton active={readingMode} onPress={() => setReadingMode(true)} size={pageButtonSize}>
+              <BookOpen color={readingMode ? "#FFFFFF" : theme.text} size={18} />
+            </IconButton>
             <IconButton onPress={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage <= 1} size={pageButtonSize}>
               <ChevronLeft color={theme.text} size={18} />
             </IconButton>
@@ -386,8 +402,9 @@ export function NotebookScreen() {
           </View>
         </View>
       </View>
+      ) : null}
       <View style={styles.workspace}>
-        <GestureDetector gesture={Gesture.Simultaneous(panGesture, pinchGesture)}>
+        <GestureDetector gesture={Gesture.Simultaneous(panGesture, pinchGesture, doubleTapGesture)}>
           <Animated.View
             onPointerDown={(event) => updatePalmRejection(event.nativeEvent as unknown as Record<string, unknown>)}
             onPointerMove={(event) => updatePalmRejection(event.nativeEvent as unknown as Record<string, unknown>)}

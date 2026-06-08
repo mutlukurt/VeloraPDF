@@ -12,20 +12,25 @@ import { useUiStore } from "@/stores/useUiStore";
 
 export function PhoneReaderLayout() {
   const pagesOpen = useUiStore((state) => state.pagesPanelOpen);
+  const readingMode = useUiStore((state) => state.readingMode);
+  const setReadingMode = useUiStore((state) => state.setReadingMode);
   const setPagesPanelOpen = useUiStore((state) => state.setPagesPanelOpen);
   useEffect(() => {
     setPagesPanelOpen(false);
-  }, [setPagesPanelOpen]);
+    setReadingMode(false);
+  }, [setPagesPanelOpen, setReadingMode]);
 
   return (
     <View style={styles.root}>
-      <View style={styles.controlsLayer}>
-        <AppHeader />
-        <BottomToolDock />
-        <View style={styles.pageControl}>
-          <PageControl compact />
+      {!readingMode ? (
+        <View style={styles.controlsLayer}>
+          <AppHeader />
+          <BottomToolDock />
+          <View style={styles.pageControl}>
+            <PageControl compact />
+          </View>
         </View>
-      </View>
+      ) : null}
       <View style={styles.reader}>
         <PdfPageSurface />
       </View>
