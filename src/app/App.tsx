@@ -7,6 +7,7 @@ import { registerShortcuts } from "../lib/utils/shortcuts";
 import { useAnnotationStore } from "../stores/useAnnotationStore";
 import { usePdfStore } from "../stores/usePdfStore";
 import { useUiStore } from "../stores/useUiStore";
+import { useWorkspaceStore } from "../lib/store/workspace";
 
 export function App() {
   const theme = useUiStore((state) => state.theme);
@@ -22,6 +23,12 @@ export function App() {
   const annotations = useAnnotationStore((state) => state.annotations);
   const undo = useAnnotationStore((state) => state.undo);
   const redo = useAnnotationStore((state) => state.redo);
+
+  const initializeWorkspace = useWorkspaceStore((state) => state.initialize);
+
+  useEffect(() => {
+    initializeWorkspace();
+  }, [initializeWorkspace]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

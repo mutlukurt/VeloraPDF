@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 export type ThemeMode = "light" | "dark";
 export type SidebarMode = "home" | "thumbnails" | "search" | "bookmarks" | "comments" | "settings" | null;
+export type ActiveView = "pdf" | "notes";
 export type ActiveTool =
   | "select"
   | "hand"
@@ -31,10 +32,12 @@ type UiState = {
   sidebarMode: SidebarMode;
   rightPanelOpen: boolean;
   viewSettings: ViewSettings;
+  activeView: ActiveView;
   toggleTheme: () => void;
   setTheme: (theme: ThemeMode) => void;
   setActiveTool: (tool: ActiveTool) => void;
   setSidebarMode: (mode: SidebarMode) => void;
+  setActiveView: (view: ActiveView) => void;
   toggleRightPanel: () => void;
   setRightPanelOpen: (open: boolean) => void;
   updateViewSettings: (settings: Partial<ViewSettings>) => void;
@@ -65,6 +68,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   sidebarMode: null,
   rightPanelOpen: true,
   viewSettings: initialSettings(),
+  activeView: "pdf",
   toggleTheme: () => {
     const theme = get().theme === "dark" ? "light" : "dark";
     localStorage.setItem(THEME_KEY, theme);
@@ -76,6 +80,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
   setActiveTool: (tool) => set({ activeTool: tool }),
   setSidebarMode: (mode) => set({ sidebarMode: mode }),
+  setActiveView: (view) => set({ activeView: view }),
   toggleRightPanel: () => set((state) => ({ rightPanelOpen: !state.rightPanelOpen })),
   setRightPanelOpen: (open) => set({ rightPanelOpen: open }),
   updateViewSettings: (settings) =>

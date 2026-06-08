@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.1-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.4-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.1-aarch64.dmg](downloads/Velora-PDF-1.0.1-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.4-aarch64.dmg](downloads/Velora-PDF-1.0.4-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.4.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.1_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.4_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.4.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.1
+1.0.4
 ```
 
 Bundle identifier:
@@ -482,6 +482,38 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.4
+
+Released to resolve window layout conflicts when operating in Notes view under small window/screen dimensions.
+
+Changes:
+
+- Fixed the macOS window control traffic lights (close, minimize, zoom buttons) overlap issue in the Notes workspace view.
+- Imported the missing class utility `cn` inside `LeftRail.tsx`.
+- Shifted top icons in `LeftRail` and layout elements in `Sidebar` (both open and collapsed states) to start at `y=48px` to cleanly clear the overlay buttons.
+- Bumped application version to `1.0.4` and built the production DMG release.
+
+### 1.0.3
+
+Released to integrate the private local workspace features and rich notes functionality.
+
+Changes:
+
+- Integrated the block-based private local workspace notes functionality (from Kairnly project) into Velora PDF.
+- Enabled SQLite local-first storage, Welcome pages, page icons, drag-and-drop sortable page trees, Tiptap-based rich-text editing, sidebar toggle, settings, and command palette.
+- Integrated Velora PDF styles (variables, extended shadows) and added Notes Workspace entry cards to the home screen.
+- Bumped version to `1.0.3` and built the production DMG release.
+
+### 1.0.2
+
+Released to support clearing/deleting recent files from the dashboard.
+
+Changes:
+
+- Added the ability to delete recent file cards directly from the Home screen grid.
+- Added a hover-visible trash icon button with event propagation handling to clear files from the local storage.
+- Bumped version to `1.0.2` and built the production DMG release.
 
 ### 1.0.1
 

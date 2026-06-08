@@ -3,7 +3,9 @@ import { RightInspector } from "./RightInspector";
 import { TopToolbar } from "./TopToolbar";
 import { HomeScreen } from "../home/HomeScreen";
 import { PdfViewer } from "../pdf/PdfViewer";
+import { NotesWorkspace } from "../notes/NotesWorkspace";
 import { usePdfStore } from "../../stores/usePdfStore";
+import { useUiStore } from "../../stores/useUiStore";
 
 type AppShellProps = {
   onOpenPdf: () => void;
@@ -14,6 +16,16 @@ type AppShellProps = {
 
 export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExportPdf }: AppShellProps) {
   const pdf = usePdfStore((state) => state.pdf);
+  const activeView = useUiStore((state) => state.activeView);
+
+  if (activeView === "notes") {
+    return (
+      <div className="flex h-screen w-screen overflow-hidden bg-app text-primary">
+        <LeftRail />
+        <NotesWorkspace />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-app text-primary">

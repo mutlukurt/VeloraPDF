@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;450;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,6 +21,23 @@
   --pdf-canvas: #ececf1;
   --accent-gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
   color-scheme: light;
+
+  /* Kairnly Editor Integration Variables */
+  --background: var(--workspace);
+  --background-translucent: rgba(247, 247, 250, 0.78);
+  --surface-muted: var(--elevated);
+  --surface-hover: color-mix(in srgb, var(--surface) 92%, var(--primary));
+  --text: var(--primary);
+  --text-muted: var(--secondary);
+  --text-faint: color-mix(in srgb, var(--secondary) 60%, transparent);
+  --accent-strong: var(--accent-secondary);
+  --accent-soft: var(--soft-purple);
+  --success: #6e8b68;
+  --danger: #b45a4d;
+  --danger-soft: rgba(180, 90, 77, 0.12);
+  --editor-font-size: 16px;
+  --editor-line-height: 1.75;
+  --editor-max-width: 860px;
 }
 
 .dark {
@@ -40,6 +58,21 @@
   --pdf-canvas: #24242b;
   --accent-gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
   color-scheme: dark;
+
+  /* Kairnly Editor Integration Variables (Dark Mode) */
+  --background: var(--workspace);
+  --background-translucent: rgba(9, 9, 11, 0.78);
+  --sidebar: #111114;
+  --surface-muted: var(--elevated);
+  --surface-hover: color-mix(in srgb, var(--surface) 92%, var(--primary));
+  --text: var(--primary);
+  --text-muted: var(--secondary);
+  --text-faint: color-mix(in srgb, var(--secondary) 60%, transparent);
+  --accent-strong: var(--accent-secondary);
+  --accent-soft: var(--soft-purple);
+  --success: #8dad82;
+  --danger: #d17265;
+  --danger-soft: rgba(209, 114, 101, 0.14);
 }
 
 @layer utilities {
@@ -95,3 +128,300 @@ input {
   border-radius: 999px;
   background-clip: content-box;
 }
+
+/* Kairnly Rich Editor Styles */
+.kairnly-editor {
+  min-height: 48vh;
+  color: var(--text);
+  font-size: var(--editor-font-size);
+  line-height: var(--editor-line-height);
+}
+
+:root[data-show-word-count='false'] .editor-word-count {
+  display: none;
+}
+
+:root[data-focus-mode='true'] .editor-word-count,
+:root[data-focus-mode='true'] .editor-word-count + span {
+  display: none;
+}
+
+.kairnly-editor p.is-editor-empty:first-child::before {
+  color: var(--text-faint);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.kairnly-editor h1,
+.kairnly-editor h2,
+.kairnly-editor h3 {
+  color: var(--text);
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.18;
+}
+
+.kairnly-editor h1 {
+  margin: 1.6em 0 0.5em;
+  font-size: 2.15rem;
+}
+
+.kairnly-editor h2 {
+  margin: 1.45em 0 0.45em;
+  font-size: 1.55rem;
+}
+
+.kairnly-editor h3 {
+  margin: 1.25em 0 0.35em;
+  font-size: 1.15rem;
+}
+
+.kairnly-editor p {
+  margin: 0.7em 0;
+}
+
+.kairnly-editor ul,
+.kairnly-editor ol {
+  padding-left: 1.5rem;
+}
+
+.kairnly-editor ul:not([data-type='taskList']) {
+  list-style-type: disc;
+}
+
+.kairnly-editor ol {
+  list-style-type: decimal;
+}
+
+.kairnly-editor li {
+  color: var(--text);
+  margin: 0.25rem 0;
+}
+
+.kairnly-editor li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.kairnly-editor li > p {
+  margin: 0.25rem 0;
+}
+
+.kairnly-editor blockquote {
+  margin: 1rem 0;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  background: var(--surface-muted);
+  padding: 0.75rem 1rem;
+  color: var(--text);
+}
+
+.kairnly-editor blockquote p:first-child {
+  margin-top: 0;
+}
+
+.kairnly-editor blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.kairnly-editor img {
+  display: block;
+  max-width: 100%;
+  max-height: 520px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 38px rgba(31, 31, 28, 0.08);
+}
+
+.kairnly-media-block {
+  margin: 1rem 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 12px 38px rgba(31, 31, 28, 0.06);
+}
+
+.kairnly-media-video {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  background: #111;
+}
+
+.kairnly-media-block figcaption {
+  padding: 0.75rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.kairnly-media-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+}
+
+.kairnly-media-card strong,
+.kairnly-media-card a {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.kairnly-media-kicker,
+.kairnly-media-url {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 0.74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kairnly-editor pre {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-muted);
+  padding: 1rem;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.kairnly-editor code {
+  border-radius: 5px;
+  background: var(--surface-muted);
+  padding: 0.13rem 0.35rem;
+  font-size: 0.9em;
+}
+
+.kairnly-editor pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.kairnly-editor hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.kairnly-editor a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kairnly-editor mark {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
+  color: inherit;
+  padding: 0.05rem 0.15rem;
+}
+
+.kairnly-editor ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.75rem 0;
+}
+
+.kairnly-editor ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0.35rem 0;
+}
+
+.kairnly-editor ul[data-type='taskList'] label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.78em;
+  padding-top: 0;
+  user-select: none;
+}
+
+.kairnly-editor ul[data-type='taskList'] li > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.kairnly-editor ul[data-type='taskList'] li > div > p {
+  margin: 0;
+}
+
+.kairnly-editor ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--text-faint);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--text-faint) 70%, transparent);
+}
+
+.kairnly-editor input[type='checkbox'] {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--text-faint) 72%, transparent);
+  border-radius: 0.32rem;
+  background: var(--surface);
+  box-shadow: inset 0 1px 1px rgba(31, 31, 28, 0.06);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.kairnly-editor input[type='checkbox']::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  clip-path: polygon(14% 44%, 0 60%, 40% 100%, 100% 18%, 84% 4%, 38% 68%);
+  background: #fff;
+  content: '';
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.kairnly-editor input[type='checkbox']:checked {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.kairnly-editor input[type='checkbox']:checked::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.kairnly-editor input[type='checkbox']:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--success) 48%, transparent);
+  outline-offset: 2px;
+}
+
+.kairnly-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 12px;
+  margin: 1.2rem 0;
+}
+
+.kairnly-editor th,
+.kairnly-editor td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.7rem;
+  vertical-align: top;
+}
+
+.kairnly-editor th {
+  background: var(--surface-muted);
+  font-weight: 600;
+}
+

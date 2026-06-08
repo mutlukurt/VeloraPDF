@@ -1,39 +1,112 @@
-import { FileText, Home, MessageSquareText, Paperclip, Search, Settings, Sidebar, Star } from "lucide-react";
+import { FileText, Home, MessageSquareText, Paperclip, Search, Settings, Sidebar, Star, Notebook } from "lucide-react";
 import { IconButton } from "../ui/IconButton";
 import { usePdfStore } from "../../stores/usePdfStore";
-import { useUiStore, type SidebarMode } from "../../stores/useUiStore";
-
-const items: Array<{ mode: SidebarMode; label: string; icon: typeof Home }> = [
-  { mode: "home", label: "Home", icon: Home },
-  { mode: "thumbnails", label: "Thumbnails", icon: Sidebar },
-  { mode: "search", label: "Search", icon: Search },
-  { mode: "bookmarks", label: "Bookmarks", icon: Star },
-  { mode: "comments", label: "Comments", icon: MessageSquareText },
-  { mode: null, label: "Attachments", icon: Paperclip },
-  { mode: "settings", label: "Settings", icon: Settings },
-];
+import { useUiStore } from "../../stores/useUiStore";
+import { cn } from "../../lib/utils/cn";
 
 export function LeftRail() {
   const sidebarMode = useUiStore((state) => state.sidebarMode);
   const setSidebarMode = useUiStore((state) => state.setSidebarMode);
+  const activeView = useUiStore((state) => state.activeView);
+  const setActiveView = useUiStore((state) => state.setActiveView);
   const closePdf = usePdfStore((state) => state.closePdf);
 
+  const isPdf = activeView === "pdf";
+
   return (
-    <aside className="flex w-14 shrink-0 flex-col items-center gap-2 border-r border-border bg-rail py-4">
+    <aside
+      className={cn(
+        "flex w-14 shrink-0 flex-col items-center gap-2 border-r border-border bg-rail pb-4",
+        activeView === "notes" ? "pt-12" : "pt-4"
+      )}
+    >
       <FileText className="mb-3 h-5 w-5 text-accent" />
-      {items.map(({ mode, label, icon: Icon }) => (
-        <IconButton
-          key={label}
-          label={label}
-          active={sidebarMode === mode && mode !== null}
-          onClick={() => {
-            if (mode === "home") closePdf();
-            setSidebarMode(mode === sidebarMode ? null : mode);
-          }}
-        >
-          <Icon size={18} />
-        </IconButton>
-      ))}
+      
+      {/* Home Button */}
+      <IconButton
+        label="Home"
+        active={isPdf && sidebarMode === "home"}
+        onClick={() => {
+          closePdf();
+          setActiveView("pdf");
+          setSidebarMode("home");
+        }}
+      >
+        <Home size={18} />
+      </IconButton>
+
+      {/* Notes Button */}
+      <IconButton
+        label="Notes"
+        active={activeView === "notes"}
+        onClick={() => {
+          setActiveView("notes");
+          setSidebarMode(null);
+        }}
+      >
+        <Notebook size={18} />
+      </IconButton>
+
+      <div className="my-2 h-[1px] w-8 bg-border" />
+
+      {/* PDF specific tools */}
+      <IconButton
+        label="Thumbnails"
+        active={isPdf && sidebarMode === "thumbnails"}
+        disabled={!isPdf}
+        onClick={() => setSidebarMode(sidebarMode === "thumbnails" ? null : "thumbnails")}
+      >
+        <Sidebar size={18} />
+      </IconButton>
+
+      <IconButton
+        label="Search"
+        active={isPdf && sidebarMode === "search"}
+        disabled={!isPdf}
+        onClick={() => setSidebarMode(sidebarMode === "search" ? null : "search")}
+      >
+        <Search size={18} />
+      </IconButton>
+
+      <IconButton
+        label="Bookmarks"
+        active={isPdf && sidebarMode === "bookmarks"}
+        disabled={!isPdf}
+        onClick={() => setSidebarMode(sidebarMode === "bookmarks" ? null : "bookmarks")}
+      >
+        <Star size={18} />
+      </IconButton>
+
+      <IconButton
+        label="Comments"
+        active={isPdf && sidebarMode === "comments"}
+        disabled={!isPdf}
+        onClick={() => setSidebarMode(sidebarMode === "comments" ? null : "comments")}
+      >
+        <MessageSquareText size={18} />
+      </IconButton>
+
+      <IconButton
+        label="Attachments"
+        active={isPdf && sidebarMode === null}
+        disabled={!isPdf}
+        onClick={() => setSidebarMode(null)}
+      >
+        <Paperclip size={18} />
+      </IconButton>
+
+      <div className="flex-1" />
+
+      <IconButton
+        label="Settings"
+        active={isPdf && sidebarMode === "settings"}
+        onClick={() => {
+          setActiveView("pdf");
+          setSidebarMode(sidebarMode === "settings" ? null : "settings");
+        }}
+      >
+        <Settings size={18} />
+      </IconButton>
     </aside>
   );
 }

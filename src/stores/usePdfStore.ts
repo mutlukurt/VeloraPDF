@@ -32,6 +32,7 @@ type PdfState = {
   setSearchQuery: (query: string) => void;
   setStatusMessage: (message: string) => void;
   addRecentFile: (file: RecentFile) => void;
+  removeRecentFile: (key: string) => void;
   clearRecentFiles: () => void;
   closePdf: () => void;
 };
@@ -74,6 +75,12 @@ export const usePdfStore = create<PdfState>((set, get) => ({
     set((state) => {
       const key = file.path ?? file.name;
       const next = [file, ...state.recentFiles.filter((item) => (item.path ?? item.name) !== key)].slice(0, 12);
+      persistRecentFiles(next);
+      return { recentFiles: next };
+    }),
+  removeRecentFile: (key) =>
+    set((state) => {
+      const next = state.recentFiles.filter((item) => (item.path ?? item.name) !== key);
       persistRecentFiles(next);
       return { recentFiles: next };
     }),
