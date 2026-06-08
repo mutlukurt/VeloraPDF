@@ -4,6 +4,8 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.1-aarch64.dmg)
 
+[Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
+
 Velora PDF is a private, local-first desktop PDF reader and lightweight annotation workspace for macOS.
 
 It is designed for people who want a calm, premium PDF reading experience without accounts, subscriptions, cloud sync, tracking, analytics, or external APIs. PDFs are opened from the user’s own device, rendered locally, annotated locally, and exported locally.
@@ -22,6 +24,35 @@ Tauri build output:
 
 ```text
 src-tauri/target/release/bundle/dmg/Velora PDF_1.0.1_aarch64.dmg
+```
+
+## Download Android APK
+
+Velora PDF Mobile is available as local Android APK builds for phones and tablets.
+
+Most modern Android phones and tablets should use the arm64-v8a build:
+
+[Download Android arm64-v8a APK](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
+
+Other Android CPU builds:
+
+- [Download Android armeabi-v7a APK](downloads/Velora-PDF-Mobile-1.0.0-armeabi-v7a.apk)
+- [Download Android x86 APK](downloads/Velora-PDF-Mobile-1.0.0-x86.apk)
+- [Download Android x86_64 APK](downloads/Velora-PDF-Mobile-1.0.0-x86_64.apk)
+
+Current mobile release build outputs:
+
+```text
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-armeabi-v7a.apk
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-x86.apk
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-x86_64.apk
+```
+
+Android project source:
+
+```text
+VeloraPDF Mobile/
 ```
 
 ## Important

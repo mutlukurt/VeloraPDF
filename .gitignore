@@ -7,6 +7,22 @@ dist/
 # Tauri/Rust build output
 src-tauri/target/
 
+# React Native / Expo generated output
+.expo/
+.expo-shared/
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/app/.cxx/
+VeloraPDF Mobile/.expo/
+VeloraPDF Mobile/.expo-shared/
+VeloraPDF Mobile/android/.gradle/
+VeloraPDF Mobile/android/.kotlin/
+VeloraPDF Mobile/android/build/
+VeloraPDF Mobile/android/app/build/
+VeloraPDF Mobile/android/app/.cxx/
+
 # Logs
 *.log
 npm-debug.log*
@@ -28,3 +44,5 @@ Thumbs.db
 # Local generated installers
 *.dmg
 !downloads/*.dmg
+*.apk
+!downloads/*.apk
