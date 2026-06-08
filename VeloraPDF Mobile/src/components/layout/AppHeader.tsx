@@ -58,5 +58,5 @@ export function AppHeader() {
 const styles = StyleSheet.create({
   actions: { flexDirection: "row", gap: 8 },
   fileName: { flex: 1, fontSize: 14, fontWeight: "800", minWidth: 0 },
-  header: { alignItems: "center", borderRadius: 8, borderWidth: 1, flexDirection: "row", gap: 12, margin: 12, padding: 8 }
+  header: { alignItems: "center", borderRadius: 8, borderWidth: 1, elevation: 30, flexDirection: "row", gap: 12, margin: 12, padding: 8, zIndex: 30 }
 });

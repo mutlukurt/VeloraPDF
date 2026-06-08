@@ -304,84 +304,86 @@ export function NotebookScreen() {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: theme.app }]}>
-      <View style={[styles.header, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
-        <IconButton onPress={() => router.replace("/")}>
-          <ChevronLeft color={theme.text} size={20} />
-        </IconButton>
-        <View style={styles.headerText}>
-          <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
-            {notebook.title}
-          </Text>
-          <Text style={[styles.meta, { color: theme.textMuted }]}>{labelForTemplate(notebook.template)}</Text>
+      <View style={styles.controlsLayer}>
+        <View style={[styles.header, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
+          <IconButton onPress={() => router.replace("/")}>
+            <ChevronLeft color={theme.text} size={20} />
+          </IconButton>
+          <View style={styles.headerText}>
+            <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+              {notebook.title}
+            </Text>
+            <Text style={[styles.meta, { color: theme.textMuted }]}>{labelForTemplate(notebook.template)}</Text>
+          </View>
+          {!device.isTablet ? (
+            <>
+              <IconButton onPress={handleExportPdf} disabled={exporting}>
+                <FileDown color={theme.text} size={20} />
+              </IconButton>
+              <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)}>
+                {recording ? <StopCircle color="#FFFFFF" size={21} /> : <Mic color={theme.text} size={20} />}
+              </IconButton>
+            </>
+          ) : null}
         </View>
-        {!device.isTablet ? (
-          <>
-            <IconButton onPress={handleExportPdf} disabled={exporting}>
-              <FileDown color={theme.text} size={20} />
+        <View style={[styles.dock, device.isTablet ? styles.dockTablet : null, isLandscape ? styles.dockLandscape : null, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
+          <View style={styles.pageRow}>
+            <IconButton onPress={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage <= 1} size={pageButtonSize}>
+              <ChevronLeft color={theme.text} size={18} />
             </IconButton>
-            <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)}>
-              {recording ? <StopCircle color="#FFFFFF" size={21} /> : <Mic color={theme.text} size={20} />}
+            <Text style={[styles.pageText, { color: theme.text }]}>{currentPage} / {pageCount}</Text>
+            <IconButton onPress={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} disabled={currentPage >= pageCount} size={pageButtonSize}>
+              <ChevronRight color={theme.text} size={18} />
             </IconButton>
-          </>
-        ) : null}
-      </View>
-      <View style={[styles.dock, device.isTablet ? styles.dockTablet : null, isLandscape ? styles.dockLandscape : null, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
-        <View style={styles.pageRow}>
-          <IconButton onPress={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage <= 1} size={pageButtonSize}>
-            <ChevronLeft color={theme.text} size={18} />
-          </IconButton>
-          <Text style={[styles.pageText, { color: theme.text }]}>{currentPage} / {pageCount}</Text>
-          <IconButton onPress={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} disabled={currentPage >= pageCount} size={pageButtonSize}>
-            <ChevronRight color={theme.text} size={18} />
-          </IconButton>
-          <IconButton onPress={handleAddPage} size={pageButtonSize}>
-            <FilePlus2 color={theme.text} size={18} />
-          </IconButton>
-          <IconButton onPress={handleExportPdf} disabled={exporting} size={pageButtonSize}>
-            <FileDown color={theme.text} size={18} />
-          </IconButton>
-        </View>
-        <View style={styles.toolRow}>
-          <IconButton active={palmRejection} onPress={() => setPalmRejection((value) => !value)} size={toolbarButtonSize}>
-            <Hand color={palmRejection ? "#FFFFFF" : theme.text} size={19} />
-          </IconButton>
-          <IconButton active={tool === "select"} onPress={() => setTool("select")} size={toolbarButtonSize}>
-            <MousePointer2 color={tool === "select" ? "#FFFFFF" : theme.text} size={19} />
-          </IconButton>
-          <IconButton active={tool === "pen"} onPress={() => setTool("pen")} size={toolbarButtonSize}>
-            <PenLine color={tool === "pen" ? "#FFFFFF" : theme.text} size={19} />
-          </IconButton>
-          <IconButton active={tool === "highlight"} onPress={() => setTool("highlight")} size={toolbarButtonSize}>
-            <Highlighter color={tool === "highlight" ? "#FFFFFF" : theme.text} size={19} />
-          </IconButton>
-          <IconButton active={tool === "eraser"} onPress={() => setTool("eraser")} size={toolbarButtonSize}>
-            <Eraser color={tool === "eraser" ? "#FFFFFF" : theme.text} size={19} />
-          </IconButton>
-          <IconButton onPress={() => undoStroke(notebook.id, currentPage)} disabled={currentPageStrokes.length === 0} size={toolbarButtonSize}>
-            <Undo2 color={theme.text} size={19} />
-          </IconButton>
-          <IconButton onPress={() => redoStroke(notebook.id, currentPage)} disabled={!canRedo} size={toolbarButtonSize}>
-            <Redo2 color={theme.text} size={19} />
-          </IconButton>
-        </View>
-        <View style={styles.colorRow}>
-          {noteColors.map((item) => (
-            <Pressable key={item} onPress={() => setColor(item)} style={[styles.swatch, device.isTablet ? styles.swatchTablet : null, { backgroundColor: item, borderColor: color === item ? theme.accent : theme.border, transform: [{ scale: color === item ? 1.1 : 1 }] }]} />
-          ))}
-        </View>
-        <View style={styles.audioRow}>
-          <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)} size={toolbarButtonSize}>
-            {recording ? <StopCircle color="#FFFFFF" size={20} /> : <Mic color={theme.text} size={19} />}
-          </IconButton>
-          <Text style={[styles.dockText, { color: theme.textMuted }]} numberOfLines={1}>
-            {recording ? "Recording while writing" : "Audio notes"}
-          </Text>
-          {recording ? <View style={styles.recordingDot} /> : null}
-          {currentPageVoiceNotes.slice(-3).map((note) => (
-            <IconButton key={note.id} onPress={() => playVoice(note)} size={40}>
-              {playingId === note.id ? <Pause color={theme.text} size={18} /> : <Play color={theme.text} size={18} />}
+            <IconButton onPress={handleAddPage} size={pageButtonSize}>
+              <FilePlus2 color={theme.text} size={18} />
             </IconButton>
-          ))}
+            <IconButton onPress={handleExportPdf} disabled={exporting} size={pageButtonSize}>
+              <FileDown color={theme.text} size={18} />
+            </IconButton>
+          </View>
+          <View style={styles.toolRow}>
+            <IconButton active={palmRejection} onPress={() => setPalmRejection((value) => !value)} size={toolbarButtonSize}>
+              <Hand color={palmRejection ? "#FFFFFF" : theme.text} size={19} />
+            </IconButton>
+            <IconButton active={tool === "select"} onPress={() => setTool("select")} size={toolbarButtonSize}>
+              <MousePointer2 color={tool === "select" ? "#FFFFFF" : theme.text} size={19} />
+            </IconButton>
+            <IconButton active={tool === "pen"} onPress={() => setTool("pen")} size={toolbarButtonSize}>
+              <PenLine color={tool === "pen" ? "#FFFFFF" : theme.text} size={19} />
+            </IconButton>
+            <IconButton active={tool === "highlight"} onPress={() => setTool("highlight")} size={toolbarButtonSize}>
+              <Highlighter color={tool === "highlight" ? "#FFFFFF" : theme.text} size={19} />
+            </IconButton>
+            <IconButton active={tool === "eraser"} onPress={() => setTool("eraser")} size={toolbarButtonSize}>
+              <Eraser color={tool === "eraser" ? "#FFFFFF" : theme.text} size={19} />
+            </IconButton>
+            <IconButton onPress={() => undoStroke(notebook.id, currentPage)} disabled={currentPageStrokes.length === 0} size={toolbarButtonSize}>
+              <Undo2 color={theme.text} size={19} />
+            </IconButton>
+            <IconButton onPress={() => redoStroke(notebook.id, currentPage)} disabled={!canRedo} size={toolbarButtonSize}>
+              <Redo2 color={theme.text} size={19} />
+            </IconButton>
+          </View>
+          <View style={styles.colorRow}>
+            {noteColors.map((item) => (
+              <Pressable key={item} onPress={() => setColor(item)} style={[styles.swatch, device.isTablet ? styles.swatchTablet : null, { backgroundColor: item, borderColor: color === item ? theme.accent : theme.border, transform: [{ scale: color === item ? 1.1 : 1 }] }]} />
+            ))}
+          </View>
+          <View style={styles.audioRow}>
+            <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)} size={toolbarButtonSize}>
+              {recording ? <StopCircle color="#FFFFFF" size={20} /> : <Mic color={theme.text} size={19} />}
+            </IconButton>
+            <Text style={[styles.dockText, { color: theme.textMuted }]} numberOfLines={1}>
+              {recording ? "Recording while writing" : "Audio notes"}
+            </Text>
+            {recording ? <View style={styles.recordingDot} /> : null}
+            {currentPageVoiceNotes.slice(-3).map((note) => (
+              <IconButton key={note.id} onPress={() => playVoice(note)} size={40}>
+                {playingId === note.id ? <Pause color={theme.text} size={18} /> : <Play color={theme.text} size={18} />}
+              </IconButton>
+            ))}
+          </View>
         </View>
       </View>
       <View style={styles.workspace}>
@@ -454,23 +456,24 @@ function findNearestStroke(strokes: NoteStroke[], point: { x: number; y: number 
 const styles = StyleSheet.create({
   audioRow: { alignItems: "center", flexDirection: "row", gap: 8 },
   colorRow: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "center" },
-  dock: { alignItems: "center", alignSelf: "center", borderRadius: 8, borderWidth: 1, elevation: 20, gap: 8, marginBottom: 8, marginHorizontal: 12, maxWidth: "96%", padding: 8, shadowColor: "#000000", shadowOpacity: 0.18, shadowRadius: 12, zIndex: 20 },
+  controlsLayer: { elevation: 30, zIndex: 30 },
+  dock: { alignItems: "center", alignSelf: "center", borderRadius: 8, borderWidth: 1, elevation: 30, gap: 8, marginBottom: 8, marginHorizontal: 12, maxWidth: "96%", padding: 8, shadowColor: "#000000", shadowOpacity: 0.18, shadowRadius: 12, zIndex: 30 },
   dockLandscape: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", marginBottom: 6, padding: 6 },
   dockTablet: { flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 10, paddingHorizontal: 10, paddingVertical: 8 },
   dockText: { fontSize: 12, fontWeight: "800" },
   empty: { alignItems: "center", flex: 1, gap: 16, justifyContent: "center" },
   emptyTitle: { fontSize: 18, fontWeight: "800" },
-  header: { alignItems: "center", borderRadius: 8, borderWidth: 1, flexDirection: "row", gap: 10, margin: 12, padding: 8 },
+  header: { alignItems: "center", borderRadius: 8, borderWidth: 1, elevation: 30, flexDirection: "row", gap: 10, margin: 12, padding: 8, zIndex: 30 },
   headerText: { flex: 1 },
   meta: { fontSize: 12, fontWeight: "700", marginTop: 2 },
-  paper: { backgroundColor: paperColor, borderRadius: 8, elevation: 8, overflow: "hidden", shadowColor: "#000000", shadowOpacity: 0.18, shadowRadius: 18 },
+  paper: { backgroundColor: paperColor, borderRadius: 8, elevation: 1, overflow: "hidden", shadowColor: "#000000", shadowOpacity: 0.14, shadowRadius: 14, zIndex: 0 },
   pageRow: { alignItems: "center", flexDirection: "row", gap: 6 },
   pageText: { fontSize: 13, fontWeight: "900", minWidth: 52, textAlign: "center" },
   recordingDot: { backgroundColor: "#FF3B30", borderRadius: 5, height: 10, width: 10 },
-  root: { flex: 1 },
+  root: { flex: 1, overflow: "hidden" },
   title: { fontSize: 18, fontWeight: "900" },
   swatch: { borderRadius: 8, borderWidth: 2, height: 28, width: 28 },
   swatchTablet: { height: 24, width: 24 },
   toolRow: { flexDirection: "row", gap: 6 },
-  workspace: { alignItems: "center", flex: 1, justifyContent: "center", paddingBottom: 12 }
+  workspace: { alignItems: "center", flex: 1, justifyContent: "center", overflow: "hidden", paddingBottom: 12, zIndex: 0 }
 });

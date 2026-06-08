@@ -17,6 +17,6 @@ export function PdfPageSurface() {
 }
 
 const styles = StyleSheet.create({
-  surface: { flex: 1, padding: 12 },
+  surface: { flex: 1, overflow: "hidden", padding: 12, zIndex: 0 },
   surfaceLandscape: { paddingHorizontal: 4, paddingVertical: 8 }
 });

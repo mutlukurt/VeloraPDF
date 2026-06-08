@@ -155,8 +155,9 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: 13, fontWeight: "700" },
   page: {
     overflow: "hidden",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    zIndex: 0
   },
   pdf: { flex: 1, height: "100%", width: "100%" },
-  wrap: { alignItems: "center", flex: 1, justifyContent: "center", overflow: "hidden" }
+  wrap: { alignItems: "center", flex: 1, justifyContent: "center", overflow: "hidden", zIndex: 0 }
 });

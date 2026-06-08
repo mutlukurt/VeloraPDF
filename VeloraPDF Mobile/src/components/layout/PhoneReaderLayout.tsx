@@ -19,10 +19,12 @@ export function PhoneReaderLayout() {
 
   return (
     <View style={styles.root}>
-      <AppHeader />
-      <BottomToolDock />
-      <View style={styles.pageControl}>
-        <PageControl compact />
+      <View style={styles.controlsLayer}>
+        <AppHeader />
+        <BottomToolDock />
+        <View style={styles.pageControl}>
+          <PageControl compact />
+        </View>
       </View>
       <View style={styles.reader}>
         <PdfPageSurface />
@@ -37,7 +39,8 @@ export function PhoneReaderLayout() {
 }
 
 const styles = StyleSheet.create({
+  controlsLayer: { elevation: 30, zIndex: 30 },
   pageControl: { alignItems: "center", marginBottom: 8 },
-  reader: { flex: 1 },
-  root: { flex: 1 }
+  reader: { flex: 1, overflow: "hidden", zIndex: 0 },
+  root: { flex: 1, overflow: "hidden" }
 });

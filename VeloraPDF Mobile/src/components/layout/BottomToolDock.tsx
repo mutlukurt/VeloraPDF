@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 8,
     borderWidth: 1,
-    elevation: 20,
+    elevation: 30,
     gap: 6,
     marginBottom: 8,
     marginHorizontal: 12,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 12,
     width: "96%",
-    zIndex: 20
+    zIndex: 30
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 4, justifyContent: "center" },
   swatch: { borderRadius: 8, borderWidth: 2, height: 26, width: 26 }

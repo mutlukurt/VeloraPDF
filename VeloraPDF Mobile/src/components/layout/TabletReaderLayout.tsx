@@ -39,7 +39,9 @@ export function TabletReaderLayout() {
           <FloatingToolbar compact />
           <PageControl compact />
         </View>
-        <PdfPageSurface />
+        <View style={styles.reader}>
+          <PdfPageSurface />
+        </View>
       </View>
       <SettingsSheet />
       <SearchSheet />
@@ -48,7 +50,8 @@ export function TabletReaderLayout() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, flexDirection: "row" },
-  top: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center", paddingHorizontal: 14, paddingVertical: 10, zIndex: 2 },
-  workspace: { flex: 1 }
+  reader: { flex: 1, overflow: "hidden", zIndex: 0 },
+  root: { flex: 1, flexDirection: "row", overflow: "hidden" },
+  top: { alignItems: "center", elevation: 30, flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center", paddingHorizontal: 14, paddingVertical: 10, zIndex: 30 },
+  workspace: { flex: 1, overflow: "hidden" }
 });
