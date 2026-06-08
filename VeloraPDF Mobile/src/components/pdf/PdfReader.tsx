@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { AnnotationOverlay } from "@/components/pdf/AnnotationOverlay";
+import { useDeviceClass } from "@/lib/device/breakpoints";
 import { useAnnotationStore } from "@/stores/useAnnotationStore";
 import { usePdfStore } from "@/stores/usePdfStore";
 import { useUiStore } from "@/stores/useUiStore";
@@ -13,6 +14,7 @@ export function PdfReader() {
   const [pageSize, setPageSize] = useState<{ width: number; height: number } | null>(null);
   const [viewport, setViewport] = useState({ width: 1, height: 1 });
   const pdfRef = useRef<Pdf>(null);
+  const device = useDeviceClass();
   const file = usePdfStore((state) => state.currentFile);
   const currentPage = usePdfStore((state) => state.currentPage);
   const setPageCount = usePdfStore((state) => state.setPageCount);
@@ -33,7 +35,11 @@ export function PdfReader() {
     }
     const horizontalPadding = 18;
     const verticalPadding = 18;
-    const maxWidth = Math.max(1, viewport.width - horizontalPadding * 2);
+    const readableMaxWidth =
+      device.isTablet && !device.isLandscape
+        ? Math.min(viewport.width - horizontalPadding * 2, 520)
+        : viewport.width - horizontalPadding * 2;
+    const maxWidth = Math.max(1, readableMaxWidth);
     const maxHeight = Math.max(1, viewport.height - verticalPadding * 2);
     const pageRatio = pageSize.width / pageSize.height;
     const viewportRatio = maxWidth / maxHeight;
@@ -41,7 +47,7 @@ export function PdfReader() {
       return { width: maxWidth, height: maxWidth / pageRatio };
     }
     return { width: maxHeight * pageRatio, height: maxHeight };
-  }, [pageSize, viewport.height, viewport.width]);
+  }, [device.isLandscape, device.isTablet, pageSize, viewport.height, viewport.width]);
 
   const panGesture = useMemo(
     () =>
@@ -61,7 +67,6 @@ export function PdfReader() {
   const pinchGesture = useMemo(
     () =>
       Gesture.Pinch()
-        .enabled(activeTool === "select")
         .onUpdate((event) => {
           scale.value = Math.max(1, Math.min(4, savedScale.value * event.scale));
         })
@@ -153,5 +158,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent"
   },
   pdf: { flex: 1, height: "100%", width: "100%" },
-  wrap: { alignItems: "center", flex: 1, justifyContent: "center" }
+  wrap: { alignItems: "center", flex: 1, justifyContent: "center", overflow: "hidden" }
 });

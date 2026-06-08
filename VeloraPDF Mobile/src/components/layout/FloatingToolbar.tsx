@@ -19,7 +19,7 @@ const tools: { id: AnnotationTool; icon: typeof MousePointer2 }[] = [
 ];
 const colors = [annotationColors.yellow, annotationColors.green, annotationColors.pink, annotationColors.blue, annotationColors.inkPurple, annotationColors.inkRed, annotationColors.inkDark];
 
-export function FloatingToolbar() {
+export function FloatingToolbar({ compact = false }: { compact?: boolean }) {
   const file = usePdfStore((state) => state.currentFile);
   const activeTool = useAnnotationStore((state) => state.activeTool);
   const setActiveTool = useAnnotationStore((state) => state.setActiveTool);
@@ -37,30 +37,30 @@ export function FloatingToolbar() {
   const iconColor = resolvedTheme === "dark" ? "#FFFFFF" : "#0E0E12";
 
   return (
-    <View style={[styles.toolbar, { backgroundColor: theme.toolbar, borderColor: theme.border, shadowColor: theme.accent }]}>
-      <View style={styles.row}>
-        <IconButton active={palmRejection} onPress={() => setPalmRejection(!palmRejection)} size={42}>
-          <Hand color={palmRejection ? "#FFFFFF" : iconColor} size={18} />
+    <View style={[styles.toolbar, compact ? styles.compactToolbar : null, { backgroundColor: theme.toolbar, borderColor: theme.border, shadowColor: theme.accent }]}>
+      <View style={[styles.row, compact ? styles.compactRow : null]}>
+        <IconButton active={palmRejection} onPress={() => setPalmRejection(!palmRejection)} size={compact ? 36 : 42}>
+          <Hand color={palmRejection ? "#FFFFFF" : iconColor} size={compact ? 17 : 18} />
         </IconButton>
         {tools.map((tool) => {
           const Icon = tool.icon;
           const active = activeTool === tool.id;
           return (
-            <IconButton key={tool.id} active={active} onPress={() => setActiveTool(tool.id)} size={42}>
-              <Icon color={active ? "#FFFFFF" : iconColor} size={18} />
+            <IconButton key={tool.id} active={active} onPress={() => setActiveTool(tool.id)} size={compact ? 36 : 42}>
+              <Icon color={active ? "#FFFFFF" : iconColor} size={compact ? 17 : 18} />
             </IconButton>
           );
         })}
-        <IconButton onPress={() => file && undo(file.id)} disabled={!canUndo} size={42}>
-          <Undo2 color={iconColor} size={18} />
+        <IconButton onPress={() => file && undo(file.id)} disabled={!canUndo} size={compact ? 36 : 42}>
+          <Undo2 color={iconColor} size={compact ? 17 : 18} />
         </IconButton>
-        <IconButton onPress={() => file && redo(file.id)} disabled={!canRedo} size={42}>
-          <Redo2 color={iconColor} size={18} />
+        <IconButton onPress={() => file && redo(file.id)} disabled={!canRedo} size={compact ? 36 : 42}>
+          <Redo2 color={iconColor} size={compact ? 17 : 18} />
         </IconButton>
       </View>
-      <View style={styles.colors}>
+      <View style={[styles.colors, compact ? styles.compactColors : null]}>
         {colors.map((item) => (
-          <Pressable key={item} onPress={() => setColor(item)} style={[styles.swatch, { backgroundColor: item, borderColor: color === item ? theme.accent : theme.border, transform: [{ scale: color === item ? 1.1 : 1 }] }]} />
+          <Pressable key={item} onPress={() => setColor(item)} style={[styles.swatch, compact ? styles.compactSwatch : null, { backgroundColor: item, borderColor: color === item ? theme.accent : theme.border, transform: [{ scale: color === item ? 1.1 : 1 }] }]} />
         ))}
       </View>
     </View>
@@ -79,6 +79,10 @@ const styles = StyleSheet.create({
     shadowRadius: 18
   },
   colors: { flexDirection: "row", gap: 8, justifyContent: "center" },
+  compactColors: { gap: 6 },
+  compactRow: { gap: 6 },
+  compactSwatch: { height: 23, width: 23 },
+  compactToolbar: { gap: 7, maxWidth: "100%", padding: 7 },
   row: { flexDirection: "row", gap: 8 },
   swatch: { borderRadius: 8, borderWidth: 2, height: 28, width: 28 }
 });

@@ -8,6 +8,7 @@ export type PdfFileRecord = {
 };
 
 export type NotebookTemplate = "blank" | "lined" | "grid";
+export type NotebookPageOrientation = "portrait" | "landscape";
 
 export type NoteStroke = {
   id: string;
@@ -34,6 +35,7 @@ export type NotebookRecord = {
   id: string;
   title: string;
   template: NotebookTemplate;
+  pageOrientations?: Record<string, NotebookPageOrientation>;
   createdAt: number;
   updatedAt: number;
   lastOpened: number;

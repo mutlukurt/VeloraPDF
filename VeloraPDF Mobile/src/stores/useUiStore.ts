@@ -32,7 +32,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   resolvedTheme: "dark",
   eyeProtection: false,
   keepScreenAwake: false,
-  pagesPanelOpen: true,
+  pagesPanelOpen: false,
   settingsOpen: false,
   searchOpen: false,
   hydrate: async () => {

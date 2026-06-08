@@ -62,11 +62,38 @@ The project is configured for arm64-v8a output. Copy the generated APK to the de
 cp "<generated-arm64-apk-path>" "/Users/mutlu/Desktop/Velora-PDF-Mobile-1.0.0-arm64.apk"
 ```
 
-Expected generated paths include:
+The release build produces split APKs for all configured Android ABIs:
 
 ```txt
+android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk
 android/app/build/outputs/apk/release/app-arm64-v8a-release.apk
+android/app/build/outputs/apk/release/app-x86-release.apk
+android/app/build/outputs/apk/release/app-x86_64-release.apk
 ```
+
+The published desktop copies are:
+
+```txt
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-armeabi-v7a.apk
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-x86.apk
+/Users/mutlu/Desktop/VeloraPDF Mobile APKs/Velora-PDF-Mobile-1.0.0-x86_64.apk
+```
+
+## Current Release Notes
+
+Velora PDF Mobile now ships as one responsive Android project for phones and tablets. Tablet-specific behavior is handled inside the same source tree and the same APK outputs, so there is no separate tablet project to maintain.
+
+This release includes:
+
+- Full multi-page PDF loading and stable page navigation for imported documents.
+- A cleaned tablet PDF reader with the toolbar fixed at the top, a visible back/home control, compact annotation tools, and the redundant left page list removed.
+- Responsive PDF reading across portrait and landscape tablet use, with pinch zoom available on the reading surface.
+- A notebook workspace for clean A4 pages, including blank, lined, and grid paper templates.
+- Portrait and landscape notebook pages, with orientation saved per page.
+- PDF export for notebooks that respects each page's portrait or landscape A4 orientation.
+- Stylus-friendly palm rejection for notebook writing and PDF annotation.
+- Practical note tools on phone and tablet: pen, highlight, eraser, undo, redo, color controls, zoom, page navigation, recording, playback, and export.
 
 ## Working MVP Features
 
@@ -78,11 +105,17 @@ android/app/build/outputs/apk/release/app-arm64-v8a-release.apk
 - Page navigation
 - Pinch zoom through the native PDF viewer
 - Responsive phone and tablet layouts
+- Fixed top toolbar for PDF and notebook workflows
 - Dark/light/system theme
 - Eye protection mode
 - Recent files
 - Highlight annotation
 - Pen annotation
+- Eraser, undo, redo, and color selection tools
+- Notebook pages with blank, lined, and grid templates
+- Portrait and landscape A4 note pages
+- Notebook PDF export
+- Audio recording and local playback inside notes
 - Local annotation persistence
 - Annotation JSON export/share
 - Original PDF share

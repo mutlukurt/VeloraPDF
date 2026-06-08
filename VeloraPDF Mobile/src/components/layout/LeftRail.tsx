@@ -1,4 +1,4 @@
-import { FolderOpen, Home, PanelLeft, Search, Settings } from "lucide-react-native";
+import { FolderOpen, Home, Search, Settings } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { IconButton } from "@/components/ui/IconButton";
@@ -10,8 +10,6 @@ export function LeftRail() {
   const router = useRouter();
   const closePdf = usePdfStore((state) => state.closePdf);
   const openPdf = usePdfStore((state) => state.openPdf);
-  const pagesOpen = useUiStore((state) => state.pagesPanelOpen);
-  const setPagesPanelOpen = useUiStore((state) => state.setPagesPanelOpen);
   const setSettingsOpen = useUiStore((state) => state.setSettingsOpen);
   const setSearchOpen = useUiStore((state) => state.setSearchOpen);
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
@@ -21,9 +19,6 @@ export function LeftRail() {
 
   return (
     <View style={[styles.rail, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-      <IconButton onPress={() => setPagesPanelOpen(!pagesOpen)} active={pagesOpen}>
-        <PanelLeft color="#FFFFFF" size={20} />
-      </IconButton>
       <IconButton onPress={() => openPdf()}>
         <FolderOpen color={iconColor} size={20} />
       </IconButton>

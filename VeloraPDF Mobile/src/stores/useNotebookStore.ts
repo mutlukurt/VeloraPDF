@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createId } from "@/lib/utils/ids";
 import { loadNotebooks, saveNotebooks } from "@/lib/notebook/notebookStorage";
-import type { NotebookRecord, NotebookTemplate, NoteStroke, VoiceNote } from "@/types";
+import type { NotebookPageOrientation, NotebookRecord, NotebookTemplate, NoteStroke, VoiceNote } from "@/types";
 
 type NotebookState = {
   notebooks: NotebookRecord[];
@@ -15,6 +15,7 @@ type NotebookState = {
   redoStroke: (notebookId: string, page?: number) => Promise<void>;
   deleteStroke: (notebookId: string, strokeId: string) => Promise<void>;
   addPage: (notebookId: string) => Promise<number>;
+  setPageOrientation: (notebookId: string, page: number, orientation: NotebookPageOrientation) => Promise<void>;
   addVoiceNote: (notebookId: string, voiceNote: VoiceNote) => Promise<void>;
   removeNotebook: (notebookId: string) => Promise<void>;
 };
@@ -44,6 +45,7 @@ export const useNotebookStore = create<NotebookState>((set, get) => ({
     const notebooks = (await loadNotebooks()).map((notebook) => ({
       ...notebook,
       pageCount: Math.max(1, notebook.pageCount || 1),
+      pageOrientations: notebook.pageOrientations ?? {},
       strokes: notebook.strokes.map((stroke) => ({ ...stroke, page: stroke.page || 1 })),
       voiceNotes: notebook.voiceNotes.map((voiceNote) => ({ ...voiceNote, page: voiceNote.page || 1 }))
     }));
@@ -55,6 +57,7 @@ export const useNotebookStore = create<NotebookState>((set, get) => ({
       id: createId("notebook"),
       title: titleForTemplate(template),
       template,
+      pageOrientations: {},
       createdAt: now,
       updatedAt: now,
       lastOpened: now,
@@ -125,6 +128,17 @@ export const useNotebookStore = create<NotebookState>((set, get) => ({
       };
     });
     return nextPage;
+  },
+  setPageOrientation: async (notebookId, page, orientation) => {
+    await updateNotebook(set, get, notebookId, (notebook) => {
+      const current = notebook.pageOrientations?.[String(page)];
+      if (current === orientation) return notebook;
+      return {
+        ...notebook,
+        pageOrientations: { ...(notebook.pageOrientations ?? {}), [String(page)]: orientation },
+        updatedAt: Date.now()
+      };
+    });
   },
   addVoiceNote: async (notebookId, voiceNote) => {
     await updateNotebook(set, get, notebookId, (notebook) => ({

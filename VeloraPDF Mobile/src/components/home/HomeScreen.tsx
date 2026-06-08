@@ -95,9 +95,9 @@ export function HomeScreen() {
             </View>
           </View>
           <View style={[styles.templateGrid, device.isTablet && styles.templateGridTablet]}>
-            <TemplateCard icon={<Square color={theme.text} size={22} />} title="Blank page" subtitle="Free handwriting canvas." onPress={() => handleCreateNotebook("blank")} />
-            <TemplateCard icon={<NotebookPen color={theme.text} size={22} />} title="Lined page" subtitle="Notebook lines for writing." onPress={() => handleCreateNotebook("lined")} />
-            <TemplateCard icon={<Grid3X3 color={theme.text} size={22} />} title="Grid page" subtitle="Square paper for diagrams." onPress={() => handleCreateNotebook("grid")} />
+            <TemplateCard tablet={device.isTablet} icon={<Square color={theme.text} size={22} />} title="Blank page" subtitle="Free handwriting canvas." onPress={() => handleCreateNotebook("blank")} />
+            <TemplateCard tablet={device.isTablet} icon={<NotebookPen color={theme.text} size={22} />} title="Lined page" subtitle="Notebook lines for writing." onPress={() => handleCreateNotebook("lined")} />
+            <TemplateCard tablet={device.isTablet} icon={<Grid3X3 color={theme.text} size={22} />} title="Grid page" subtitle="Square paper for diagrams." onPress={() => handleCreateNotebook("grid")} />
           </View>
           {notebooks.length > 0 ? (
             <View style={[styles.recentGrid, device.isTablet && styles.recentGridTablet]}>
@@ -124,18 +124,26 @@ export function HomeScreen() {
   );
 }
 
-function TemplateCard({ icon, title, subtitle, onPress }: { icon: React.ReactNode; title: string; subtitle: string; onPress: () => void }) {
+function TemplateCard({ icon, title, subtitle, onPress, tablet = false }: { icon: React.ReactNode; title: string; subtitle: string; onPress: () => void; tablet?: boolean }) {
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
   const eyeProtection = useUiStore((state) => state.eyeProtection);
   const theme = getTheme(resolvedTheme, eyeProtection);
   return (
-    <View style={[styles.templateCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-      <View style={[styles.templateIcon, { backgroundColor: theme.elevated, borderColor: theme.border }]}>{icon}</View>
-      <View style={styles.templateText}>
-        <Text style={[styles.templateTitle, { color: theme.text }]}>{title}</Text>
-        <Text style={[styles.templateSubtitle, { color: theme.textMuted }]}>{subtitle}</Text>
+    <View style={[styles.templateCard, tablet ? styles.templateCardTablet : null, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+      <View style={styles.templateLead}>
+        <View style={[styles.templateIcon, { backgroundColor: theme.elevated, borderColor: theme.border }]}>{icon}</View>
+        <View style={styles.templateText}>
+          <Text style={[styles.templateTitle, { color: theme.text }]} numberOfLines={2}>
+            {title}
+          </Text>
+          <Text style={[styles.templateSubtitle, { color: theme.textMuted }]} numberOfLines={2}>
+            {subtitle}
+          </Text>
+        </View>
       </View>
-      <Button label="Create" icon={<BookOpen color="#FFFFFF" size={17} />} onPress={onPress} />
+      <View style={tablet ? styles.templateActionTablet : styles.templateAction}>
+        <Button label="Create" icon={<BookOpen color="#FFFFFF" size={17} />} onPress={onPress} />
+      </View>
     </View>
   );
 }
@@ -179,13 +187,17 @@ const styles = StyleSheet.create({
   sectionHeader: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   sectionTitle: { fontSize: 20, fontWeight: "800" },
   subtitle: { fontSize: 17, lineHeight: 25, marginTop: 12, maxWidth: 620 },
-  tabletContent: { alignSelf: "center", maxWidth: 980, width: "100%" },
+  tabletContent: { alignSelf: "center", maxWidth: 1100, width: "100%" },
+  templateAction: { flexShrink: 0 },
+  templateActionTablet: { alignSelf: "stretch", marginTop: 4 },
   templateCard: { alignItems: "center", borderRadius: 8, borderWidth: 1, flex: 1, flexDirection: "row", gap: 12, padding: 14 },
+  templateCardTablet: { alignItems: "stretch", flexDirection: "column", minHeight: 160, padding: 16 },
   templateGrid: { gap: 12 },
   templateGridTablet: { flexDirection: "row" },
   templateIcon: { alignItems: "center", borderRadius: 8, borderWidth: 1, height: 44, justifyContent: "center", width: 44 },
+  templateLead: { alignItems: "center", flex: 1, flexDirection: "row", gap: 12, minWidth: 0 },
   templateSubtitle: { fontSize: 12, fontWeight: "700", marginTop: 3 },
-  templateText: { flex: 1 },
+  templateText: { flex: 1, minWidth: 0 },
   templateTitle: { fontSize: 15, fontWeight: "900" },
   notebookActions: { flexDirection: "row", gap: 8 },
   notebookCard: { alignItems: "center", borderRadius: 8, borderWidth: 1, flexDirection: "row", gap: 12, padding: 14 },

@@ -37,6 +37,7 @@ export function NotebookScreen() {
   const redoStroke = useNotebookStore((state) => state.redoStroke);
   const deleteStroke = useNotebookStore((state) => state.deleteStroke);
   const addPage = useNotebookStore((state) => state.addPage);
+  const setPageOrientation = useNotebookStore((state) => state.setPageOrientation);
   const canRedo = useNotebookStore((state) => Boolean(notebook && (state.undoneStrokesByNotebook[notebook.id] ?? []).some((stroke) => (stroke.page || 1) === currentPage)));
   const addVoiceNote = useNotebookStore((state) => state.addVoiceNote);
   const [pageSize, setPageSize] = useState({ width: 1, height: 1 });
@@ -57,6 +58,8 @@ export function NotebookScreen() {
   const translateY = useSharedValue(0);
   const savedTranslateX = useSharedValue(0);
   const savedTranslateY = useSharedValue(0);
+  const screenPageOrientation = isLandscape ? "landscape" : "portrait";
+  const currentPageOrientation = notebook?.pageOrientations?.[String(currentPage)] ?? screenPageOrientation;
 
   useEffect(() => {
     hydrate();
@@ -78,9 +81,14 @@ export function NotebookScreen() {
   const pageCount = Math.max(1, notebook?.pageCount || 1);
   const currentPageStrokes = useMemo(() => notebook?.strokes.filter((stroke) => (stroke.page || 1) === currentPage) ?? [], [currentPage, notebook?.strokes]);
   const currentPageVoiceNotes = useMemo(() => notebook?.voiceNotes.filter((voiceNote) => (voiceNote.page || 1) === currentPage) ?? [], [currentPage, notebook?.voiceNotes]);
-  const availablePageHeight = Math.max(320, height - (isLandscape ? 260 : device.isTablet ? 330 : 420));
-  const pageWidth = Math.min(width - 24, device.isTablet ? 860 : width - 24, availablePageHeight / 1.414);
-  const pageHeight = pageWidth * 1.414;
+  const toolbarButtonSize = device.isTablet ? 36 : 40;
+  const pageButtonSize = device.isTablet ? 34 : 36;
+  const availablePageHeight = Math.max(320, height - (isLandscape ? 230 : device.isTablet ? 330 : 420));
+  const availablePageWidth = Math.max(320, width - 24);
+  const pageAspect = currentPageOrientation === "landscape" ? 1.414 : 1 / 1.414;
+  const maxPageWidth = Math.min(availablePageWidth, device.isTablet ? (currentPageOrientation === "landscape" ? 1280 : 860) : availablePageWidth);
+  const pageWidth = Math.min(maxPageWidth, availablePageHeight * pageAspect);
+  const pageHeight = pageWidth / pageAspect;
   const panGesture = useMemo(
     () =>
       Gesture.Pan()
@@ -122,6 +130,11 @@ export function NotebookScreen() {
     if (!notebook) return;
     setCurrentPage((page) => Math.min(Math.max(1, page), Math.max(1, notebook.pageCount || 1)));
   }, [notebook]);
+
+  useEffect(() => {
+    if (!notebook) return;
+    void setPageOrientation(notebook.id, currentPage, screenPageOrientation);
+  }, [currentPage, notebook?.id, screenPageOrientation, setPageOrientation]);
 
   useEffect(() => {
     scale.value = 1;
@@ -301,59 +314,63 @@ export function NotebookScreen() {
           </Text>
           <Text style={[styles.meta, { color: theme.textMuted }]}>{labelForTemplate(notebook.template)}</Text>
         </View>
-        <IconButton onPress={handleExportPdf} disabled={exporting}>
-          <FileDown color={theme.text} size={20} />
-        </IconButton>
-        <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)}>
-          {recording ? <StopCircle color="#FFFFFF" size={21} /> : <Mic color={theme.text} size={20} />}
-        </IconButton>
+        {!device.isTablet ? (
+          <>
+            <IconButton onPress={handleExportPdf} disabled={exporting}>
+              <FileDown color={theme.text} size={20} />
+            </IconButton>
+            <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)}>
+              {recording ? <StopCircle color="#FFFFFF" size={21} /> : <Mic color={theme.text} size={20} />}
+            </IconButton>
+          </>
+        ) : null}
       </View>
-      <View style={[styles.dock, isLandscape ? styles.dockLandscape : null, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
+      <View style={[styles.dock, device.isTablet ? styles.dockTablet : null, isLandscape ? styles.dockLandscape : null, { backgroundColor: theme.toolbar, borderColor: theme.border }]}>
         <View style={styles.pageRow}>
-          <IconButton onPress={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage <= 1} size={36}>
+          <IconButton onPress={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage <= 1} size={pageButtonSize}>
             <ChevronLeft color={theme.text} size={18} />
           </IconButton>
           <Text style={[styles.pageText, { color: theme.text }]}>{currentPage} / {pageCount}</Text>
-          <IconButton onPress={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} disabled={currentPage >= pageCount} size={36}>
+          <IconButton onPress={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} disabled={currentPage >= pageCount} size={pageButtonSize}>
             <ChevronRight color={theme.text} size={18} />
           </IconButton>
-          <IconButton onPress={handleAddPage} size={36}>
+          <IconButton onPress={handleAddPage} size={pageButtonSize}>
             <FilePlus2 color={theme.text} size={18} />
           </IconButton>
-          <IconButton onPress={handleExportPdf} disabled={exporting} size={36}>
+          <IconButton onPress={handleExportPdf} disabled={exporting} size={pageButtonSize}>
             <FileDown color={theme.text} size={18} />
           </IconButton>
         </View>
         <View style={styles.toolRow}>
-          <IconButton active={palmRejection} onPress={() => setPalmRejection((value) => !value)} size={40}>
+          <IconButton active={palmRejection} onPress={() => setPalmRejection((value) => !value)} size={toolbarButtonSize}>
             <Hand color={palmRejection ? "#FFFFFF" : theme.text} size={19} />
           </IconButton>
-          <IconButton active={tool === "select"} onPress={() => setTool("select")} size={40}>
+          <IconButton active={tool === "select"} onPress={() => setTool("select")} size={toolbarButtonSize}>
             <MousePointer2 color={tool === "select" ? "#FFFFFF" : theme.text} size={19} />
           </IconButton>
-          <IconButton active={tool === "pen"} onPress={() => setTool("pen")} size={40}>
+          <IconButton active={tool === "pen"} onPress={() => setTool("pen")} size={toolbarButtonSize}>
             <PenLine color={tool === "pen" ? "#FFFFFF" : theme.text} size={19} />
           </IconButton>
-          <IconButton active={tool === "highlight"} onPress={() => setTool("highlight")} size={40}>
+          <IconButton active={tool === "highlight"} onPress={() => setTool("highlight")} size={toolbarButtonSize}>
             <Highlighter color={tool === "highlight" ? "#FFFFFF" : theme.text} size={19} />
           </IconButton>
-          <IconButton active={tool === "eraser"} onPress={() => setTool("eraser")} size={40}>
+          <IconButton active={tool === "eraser"} onPress={() => setTool("eraser")} size={toolbarButtonSize}>
             <Eraser color={tool === "eraser" ? "#FFFFFF" : theme.text} size={19} />
           </IconButton>
-          <IconButton onPress={() => undoStroke(notebook.id, currentPage)} disabled={currentPageStrokes.length === 0} size={40}>
+          <IconButton onPress={() => undoStroke(notebook.id, currentPage)} disabled={currentPageStrokes.length === 0} size={toolbarButtonSize}>
             <Undo2 color={theme.text} size={19} />
           </IconButton>
-          <IconButton onPress={() => redoStroke(notebook.id, currentPage)} disabled={!canRedo} size={40}>
+          <IconButton onPress={() => redoStroke(notebook.id, currentPage)} disabled={!canRedo} size={toolbarButtonSize}>
             <Redo2 color={theme.text} size={19} />
           </IconButton>
         </View>
         <View style={styles.colorRow}>
           {noteColors.map((item) => (
-            <Pressable key={item} onPress={() => setColor(item)} style={[styles.swatch, { backgroundColor: item, borderColor: color === item ? theme.accent : theme.border, transform: [{ scale: color === item ? 1.1 : 1 }] }]} />
+            <Pressable key={item} onPress={() => setColor(item)} style={[styles.swatch, device.isTablet ? styles.swatchTablet : null, { backgroundColor: item, borderColor: color === item ? theme.accent : theme.border, transform: [{ scale: color === item ? 1.1 : 1 }] }]} />
           ))}
         </View>
         <View style={styles.audioRow}>
-          <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)} size={40}>
+          <IconButton onPress={recording ? stopRecording : startRecording} active={Boolean(recording)} size={toolbarButtonSize}>
             {recording ? <StopCircle color="#FFFFFF" size={20} /> : <Mic color={theme.text} size={19} />}
           </IconButton>
           <Text style={[styles.dockText, { color: theme.textMuted }]} numberOfLines={1}>
@@ -439,6 +456,7 @@ const styles = StyleSheet.create({
   colorRow: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "center" },
   dock: { alignItems: "center", alignSelf: "center", borderRadius: 8, borderWidth: 1, elevation: 20, gap: 8, marginBottom: 8, marginHorizontal: 12, maxWidth: "96%", padding: 8, shadowColor: "#000000", shadowOpacity: 0.18, shadowRadius: 12, zIndex: 20 },
   dockLandscape: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", marginBottom: 6, padding: 6 },
+  dockTablet: { flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 10, paddingHorizontal: 10, paddingVertical: 8 },
   dockText: { fontSize: 12, fontWeight: "800" },
   empty: { alignItems: "center", flex: 1, gap: 16, justifyContent: "center" },
   emptyTitle: { fontSize: 18, fontWeight: "800" },
@@ -452,6 +470,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   title: { fontSize: 18, fontWeight: "900" },
   swatch: { borderRadius: 8, borderWidth: 2, height: 28, width: 28 },
+  swatchTablet: { height: 24, width: 24 },
   toolRow: { flexDirection: "row", gap: 6 },
   workspace: { alignItems: "center", flex: 1, justifyContent: "center", paddingBottom: 12 }
 });
