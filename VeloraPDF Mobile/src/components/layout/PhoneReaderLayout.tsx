@@ -5,6 +5,7 @@ import { BottomToolDock } from "@/components/layout/BottomToolDock";
 import { PageNavigator } from "@/components/layout/PageNavigator";
 import { SearchSheet } from "@/components/layout/SearchSheet";
 import { SettingsSheet } from "@/components/layout/SettingsSheet";
+import { PageControl } from "@/components/pdf/PageControl";
 import { PdfPageSurface } from "@/components/pdf/PdfPageSurface";
 import { Sheet } from "@/components/ui/Sheet";
 import { useUiStore } from "@/stores/useUiStore";
@@ -20,6 +21,9 @@ export function PhoneReaderLayout() {
     <View style={styles.root}>
       <AppHeader />
       <BottomToolDock />
+      <View style={styles.pageControl}>
+        <PageControl compact />
+      </View>
       <View style={styles.reader}>
         <PdfPageSurface />
       </View>
@@ -33,6 +37,7 @@ export function PhoneReaderLayout() {
 }
 
 const styles = StyleSheet.create({
+  pageControl: { alignItems: "center", marginBottom: 8 },
   reader: { flex: 1 },
   root: { flex: 1 }
 });

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
+import ReactNativeBlobUtil from "react-native-blob-util";
 import type { Annotation, PdfFileRecord } from "@/types";
 
 const RECENTS_KEY = "velora.recentFiles.v1";
@@ -18,13 +19,33 @@ export async function copyPdfToLocal(asset: { name?: string | null; uri: string 
   const safeName = name.replace(/[^\w.\-() ]+/g, "_");
   const destination = `${PDF_DIR}${id}-${safeName}`;
   await FileSystem.copyAsync({ from: asset.uri, to: destination });
+  const pageCount = await readPdfPageCount(destination);
   return {
     id,
     name,
     uri: destination,
     originalUri: asset.uri,
+    pageCount,
     lastOpened: Date.now()
   };
+}
+
+export async function readPdfPageCount(uri: string): Promise<number | undefined> {
+  try {
+    const path = uri.replace(/^file:\/\//, "");
+    const raw = await ReactNativeBlobUtil.fs.readFile(path, "utf8");
+    const pageTreeCounts = [
+      ...raw.matchAll(/\/Type\s*\/Pages\b(?:(?!endobj).){0,800}?\/Count\s+(\d+)/gs),
+      ...raw.matchAll(/\/Count\s+(\d+)(?:(?!endobj).){0,800}?\/Type\s*\/Pages\b/gs)
+    ]
+      .map((match) => Number(match[1]))
+      .filter((count) => Number.isFinite(count) && count > 0);
+    if (pageTreeCounts.length) return Math.max(...pageTreeCounts);
+    const matches = raw.match(/\/Type\s*\/Page\b/g);
+    return matches?.length ? matches.length : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function loadRecentFiles(): Promise<PdfFileRecord[]> {

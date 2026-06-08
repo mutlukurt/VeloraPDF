@@ -10,6 +10,7 @@ export function PageNavigator({ compact = false }: { compact?: boolean }) {
   const pageCount = usePdfStore((state) => state.pageCount);
   const currentPage = usePdfStore((state) => state.currentPage);
   const setCurrentPage = usePdfStore((state) => state.setCurrentPage);
+  const setPagesPanelOpen = useUiStore((state) => state.setPagesPanelOpen);
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
   const eyeProtection = useUiStore((state) => state.eyeProtection);
   const theme = getTheme(resolvedTheme, eyeProtection);
@@ -34,7 +35,10 @@ export function PageNavigator({ compact = false }: { compact?: boolean }) {
               key={page}
               label={`Page ${page}`}
               variant={active ? "primary" : "secondary"}
-              onPress={() => setCurrentPage(page)}
+              onPress={() => {
+                setCurrentPage(page);
+                if (compact) setPagesPanelOpen(false);
+              }}
             />
           );
         })}

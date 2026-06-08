@@ -1,6 +1,6 @@
 import Pdf from "react-native-pdf";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { AnnotationOverlay } from "@/components/pdf/AnnotationOverlay";
@@ -12,9 +12,9 @@ import { getTheme } from "@/theme/tokens";
 export function PdfReader() {
   const [pageSize, setPageSize] = useState<{ width: number; height: number } | null>(null);
   const [viewport, setViewport] = useState({ width: 1, height: 1 });
+  const pdfRef = useRef<Pdf>(null);
   const file = usePdfStore((state) => state.currentFile);
   const currentPage = usePdfStore((state) => state.currentPage);
-  const setCurrentPage = usePdfStore((state) => state.setCurrentPage);
   const setPageCount = usePdfStore((state) => state.setPageCount);
   const activeTool = useAnnotationStore((state) => state.activeTool);
   const resolvedTheme = useUiStore((state) => state.resolvedTheme);
@@ -83,11 +83,24 @@ export function PdfReader() {
     transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }]
   }));
 
+  useEffect(() => {
+    scale.value = 1;
+    savedScale.value = 1;
+    translateX.value = 0;
+    translateY.value = 0;
+    savedTranslateX.value = 0;
+    savedTranslateY.value = 0;
+  }, [currentPage, file?.id, savedScale, savedTranslateX, savedTranslateY, scale, translateX, translateY]);
+
+  useEffect(() => {
+    pdfRef.current?.setPage(currentPage);
+  }, [currentPage]);
+
   if (!file) return null;
 
   return (
     <View
-      style={[styles.wrap, { backgroundColor: theme.canvas }]}
+      style={styles.wrap}
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;
         setViewport((current) => (current.width === width && current.height === height ? current : { width, height }));
@@ -96,6 +109,8 @@ export function PdfReader() {
       <GestureDetector gesture={Gesture.Simultaneous(panGesture, pinchGesture)}>
         <Animated.View style={[styles.page, { width: pageFrame.width, height: pageFrame.height }, animatedPageStyle]}>
           <Pdf
+            ref={pdfRef}
+            key={`${file.id}-${currentPage}`}
             source={{ uri: file.uri }}
             page={currentPage}
             trustAllCerts={false}
@@ -113,7 +128,7 @@ export function PdfReader() {
               setPageCount(pages);
               setPageSize(size);
             }}
-            onPageChanged={(page) => setCurrentPage(page)}
+            onPageChanged={() => {}}
             onError={() => {}}
             renderActivityIndicator={() => (
               <View style={styles.loading}>
@@ -134,13 +149,9 @@ const styles = StyleSheet.create({
   loading: { alignItems: "center", gap: 12, justifyContent: "center" },
   loadingText: { fontSize: 13, fontWeight: "700" },
   page: {
-    backgroundColor: "#FFFFFF",
-    elevation: 8,
     overflow: "hidden",
-    shadowColor: "#000000",
-    shadowOpacity: 0.18,
-    shadowRadius: 18
+    backgroundColor: "transparent"
   },
   pdf: { flex: 1, height: "100%", width: "100%" },
-  wrap: { alignItems: "center", borderRadius: 8, flex: 1, justifyContent: "center", overflow: "hidden" }
+  wrap: { alignItems: "center", flex: 1, justifyContent: "center" }
 });
