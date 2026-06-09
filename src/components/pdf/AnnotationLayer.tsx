@@ -31,6 +31,13 @@ function clamp(value: number, min: number, max: number) {
 export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const stickyInputRef = useRef<HTMLTextAreaElement>(null);
+  const stickyDragRef = useRef<{
+    id: string;
+    pointerId: number;
+    startClient: Point;
+    start: Point;
+    moved: boolean;
+  } | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [stickyDraft, setStickyDraft] = useState<{
     id?: string;
@@ -98,36 +105,37 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     });
   };
 
-  useEffect(() => {
-    if (!stickyDrag) return;
+  const moveSticky = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const drag = stickyDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const nextX = clamp(drag.start.x + event.clientX - drag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
+    const nextY = clamp(drag.start.y + event.clientY - drag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
+    const moved = Math.abs(nextX - drag.start.x) > 1 || Math.abs(nextY - drag.start.y) > 1;
+    stickyDragRef.current = { ...drag, moved: drag.moved || moved };
+    setStickyDrag((current) => (current?.id === drag.id ? { ...current, current: { x: nextX, y: nextY } } : current));
+  };
 
-    const moveSticky = (event: PointerEvent) => {
-      if (event.pointerId !== stickyDrag.pointerId) return;
-      const nextX = clamp(stickyDrag.start.x + event.clientX - stickyDrag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
-      const nextY = clamp(stickyDrag.start.y + event.clientY - stickyDrag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
-      setStickyDrag((current) => (current?.id === stickyDrag.id ? { ...current, current: { x: nextX, y: nextY } } : current));
-    };
-
-    const finishSticky = (event: PointerEvent) => {
-      if (event.pointerId !== stickyDrag.pointerId) return;
-      const nextX = clamp(stickyDrag.start.x + event.clientX - stickyDrag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
-      const nextY = clamp(stickyDrag.start.y + event.clientY - stickyDrag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
-      const moved = Math.abs(nextX - stickyDrag.start.x) > 1 || Math.abs(nextY - stickyDrag.start.y) > 1;
-      if (moved) {
-        updateAnnotation(stickyDrag.id, { x: nextX, y: nextY });
-      }
-      setStickyDrag(null);
-    };
-
-    window.addEventListener("pointermove", moveSticky, true);
-    window.addEventListener("pointerup", finishSticky, true);
-    window.addEventListener("pointercancel", finishSticky, true);
-    return () => {
-      window.removeEventListener("pointermove", moveSticky, true);
-      window.removeEventListener("pointerup", finishSticky, true);
-      window.removeEventListener("pointercancel", finishSticky, true);
-    };
-  }, [height, stickyDrag, updateAnnotation, width]);
+  const finishSticky = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const drag = stickyDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const nextX = clamp(drag.start.x + event.clientX - drag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
+    const nextY = clamp(drag.start.y + event.clientY - drag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
+    const moved = drag.moved || Math.abs(nextX - drag.start.x) > 1 || Math.abs(nextY - drag.start.y) > 1;
+    if (moved) {
+      updateAnnotation(drag.id, { x: nextX, y: nextY });
+    }
+    stickyDragRef.current = null;
+    setStickyDrag(null);
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture may already be released by the browser.
+    }
+  };
 
   const begin = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -567,9 +575,17 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   transform: stickyDrag?.id === annotation.id ? "rotate(0deg)" : "rotate(-2deg)",
                 }}
                 onPointerDown={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   setSelectedId(annotation.id);
                   e.currentTarget.setPointerCapture(e.pointerId);
+                  stickyDragRef.current = {
+                    id: annotation.id,
+                    pointerId: e.pointerId,
+                    startClient: { x: e.clientX, y: e.clientY },
+                    start: { x: annotation.x, y: annotation.y },
+                    moved: false,
+                  };
                   setStickyDrag({
                     id: annotation.id,
                     pointerId: e.pointerId,
@@ -578,14 +594,12 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                     current: { x: annotation.x, y: annotation.y },
                   });
                 }}
-                onPointerUp={(e) => {
-                  e.stopPropagation();
-                }}
-                onPointerCancel={(e) => {
-                  e.stopPropagation();
-                }}
+                onPointerMove={moveSticky}
+                onPointerUp={finishSticky}
+                onPointerCancel={finishSticky}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
+                  if (stickyDragRef.current?.moved) return;
                   openTextEditor(annotation);
                 }}
               >
