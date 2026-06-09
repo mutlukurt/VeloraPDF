@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.7-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.8-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.7-aarch64.dmg](downloads/Velora-PDF-1.0.7-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.8-aarch64.dmg](downloads/Velora-PDF-1.0.8-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.7.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.8.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.7_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.8_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.7.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.8.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.7
+1.0.8
 ```
 
 Bundle identifier:
@@ -482,6 +482,17 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.8
+
+Released to bring sticky-note UI into the Velora PDF application design system.
+
+Changes:
+
+- Restyled sticky notes as compact Velora-style cards with refined borders, shadows, icon surfaces, selected state, and a subtle folded corner.
+- Updated the sticky note editor to use the app surface, toolbar header, matching controls, and consistent 8px-radius panel styling.
+- Refined the annotation toolbar with clearer color swatches, selected-color checkmarks, better event isolation, and app-consistent action buttons.
+- Bumped application version to `1.0.8` and built the production macOS DMG.
 
 ### 1.0.7
 

@@ -1,4 +1,4 @@
-import { Copy, Trash2, Edit2 } from "lucide-react";
+import { Check, Copy, Trash2, Edit2 } from "lucide-react";
 import { IconButton } from "../ui/IconButton";
 import { type Annotation, useAnnotationStore } from "../../stores/useAnnotationStore";
 
@@ -34,8 +34,8 @@ export function AnnotationToolbar({ onEditText }: AnnotationToolbarProps) {
 
   return (
     <div
-      className="absolute z-40 flex items-center gap-1 rounded-2xl border border-border bg-toolbar p-1 shadow-velora"
-      style={{ left: x, top: Math.max(8, y - 54) }}
+      className="absolute z-40 flex items-center gap-1.5 rounded-xl border border-border bg-toolbar/95 p-1.5 shadow-[0_18px_46px_rgba(15,15,20,.20)] backdrop-blur-xl"
+      style={{ left: x, top: Math.max(8, y - 58) }}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerMove={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
@@ -45,19 +45,23 @@ export function AnnotationToolbar({ onEditText }: AnnotationToolbarProps) {
           key={color}
           type="button"
           aria-label={`Set color ${color}`}
-          className={`h-6 w-6 rounded-lg border border-white/20 ${"color" in selected && selected.color === color ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--toolbar)]" : ""}`}
+          className={`relative grid h-7 w-7 place-items-center rounded-lg border border-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,.55)] transition hover:scale-105 ${
+            "color" in selected && selected.color === color ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--toolbar)]" : ""
+          }`}
           style={{ background: color }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             updateAnnotation(selected.id, { color } as Partial<typeof selected>);
           }}
-        />
+        >
+          {"color" in selected && selected.color === color ? <Check size={13} className="text-zinc-950 drop-shadow-sm" /> : null}
+        </button>
       ))}
       {hasText && (
         <IconButton
           label="Edit note content"
-          className="h-8 w-8"
+          className="h-8 w-8 rounded-lg text-secondary hover:bg-elevated hover:text-accent"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
@@ -69,7 +73,7 @@ export function AnnotationToolbar({ onEditText }: AnnotationToolbarProps) {
       )}
       <IconButton
         label="Duplicate annotation"
-        className="h-8 w-8"
+        className="h-8 w-8 rounded-lg text-secondary hover:bg-elevated hover:text-primary"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
@@ -80,7 +84,7 @@ export function AnnotationToolbar({ onEditText }: AnnotationToolbarProps) {
       </IconButton>
       <IconButton
         label="Delete annotation"
-        className="h-8 w-8 text-red-400"
+        className="h-8 w-8 rounded-lg text-red-400 hover:bg-red-500/10"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();

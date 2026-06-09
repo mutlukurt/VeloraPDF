@@ -512,10 +512,15 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               <button
                 key={annotation.id}
                 title={annotation.text}
-                className={`absolute flex min-h-10 w-40 items-start gap-2 rounded-lg border border-black/10 px-2.5 py-2 text-left text-zinc-950 shadow-lg transition hover:scale-[1.02] ${
+                className={`absolute flex min-h-[58px] w-44 items-start gap-2.5 overflow-hidden rounded-lg border px-3 py-2.5 text-left text-zinc-950 shadow-[0_16px_34px_rgba(15,15,20,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(15,15,20,.22)] ${
                   selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white" : ""
                 }`}
-                style={{ left: annotation.x, top: annotation.y, background: annotation.color }}
+                style={{
+                  left: annotation.x,
+                  top: annotation.y,
+                  background: `linear-gradient(180deg, color-mix(in srgb, ${annotation.color} 86%, white), ${annotation.color})`,
+                  borderColor: `color-mix(in srgb, ${annotation.color} 62%, #0e0e12)`,
+                }}
                 onPointerDown={(e) => {
                   e.stopPropagation();
                   setSelectedId(annotation.id);
@@ -525,8 +530,11 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   openTextEditor(annotation);
                 }}
               >
-                <MessageSquare className="mt-0.5 shrink-0" size={15} />
-                <span className="line-clamp-3 break-words text-[11px] font-semibold leading-snug">{annotation.text || "Note"}</span>
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-black/10 bg-white/35 shadow-[inset_0_1px_0_rgba(255,255,255,.4)]">
+                  <MessageSquare size={14} />
+                </span>
+                <span className="line-clamp-3 min-w-0 break-words pt-0.5 text-[11px] font-semibold leading-snug">{annotation.text || "Note"}</span>
+                <span className="pointer-events-none absolute right-0 top-0 h-5 w-5 rounded-bl-lg border-b border-l border-black/10 bg-white/30" />
               </button>
             );
           }
@@ -534,21 +542,35 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         })}
         {stickyDraft ? (
           <div
-            className="absolute z-50 w-56 rounded-lg border border-black/10 p-2.5 text-zinc-950 shadow-2xl"
+            className="absolute z-50 w-60 overflow-hidden rounded-lg border border-border bg-toolbar text-zinc-950 shadow-[0_24px_70px_rgba(15,15,20,.26)] backdrop-blur-xl"
             style={{
-              left: Math.min(stickyDraft.point.x, Math.max(0, width - 224)),
-              top: Math.min(stickyDraft.point.y, Math.max(0, height - 164)),
-              background: stickyDraft.type === "sticky" ? stickyDraft.color : "#ffffff",
+              left: Math.min(stickyDraft.point.x, Math.max(0, width - 240)),
+              top: Math.min(stickyDraft.point.y, Math.max(0, height - 186)),
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onPointerMove={(e) => e.stopPropagation()}
             onPointerUp={(e) => e.stopPropagation()}
           >
+            <div
+              className="flex items-center gap-2 border-b border-black/10 px-3 py-2"
+              style={{
+                background:
+                  stickyDraft.type === "sticky"
+                    ? `linear-gradient(180deg, color-mix(in srgb, ${stickyDraft.color} 84%, white), ${stickyDraft.color})`
+                    : "var(--surface)",
+              }}
+            >
+              <span className="grid h-7 w-7 place-items-center rounded-lg border border-black/10 bg-white/40">
+                <MessageSquare size={14} />
+              </span>
+              <span className="text-xs font-bold text-zinc-950">{stickyDraft.type === "sticky" ? "Sticky Note" : "Text Note"}</span>
+            </div>
+            <div className="bg-surface p-2.5">
             <textarea
               ref={stickyInputRef}
               value={stickyDraft.text}
               aria-label="Sticky note content"
-              className="h-24 w-full resize-none rounded-md border border-black/10 bg-white/55 p-2 text-xs font-semibold leading-relaxed outline-none placeholder:text-zinc-700/60"
+              className="h-24 w-full resize-none rounded-lg border border-border bg-elevated p-2.5 text-xs font-semibold leading-relaxed text-primary outline-none placeholder:text-secondary/70 focus:border-accent"
               placeholder="Write a note..."
               onChange={(e) => setStickyDraft({ ...stickyDraft, text: e.target.value })}
               onKeyDown={(e) => {
@@ -563,12 +585,13 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               }}
             />
             <div className="mt-2 flex justify-end gap-1.5">
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] text-zinc-800 hover:bg-black/10" onClick={() => setStickyDraft(null)}>
+              <Button variant="ghost" size="sm" className="h-8 rounded-lg px-3 text-[11px]" onClick={() => setStickyDraft(null)}>
                 Cancel
               </Button>
-              <Button variant="secondary" size="sm" className="h-7 border-black/10 bg-zinc-950 px-2 text-[11px] text-white hover:bg-zinc-800" onClick={saveStickyDraft}>
+              <Button variant="primary" size="sm" className="h-8 rounded-lg px-3 text-[11px]" onClick={saveStickyDraft}>
                 Save
               </Button>
+            </div>
             </div>
           </div>
         ) : null}
