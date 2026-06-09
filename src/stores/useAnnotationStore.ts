@@ -2,8 +2,13 @@ import { create } from "zustand";
 
 export type Point = { x: number; y: number };
 
+type PageMetrics = {
+  pageWidth?: number;
+  pageHeight?: number;
+};
+
 export type Annotation =
-  | {
+  | (PageMetrics & {
       id: string;
       page: number;
       type: "highlight";
@@ -14,8 +19,8 @@ export type Annotation =
       color: string;
       opacity: number;
       createdAt: number;
-    }
-  | {
+    })
+  | (PageMetrics & {
       id: string;
       page: number;
       type: "pen";
@@ -23,8 +28,8 @@ export type Annotation =
       color: string;
       strokeWidth: number;
       createdAt: number;
-    }
-  | {
+    })
+  | (PageMetrics & {
       id: string;
       page: number;
       type: "rectangle" | "circle" | "arrow" | "underline" | "strike";
@@ -35,8 +40,8 @@ export type Annotation =
       color: string;
       strokeWidth: number;
       createdAt: number;
-    }
-  | {
+    })
+  | (PageMetrics & {
       id: string;
       page: number;
       type: "signature";
@@ -46,8 +51,8 @@ export type Annotation =
       height: number;
       dataUrl: string;
       createdAt: number;
-    }
-  | {
+    })
+  | (PageMetrics & {
       id: string;
       page: number;
       type: "text";
@@ -57,8 +62,8 @@ export type Annotation =
       color: string;
       fontSize: number;
       createdAt: number;
-    }
-  | {
+    })
+  | (PageMetrics & {
       id: string;
       page: number;
       type: "sticky";
@@ -67,7 +72,7 @@ export type Annotation =
       text: string;
       color: string;
       createdAt: number;
-    };
+    });
 
 type AnnotationState = {
   annotations: Annotation[];

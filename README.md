@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.6-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.7-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.6-aarch64.dmg](downloads/Velora-PDF-1.0.6-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.7-aarch64.dmg](downloads/Velora-PDF-1.0.7-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.6.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.7.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.6_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.7_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.6.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.7.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.6
+1.0.7
 ```
 
 Bundle identifier:
@@ -482,6 +482,17 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.7
+
+Released to fix sticky-note annotation placement and PDF export fidelity.
+
+Changes:
+
+- Stored source page render dimensions with new annotations so exported overlays scale to the actual PDF page size instead of the old fixed viewport fallback.
+- Updated sticky notes from icon-only markers to readable note cards with visible text previews and selection styling.
+- Exported sticky notes as colored note boxes with wrapped text in the annotated PDF output.
+- Bumped application version to `1.0.7` and built the production macOS DMG.
 
 ### 1.0.6
 

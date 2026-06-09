@@ -30,6 +30,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const selectedId = useAnnotationStore((state) => state.selectedId);
   const setSelectedId = useAnnotationStore((state) => state.setSelectedId);
   const pageAnnotations = useMemo(() => annotations.filter((item) => item.page === page), [annotations, page]);
+  const pageMetrics = { pageWidth: width, pageHeight: height };
 
   // Signature States
   const [isSignatureOpen, setIsSignatureOpen] = useState(false);
@@ -66,6 +67,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         addAnnotation({
           id: createAnnotationId(),
           page,
+          ...pageMetrics,
           type: "text",
           x: point.x,
           y: point.y,
@@ -83,6 +85,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         addAnnotation({
           id: createAnnotationId(),
           page,
+          ...pageMetrics,
           type: "sticky",
           x: point.x,
           y: point.y,
@@ -115,6 +118,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
       addAnnotation({
         id: createAnnotationId(),
         page,
+        ...pageMetrics,
         type: "pen",
         points: draft.points,
         color: "#6657FF",
@@ -142,6 +146,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         const base = {
           id: createAnnotationId(),
           page,
+          ...pageMetrics,
           x,
           y,
           width: annotationWidth,
@@ -215,6 +220,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     addAnnotation({
       id: createAnnotationId(),
       page,
+      ...pageMetrics,
       type: "signature",
       x: sigPos.x - 75,
       y: sigPos.y - 37,
@@ -475,7 +481,9 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               <button
                 key={annotation.id}
                 title={annotation.text}
-                className="absolute grid h-8 w-8 place-items-center rounded-xl text-zinc-950 shadow-lg hover:scale-105 transition"
+                className={`absolute flex min-h-10 w-40 items-start gap-2 rounded-lg border border-black/10 px-2.5 py-2 text-left text-zinc-950 shadow-lg transition hover:scale-[1.02] ${
+                  selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white" : ""
+                }`}
                 style={{ left: annotation.x, top: annotation.y, background: annotation.color }}
                 onPointerDown={(e) => {
                   e.stopPropagation();
@@ -489,7 +497,8 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   }
                 }}
               >
-                <MessageSquare size={16} />
+                <MessageSquare className="mt-0.5 shrink-0" size={15} />
+                <span className="line-clamp-3 break-words text-[11px] font-semibold leading-snug">{annotation.text || "Note"}</span>
               </button>
             );
           }

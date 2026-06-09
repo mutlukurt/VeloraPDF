@@ -7,6 +7,15 @@ function hexToRgb(hex: string) {
   return rgb(((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255);
 }
 
+function pageScale(annotation: Annotation, pdfWidth: number, pdfHeight: number) {
+  const sourceWidth = annotation.pageWidth || 760;
+  const sourceHeight = annotation.pageHeight || 980;
+  return {
+    sx: pdfWidth / sourceWidth,
+    sy: pdfHeight / sourceHeight,
+  };
+}
+
 export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annotation[]) {
   const pdf = await PDFDocument.load(source);
   const pages = pdf.getPages();
@@ -15,8 +24,7 @@ export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annota
     const page = pages[annotation.page - 1];
     if (!page) return;
     const { width, height } = page.getSize();
-    const sx = width / 760;
-    const sy = height / 980;
+    const { sx, sy } = pageScale(annotation, width, height);
 
     if (annotation.type === "highlight") {
       page.drawRectangle({
@@ -65,13 +73,40 @@ export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annota
       });
     }
 
-    if (annotation.type === "text" || annotation.type === "sticky") {
+    if (annotation.type === "text") {
       page.drawText(annotation.text || "Note", {
         x: annotation.x * sx,
-        y: height - annotation.y * sy,
-        size: annotation.type === "text" ? annotation.fontSize : 11,
+        y: height - (annotation.y + annotation.fontSize) * sy,
+        size: annotation.fontSize * Math.min(sx, sy),
         color: hexToRgb(annotation.color),
         maxWidth: 220 * sx,
+      });
+    }
+
+    if (annotation.type === "sticky") {
+      const noteWidth = 160;
+      const noteHeight = 62;
+      const padding = 10;
+      const x = annotation.x * sx;
+      const y = height - (annotation.y + noteHeight) * sy;
+
+      page.drawRectangle({
+        x,
+        y,
+        width: noteWidth * sx,
+        height: noteHeight * sy,
+        color: hexToRgb(annotation.color),
+        opacity: 0.95,
+        borderColor: rgb(0.76, 0.64, 0.22),
+        borderWidth: 0.8,
+      });
+      page.drawText(annotation.text || "Note", {
+        x: x + padding * sx,
+        y: y + noteHeight * sy - 20 * sy,
+        size: 10.5 * Math.min(sx, sy),
+        color: rgb(0.12, 0.1, 0.05),
+        maxWidth: (noteWidth - padding * 2) * sx,
+        lineHeight: 13 * sy,
       });
     }
   });
