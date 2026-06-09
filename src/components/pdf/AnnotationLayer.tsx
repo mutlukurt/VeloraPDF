@@ -1,4 +1,4 @@
-import { MessageSquare, X } from "lucide-react";
+import { MessageSquare, Pin, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnnotationToolbar } from "../annotations/AnnotationToolbar";
 import { createAnnotationId, type Annotation, type Point, useAnnotationStore } from "../../stores/useAnnotationStore";
@@ -16,8 +16,8 @@ type Draft =
   | { type: "highlight" | "rectangle" | "circle" | "arrow" | "underline" | "strike" | "crop"; start: Point; current: Point }
   | { type: "pen"; points: Point[] };
 
-const STICKY_CARD_WIDTH = 176;
-const STICKY_CARD_HEIGHT = 58;
+const STICKY_CARD_WIDTH = 190;
+const STICKY_CARD_HEIGHT = 154;
 
 function pointFromEvent(event: React.PointerEvent<HTMLDivElement>, element: HTMLDivElement): Point {
   const rect = element.getBoundingClientRect();
@@ -558,14 +558,13 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               <button
                 key={annotation.id}
                 title={annotation.text}
-                className={`absolute flex min-h-[58px] w-44 cursor-grab touch-none items-start gap-2.5 overflow-hidden rounded-xl border px-3 py-2.5 text-left text-zinc-900 shadow-[0_12px_24px_rgba(15,15,20,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(15,15,20,0.12)] active:cursor-grabbing ${
+                className={`absolute w-[190px] cursor-grab touch-none rounded-[8px] border border-white/80 bg-white p-4 pt-7 text-left text-zinc-950 shadow-[0_18px_38px_rgba(15,15,20,.20)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_52px_rgba(15,15,20,.25)] active:cursor-grabbing ${
                   selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-900" : ""
                 }`}
                 style={{
                   left: draggedPosition?.x ?? annotation.x,
                   top: draggedPosition?.y ?? annotation.y,
-                  background: `linear-gradient(135deg, color-mix(in srgb, ${annotation.color} 88%, white) 0%, color-mix(in srgb, ${annotation.color} 96%, white) 100%)`,
-                  borderColor: `color-mix(in srgb, ${annotation.color} 65%, #000000)`,
+                  transform: stickyDrag?.id === annotation.id ? "rotate(0deg)" : "rotate(-2deg)",
                 }}
                 onPointerDown={(e) => {
                   e.stopPropagation();
@@ -590,11 +589,34 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   openTextEditor(annotation);
                 }}
               >
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-white/50 bg-white/45 shadow-[inset_0_1px_0_rgba(255,255,255,.4),0_1px_2px_rgba(0,0,0,0.05)] text-zinc-900/80">
-                  <MessageSquare size={13} className="stroke-[2.2]" />
+                <span
+                  className="absolute left-1/2 top-0 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/70 shadow-[0_10px_22px_rgba(15,15,20,.24)]"
+                  style={{
+                    background: `radial-gradient(circle at 35% 30%, white 0%, color-mix(in srgb, ${annotation.color} 70%, white) 22%, ${annotation.color} 72%)`,
+                    boxShadow: `0 10px 24px color-mix(in srgb, ${annotation.color} 52%, transparent)`,
+                  }}
+                >
+                  <Pin size={16} className="rotate-45 text-white drop-shadow-sm" fill="currentColor" />
                 </span>
-                <span className="line-clamp-3 min-w-0 break-words pt-0.5 text-[11px] font-semibold tracking-wide text-zinc-800 leading-snug">{annotation.text || "Note"}</span>
-                <span className="pointer-events-none absolute right-0 top-0 h-4 w-4 rounded-bl-md border-b border-l border-black/10 bg-white/25 shadow-[-1px_1px_2px_rgba(0,0,0,0.05)]" />
+                <div
+                  className="min-h-[108px] rounded-[8px] border p-3 shadow-[inset_0_1px_0_rgba(255,255,255,.46)]"
+                  style={{
+                    background: `linear-gradient(135deg, color-mix(in srgb, ${annotation.color} 30%, white), color-mix(in srgb, ${annotation.color} 52%, white))`,
+                    borderColor: `color-mix(in srgb, ${annotation.color} 42%, white)`,
+                  }}
+                >
+                  <div
+                    className="mb-2 text-[20px] font-medium leading-none"
+                    style={{ color: `color-mix(in srgb, ${annotation.color} 78%, #111827)` }}
+                  >
+                    {String(page).padStart(2, "0")}
+                  </div>
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold leading-tight text-zinc-950">
+                    <MessageSquare size={12} />
+                    Sticky Note
+                  </div>
+                  <p className="line-clamp-4 break-words text-[11px] font-medium leading-snug text-zinc-700">{annotation.text || "Note"}</p>
+                </div>
               </button>
             );
           }
@@ -602,41 +624,59 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         })}
         {stickyDraft ? (
           <div
-            className="absolute z-50 w-64 overflow-hidden rounded-2xl border border-border bg-panel text-primary shadow-velora-light dark:shadow-velora backdrop-blur-xl transition-all duration-200"
+            className="absolute z-50 w-[300px] rounded-[8px] border border-white/80 bg-white p-4 pt-8 text-zinc-950 shadow-[0_28px_80px_rgba(15,15,20,.28)] transition-all duration-200"
             style={{
-              left: Math.min(stickyDraft.point.x, Math.max(0, width - 256)),
-              top: Math.min(stickyDraft.point.y, Math.max(0, height - 200)),
+              left: Math.min(stickyDraft.point.x, Math.max(0, width - 300)),
+              top: Math.min(stickyDraft.point.y, Math.max(0, height - 260)),
+              transform: "rotate(-1deg)",
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onPointerMove={(e) => e.stopPropagation()}
             onPointerUp={(e) => e.stopPropagation()}
           >
-            <div
-              className="flex items-center gap-2.5 border-b border-border/80 px-4 py-3"
+            <span
+              className="absolute left-1/2 top-0 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/70 shadow-[0_12px_26px_rgba(15,15,20,.28)]"
               style={{
                 background:
                   stickyDraft.type === "sticky"
-                    ? `linear-gradient(180deg, color-mix(in srgb, ${stickyDraft.color} 15%, var(--panel)), color-mix(in srgb, ${stickyDraft.color} 8%, var(--panel)))`
-                    : "var(--panel)",
+                    ? `radial-gradient(circle at 35% 30%, white 0%, color-mix(in srgb, ${stickyDraft.color} 70%, white) 22%, ${stickyDraft.color} 72%)`
+                    : "radial-gradient(circle at 35% 30%, white 0%, #a7d8ff 24%, #6657ff 72%)",
+                boxShadow:
+                  stickyDraft.type === "sticky"
+                    ? `0 12px 26px color-mix(in srgb, ${stickyDraft.color} 52%, transparent)`
+                    : "0 12px 26px rgba(102,87,255,.36)",
               }}
             >
-              <span
-                className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-white/40 dark:bg-black/10 shadow-sm"
-                style={{
-                  color: stickyDraft.type === "sticky" ? `color-mix(in srgb, ${stickyDraft.color} 80%, var(--primary))` : 'var(--accent)',
-                  borderColor: stickyDraft.type === "sticky" ? `color-mix(in srgb, ${stickyDraft.color} 30%, var(--border))` : 'var(--border)'
-                }}
+              <Pin size={17} className="rotate-45 text-white drop-shadow-sm" fill="currentColor" />
+            </span>
+            <div
+              className="rounded-[8px] border p-3"
+              style={{
+                background:
+                  stickyDraft.type === "sticky"
+                    ? `linear-gradient(135deg, color-mix(in srgb, ${stickyDraft.color} 30%, white), color-mix(in srgb, ${stickyDraft.color} 52%, white))`
+                    : "linear-gradient(135deg, #eef3ff, #e4e7ff)",
+                borderColor:
+                  stickyDraft.type === "sticky"
+                    ? `color-mix(in srgb, ${stickyDraft.color} 42%, white)`
+                    : "rgba(102,87,255,.18)",
+              }}
+            >
+              <div
+                className="mb-2 text-[22px] font-medium leading-none"
+                style={{ color: stickyDraft.type === "sticky" ? `color-mix(in srgb, ${stickyDraft.color} 78%, #111827)` : "#4f46e5" }}
               >
-                <MessageSquare size={13} className="stroke-[2.2]" />
-              </span>
-              <span className="text-xs font-bold tracking-wide text-primary">{stickyDraft.type === "sticky" ? "Sticky Note" : "Text Note"}</span>
-            </div>
-            <div className="bg-panel p-3">
-              <textarea
-                ref={stickyInputRef}
-                value={stickyDraft.text}
-                aria-label="Sticky note content"
-                className="h-28 w-full resize-none rounded-xl border border-border bg-elevated p-3 text-xs font-semibold leading-relaxed text-primary outline-none placeholder:text-secondary/50 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 transition-all"
+                {String(page).padStart(2, "0")}
+              </div>
+              <div className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-zinc-950">
+                <MessageSquare size={14} />
+                {stickyDraft.type === "sticky" ? "Sticky Note" : "Text Note"}
+              </div>
+            <textarea
+              ref={stickyInputRef}
+              value={stickyDraft.text}
+              aria-label="Sticky note content"
+                className="h-32 w-full resize-none rounded-[8px] border border-white/60 bg-white/60 p-3 text-sm font-medium leading-relaxed text-zinc-800 outline-none placeholder:text-zinc-500/70 focus:border-white focus:ring-2 focus:ring-white/60"
                 placeholder="Write a note..."
                 onChange={(e) => setStickyDraft({ ...stickyDraft, text: e.target.value })}
                 onKeyDown={(e) => {
@@ -650,8 +690,8 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   }
                 }}
               />
-              <div className="mt-2.5 flex justify-end gap-1.5">
-                <Button variant="ghost" size="sm" className="h-8 rounded-lg px-3 text-[11px]" onClick={() => setStickyDraft(null)}>
+              <div className="mt-3 flex justify-end gap-1.5">
+                <Button variant="ghost" size="sm" className="h-8 rounded-lg px-3 text-[11px] text-zinc-700 hover:bg-white/50" onClick={() => setStickyDraft(null)}>
                   Cancel
                 </Button>
                 <Button variant="primary" size="sm" className="h-8 rounded-lg px-3.5 text-[11px]" onClick={saveStickyDraft}>

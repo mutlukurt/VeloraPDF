@@ -84,9 +84,10 @@ export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annota
     }
 
     if (annotation.type === "sticky") {
-      const noteWidth = 160;
-      const noteHeight = 62;
-      const padding = 10;
+      const noteWidth = 190;
+      const noteHeight = 154;
+      const innerInset = 16;
+      const pinRadius = 8;
       const x = annotation.x * sx;
       const y = height - (annotation.y + noteHeight) * sy;
 
@@ -95,17 +96,34 @@ export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annota
         y,
         width: noteWidth * sx,
         height: noteHeight * sy,
+        color: rgb(1, 1, 1),
+        opacity: 0.98,
+        borderColor: rgb(0.92, 0.92, 0.94),
+        borderWidth: 0.6,
+      });
+      page.drawCircle({
+        x: x + (noteWidth / 2) * sx,
+        y: y + (noteHeight - 2) * sy,
+        size: pinRadius * Math.min(sx, sy),
         color: hexToRgb(annotation.color),
         opacity: 0.95,
+      });
+      page.drawRectangle({
+        x: x + innerInset * sx,
+        y: y + 16 * sy,
+        width: (noteWidth - innerInset * 2) * sx,
+        height: (noteHeight - 44) * sy,
+        color: hexToRgb(annotation.color),
+        opacity: 0.32,
         borderColor: rgb(0.76, 0.64, 0.22),
         borderWidth: 0.8,
       });
       page.drawText(annotation.text || "Note", {
-        x: x + padding * sx,
-        y: y + noteHeight * sy - 20 * sy,
-        size: 10.5 * Math.min(sx, sy),
+        x: x + (innerInset + 10) * sx,
+        y: y + (noteHeight - 74) * sy,
+        size: 11 * Math.min(sx, sy),
         color: rgb(0.12, 0.1, 0.05),
-        maxWidth: (noteWidth - padding * 2) * sx,
+        maxWidth: (noteWidth - innerInset * 2 - 20) * sx,
         lineHeight: 13 * sy,
       });
     }

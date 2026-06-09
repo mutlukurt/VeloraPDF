@@ -485,15 +485,15 @@ aarch64
 
 ### 1.0.12
 
-Released to restyle and refine the sticky note user interface.
+Released to repair and redesign sticky notes as pinned visual cards.
 
 Changes:
 
-- Redesigned placed sticky notes as modern rounded-xl cards with dynamic 135deg gradient depth and custom-blended borders matching the card color.
-- Refined the popup draft editor container with a larger w-64 layout, rounded-2xl corners, and custom-tinted headers adapting to the note color.
-- Fixed text readability inside the sticky note editor popover by utilizing native `text-primary` classes, fully supporting Light and Dark modes.
-- Upgraded the text editing textarea styling with rounded-xl corners, custom border highlights, and softer placeholders.
-- Bumped version to `1.0.12` and generated the production macOS installer to the Desktop.
+- Redesigned placed sticky notes as pinned white cards with colored inner note panels, soft shadows, subtle rotation, and a pin head.
+- Updated the sticky-note create/edit popover to open as a larger pinned writable card matching the placed note style.
+- Kept sticky notes draggable and bounded within the PDF page using the updated card dimensions.
+- Updated sticky-note PDF export to draw a larger white note card, colored inner panel, and pin marker.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.12`.
 
 ### 1.0.11
 
