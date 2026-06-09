@@ -94,7 +94,6 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
           createdAt: Date.now(),
         });
       }
-      useUiStore.getState().setActiveTool("select");
     }
     if (activeTool === "signature") {
       setSigPos(point);
