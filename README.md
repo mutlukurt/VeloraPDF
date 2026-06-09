@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.4-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.5-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.4-aarch64.dmg](downloads/Velora-PDF-1.0.4-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.5-aarch64.dmg](downloads/Velora-PDF-1.0.5-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.4.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.5.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.4_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.5_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.4.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.5.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.4
+1.0.5
 ```
 
 Bundle identifier:
@@ -482,6 +482,21 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.5
+
+Released to introduce page bookmarking, an annotation summary sidebar, and various workspace UI/UX fixes.
+
+Changes:
+
+- Added a local-first page bookmarking store and a bookmark management sidebar panel.
+- Added a Bookmark toggle button inside the viewer status bar.
+- Integrated a Comments & Notes sidebar panel that aggregates and groups all annotations by page number, allowing direct navigation and inline renaming.
+- Mounted the Settings Dialog globally at the root shell to open it directly from the LeftRail settings button.
+- Fixed coordinates computation and display bug for the Annotation Toolbar when selecting pen drawings.
+- Added canvas empty space deselection behavior.
+- Repositioned the page number badge inside the visible page boundaries to prevent container clipping.
+- Bumped application version to `1.0.5` and built the production macOS DMG.
 
 ### 1.0.4
 

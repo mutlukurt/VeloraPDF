@@ -12,12 +12,24 @@ export function AnnotationToolbar() {
   const duplicateAnnotation = useAnnotationStore((state) => state.duplicateAnnotation);
   const selected = annotations.find((item) => item.id === selectedId);
 
-  if (!selected || !("x" in selected)) return null;
+  if (!selected) return null;
+
+  let x = 0;
+  let y = 0;
+  if ("x" in selected) {
+    x = selected.x;
+    y = selected.y;
+  } else if (selected.type === "pen" && selected.points.length > 0) {
+    x = Math.min(...selected.points.map((p) => p.x));
+    y = Math.min(...selected.points.map((p) => p.y));
+  } else {
+    return null;
+  }
 
   return (
     <div
       className="absolute z-40 flex items-center gap-1 rounded-2xl border border-border bg-toolbar p-1 shadow-velora"
-      style={{ left: selected.x, top: Math.max(8, selected.y - 54) }}
+      style={{ left: x, top: Math.max(8, y - 54) }}
     >
       {colors.map((color) => (
         <button

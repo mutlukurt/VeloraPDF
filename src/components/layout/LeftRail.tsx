@@ -2,6 +2,7 @@ import { FileText, Home, MessageSquareText, Paperclip, Search, Settings, Sidebar
 import { IconButton } from "../ui/IconButton";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
+import { useWorkspaceStore } from "../../lib/store/workspace";
 import { cn } from "../../lib/utils/cn";
 
 export function LeftRail() {
@@ -99,10 +100,8 @@ export function LeftRail() {
 
       <IconButton
         label="Settings"
-        active={isPdf && sidebarMode === "settings"}
         onClick={() => {
-          setActiveView("pdf");
-          setSidebarMode(sidebarMode === "settings" ? null : "settings");
+          useWorkspaceStore.getState().setSettingsOpen(true);
         }}
       >
         <Settings size={18} />

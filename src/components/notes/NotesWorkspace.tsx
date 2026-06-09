@@ -3,7 +3,6 @@ import { Sidebar } from "../../features/sidebar/Sidebar";
 import { EditorHeader } from "../../features/editor/EditorHeader";
 import { WorkspaceEditor } from "../../features/editor/WorkspaceEditor";
 import { CommandPalette } from "../../features/search/CommandPalette";
-import { SettingsDialog } from "../../features/settings/SettingsDialog";
 import { useWorkspaceStore } from "../../lib/store/workspace";
 
 export function NotesWorkspace() {
@@ -21,7 +20,6 @@ export function NotesWorkspace() {
         <WorkspaceEditor />
       </section>
       <CommandPalette />
-      <SettingsDialog />
     </div>
   );
 }

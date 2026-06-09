@@ -32,6 +32,10 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const begin = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!ref.current) return;
     const point = pointFromEvent(event, ref.current);
+    if (activeTool === "select") {
+      setSelectedId(null);
+      return;
+    }
     if (activeTool === "highlight" || activeTool === "rectangle" || activeTool === "circle" || activeTool === "arrow") {
       setDraft({ type: activeTool, start: point, current: point });
       ref.current.setPointerCapture(event.pointerId);

@@ -93,7 +93,7 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
     >
       <canvas ref={canvasRef} className="block h-full w-full" />
       <AnnotationLayer page={pageNumber} width={size.width} height={size.height} />
-      <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 rounded-full border border-border bg-toolbar px-3 py-1 text-xs font-semibold text-secondary shadow-velora">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-border bg-toolbar px-3 py-1 text-xs font-semibold text-secondary shadow-velora z-20">
         {pageNumber}
       </div>
     </div>

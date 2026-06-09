@@ -95,12 +95,20 @@ export const useAnnotationStore = create<AnnotationState>((set, get) => {
     duplicateAnnotation: (annotationId) => {
       const original = get().annotations.find((item) => item.id === annotationId);
       if (!original) return;
-      const copy = { ...original, id: id(), createdAt: Date.now() };
-      if ("x" in copy) {
-        copy.x += 16;
-        copy.y += 16;
+      let copy = { ...original, id: id(), createdAt: Date.now() } as Annotation;
+      if (copy.type === "pen") {
+        copy = {
+          ...copy,
+          points: copy.points.map((p) => ({ x: p.x + 16, y: p.y + 16 })),
+        };
+      } else {
+        copy = {
+          ...copy,
+          x: copy.x + 16,
+          y: copy.y + 16,
+        } as Annotation;
       }
-      withHistory([...get().annotations, copy as Annotation]);
+      withHistory([...get().annotations, copy]);
     },
     setSelectedId: (selectedId) => set({ selectedId }),
     setAnnotations: (annotations) => set({ annotations, selectedId: null, history: [], future: [] }),

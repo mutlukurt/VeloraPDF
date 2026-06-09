@@ -3,6 +3,8 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import { PdfPage } from "./PdfPage";
 import { PdfThumbnailPanel } from "./PdfThumbnailPanel";
 import { SearchPanel } from "./SearchPanel";
+import { PdfBookmarksPanel } from "./PdfBookmarksPanel";
+import { PdfCommentsPanel } from "./PdfCommentsPanel";
 import { StatusBar } from "../layout/StatusBar";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
@@ -116,11 +118,8 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     <div className="relative flex min-w-0 flex-1 overflow-hidden">
       {sidebarMode === "thumbnails" ? <PdfThumbnailPanel pdf={pdf} /> : null}
       {sidebarMode === "search" ? <SearchPanel pdf={pdf} /> : null}
-      {sidebarMode === "bookmarks" || sidebarMode === "comments" || sidebarMode === "settings" ? (
-        <aside className="w-64 shrink-0 border-r border-border bg-sidebar p-4">
-          <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-secondary">This premium panel is ready for the next Velora PDF module.</div>
-        </aside>
-      ) : null}
+      {sidebarMode === "bookmarks" ? <PdfBookmarksPanel /> : null}
+      {sidebarMode === "comments" ? <PdfCommentsPanel /> : null}
       <div
         ref={scrollerRef}
         className={`relative flex-1 overflow-auto overscroll-contain ${viewSettings.eyeProtection ? "bg-[#F4EFD9] dark:bg-[#1f1d16]" : "bg-pdf-canvas"}`}
