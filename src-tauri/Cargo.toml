@@ -1,6 +1,6 @@
 [package]
 name = "velora-pdf"
-version = "1.0.24"
+version = "1.0.25"
 description = "Velora PDF"
 authors = ["Velora PDF"]
 edition = "2021"

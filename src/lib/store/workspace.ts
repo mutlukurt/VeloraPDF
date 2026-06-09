@@ -46,9 +46,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   initialize: async () => {
     applyTheme(get().theme)
+    const activePageId = get().activePageId
     const [pages, dataLocation] = await Promise.all([db.listPages(), db.getDataLocation()])
     const first = pages.find((page) => page.isFavorite) ?? pages[0]
     set({ pages, dataLocation })
+    if (activePageId && pages.some((page) => page.id === activePageId)) return
     if (first) await get().openPage(first.id)
   },
 
