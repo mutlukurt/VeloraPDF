@@ -79,16 +79,18 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     }
     if (activeTool === "sticky") {
       const text = window.prompt("Sticky note");
-      addAnnotation({
-        id: createAnnotationId(),
-        page,
-        type: "sticky",
-        x: point.x,
-        y: point.y,
-        text: text || "Note",
-        color: "#FFE66D",
-        createdAt: Date.now(),
-      });
+      if (text !== null) {
+        addAnnotation({
+          id: createAnnotationId(),
+          page,
+          type: "sticky",
+          x: point.x,
+          y: point.y,
+          text: text.trim() || "Note",
+          color: "#FFE66D",
+          createdAt: Date.now(),
+        });
+      }
       useUiStore.getState().setActiveTool("select");
     }
     if (activeTool === "signature") {
@@ -452,7 +454,17 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                 key={annotation.id}
                 className="absolute font-semibold"
                 style={{ left: annotation.x, top: annotation.y, color: annotation.color, fontSize: annotation.fontSize }}
-                onClick={() => setSelectedId(annotation.id)}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(annotation.id);
+                }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  const newText = window.prompt("Edit note content", annotation.text);
+                  if (newText !== null && newText.trim() !== "") {
+                    useAnnotationStore.getState().updateAnnotation(annotation.id, { text: newText });
+                  }
+                }}
               >
                 {annotation.text}
               </button>
@@ -463,9 +475,19 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               <button
                 key={annotation.id}
                 title={annotation.text}
-                className="absolute grid h-8 w-8 place-items-center rounded-xl text-zinc-950 shadow-lg"
+                className="absolute grid h-8 w-8 place-items-center rounded-xl text-zinc-950 shadow-lg hover:scale-105 transition"
                 style={{ left: annotation.x, top: annotation.y, background: annotation.color }}
-                onClick={() => setSelectedId(annotation.id)}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(annotation.id);
+                }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  const newText = window.prompt("Edit note content", annotation.text);
+                  if (newText !== null && newText.trim() !== "") {
+                    useAnnotationStore.getState().updateAnnotation(annotation.id, { text: newText });
+                  }
+                }}
               >
                 <MessageSquare size={16} />
               </button>

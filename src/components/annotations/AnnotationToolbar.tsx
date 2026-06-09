@@ -1,4 +1,4 @@
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Trash2, Edit2 } from "lucide-react";
 import { IconButton } from "../ui/IconButton";
 import { useAnnotationStore } from "../../stores/useAnnotationStore";
 
@@ -26,6 +26,8 @@ export function AnnotationToolbar() {
     return null;
   }
 
+  const hasText = selected.type === "text" || selected.type === "sticky";
+
   return (
     <div
       className="absolute z-40 flex items-center gap-1 rounded-2xl border border-border bg-toolbar p-1 shadow-velora"
@@ -40,6 +42,20 @@ export function AnnotationToolbar() {
           onClick={() => updateAnnotation(selected.id, { color } as Partial<typeof selected>)}
         />
       ))}
+      {hasText && (
+        <IconButton
+          label="Edit note content"
+          className="h-8 w-8"
+          onClick={() => {
+            const newText = window.prompt("Edit note content", (selected as any).text);
+            if (newText !== null && newText.trim() !== "") {
+              updateAnnotation(selected.id, { text: newText });
+            }
+          }}
+        >
+          <Edit2 size={14} />
+        </IconButton>
+      )}
       <IconButton label="Duplicate annotation" className="h-8 w-8" onClick={() => duplicateAnnotation(selected.id)}><Copy size={14} /></IconButton>
       <IconButton label="Delete annotation" className="h-8 w-8 text-red-400" onClick={() => deleteAnnotation(selected.id)}><Trash2 size={14} /></IconButton>
     </div>
