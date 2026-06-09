@@ -16,9 +16,16 @@ type Draft =
   | { type: "highlight" | "rectangle" | "circle" | "arrow" | "underline" | "strike" | "crop"; start: Point; current: Point }
   | { type: "pen"; points: Point[] };
 
+const STICKY_CARD_WIDTH = 176;
+const STICKY_CARD_HEIGHT = 58;
+
 function pointFromEvent(event: React.PointerEvent<HTMLDivElement>, element: HTMLDivElement): Point {
   const rect = element.getBoundingClientRect();
   return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
 }
 
 export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
@@ -31,6 +38,13 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     text: string;
     color: string;
     type: "sticky" | "text";
+  } | null>(null);
+  const [stickyDrag, setStickyDrag] = useState<{
+    id: string;
+    pointerId: number;
+    startClient: Point;
+    start: Point;
+    current: Point;
   } | null>(null);
   const activeTool = useUiStore((state) => state.activeTool);
   const annotations = useAnnotationStore((state) => state.annotations);
@@ -83,6 +97,37 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
       type: annotation.type,
     });
   };
+
+  useEffect(() => {
+    if (!stickyDrag) return;
+
+    const moveSticky = (event: PointerEvent) => {
+      if (event.pointerId !== stickyDrag.pointerId) return;
+      const nextX = clamp(stickyDrag.start.x + event.clientX - stickyDrag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
+      const nextY = clamp(stickyDrag.start.y + event.clientY - stickyDrag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
+      setStickyDrag((current) => (current?.id === stickyDrag.id ? { ...current, current: { x: nextX, y: nextY } } : current));
+    };
+
+    const finishSticky = (event: PointerEvent) => {
+      if (event.pointerId !== stickyDrag.pointerId) return;
+      const nextX = clamp(stickyDrag.start.x + event.clientX - stickyDrag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
+      const nextY = clamp(stickyDrag.start.y + event.clientY - stickyDrag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
+      const moved = Math.abs(nextX - stickyDrag.start.x) > 1 || Math.abs(nextY - stickyDrag.start.y) > 1;
+      if (moved) {
+        updateAnnotation(stickyDrag.id, { x: nextX, y: nextY });
+      }
+      setStickyDrag(null);
+    };
+
+    window.addEventListener("pointermove", moveSticky, true);
+    window.addEventListener("pointerup", finishSticky, true);
+    window.addEventListener("pointercancel", finishSticky, true);
+    return () => {
+      window.removeEventListener("pointermove", moveSticky, true);
+      window.removeEventListener("pointerup", finishSticky, true);
+      window.removeEventListener("pointercancel", finishSticky, true);
+    };
+  }, [height, stickyDrag, updateAnnotation, width]);
 
   const begin = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -508,22 +553,37 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
             );
           }
           if (annotation.type === "sticky") {
+            const draggedPosition = stickyDrag?.id === annotation.id ? stickyDrag.current : null;
             return (
               <button
                 key={annotation.id}
                 title={annotation.text}
-                className={`absolute flex min-h-[58px] w-44 items-start gap-2.5 overflow-hidden rounded-lg border px-3 py-2.5 text-left text-zinc-950 shadow-[0_16px_34px_rgba(15,15,20,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(15,15,20,.22)] ${
+                className={`absolute flex min-h-[58px] w-44 cursor-grab touch-none items-start gap-2.5 overflow-hidden rounded-lg border px-3 py-2.5 text-left text-zinc-950 shadow-[0_16px_34px_rgba(15,15,20,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(15,15,20,.22)] active:cursor-grabbing ${
                   selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white" : ""
                 }`}
                 style={{
-                  left: annotation.x,
-                  top: annotation.y,
+                  left: draggedPosition?.x ?? annotation.x,
+                  top: draggedPosition?.y ?? annotation.y,
                   background: `linear-gradient(180deg, color-mix(in srgb, ${annotation.color} 86%, white), ${annotation.color})`,
                   borderColor: `color-mix(in srgb, ${annotation.color} 62%, #0e0e12)`,
                 }}
                 onPointerDown={(e) => {
                   e.stopPropagation();
                   setSelectedId(annotation.id);
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  setStickyDrag({
+                    id: annotation.id,
+                    pointerId: e.pointerId,
+                    startClient: { x: e.clientX, y: e.clientY },
+                    start: { x: annotation.x, y: annotation.y },
+                    current: { x: annotation.x, y: annotation.y },
+                  });
+                }}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                }}
+                onPointerCancel={(e) => {
+                  e.stopPropagation();
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
