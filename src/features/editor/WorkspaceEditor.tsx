@@ -30,6 +30,7 @@ import { downloadText } from '../../lib/utils/files'
 import { plainTextFromNode } from '../../lib/utils/text'
 import type { TiptapDoc } from '../../types'
 import { BlockInsertMenu } from './BlockInsertMenu'
+import { AudioRecorder } from './AudioRecorder'
 import { MediaBlock } from './MediaBlock'
 import type { InsertContext } from './editorCommands'
 
@@ -59,6 +60,8 @@ const backgroundColors = [
 ] as const
 
 const blockControlsOffset = 126
+
+type BlockDragRange = { from: number; to: number; json: JSONContent }
 
 function isInsideNode(editor: { state: { selection: { $from: { depth: number; node: (depth: number) => { type: { name: string }; textContent: string } } } } }, nodeName: string) {
   const { $from } = editor.state.selection
@@ -110,6 +113,7 @@ export function WorkspaceEditor() {
     deleteTo: number
     targetBlockId?: string
   }>({ visible: false, position: { left: 0, top: 0 }, insertAt: 0, deleteFrom: 0, deleteTo: 0 })
+  const [blockDropTarget, setBlockDropTarget] = useState<{ from: number; placement: 'before' | 'after' } | null>(null)
   const [iconPickerOpen, setIconPickerOpen] = useState(false)
   const [iconQuery, setIconQuery] = useState('')
   const pendingFilePicker = useRef<{
@@ -121,6 +125,8 @@ export function WorkspaceEditor() {
   const saveTimer = useRef<number | null>(null)
   const titleTimer = useRef<number | null>(null)
   const blockControlsHideTimer = useRef<number | null>(null)
+  const draggedBlockRef = useRef<BlockDragRange | null>(null)
+  const blockPointerDragRef = useRef<{ startX: number; startY: number; dragging: boolean } | null>(null)
   const loadedPageId = useRef<string | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
@@ -229,6 +235,30 @@ export function WorkspaceEditor() {
     await refreshPages()
   }, [activePage, refreshPages])
 
+  const insertAudioRecording = useCallback(
+    (recording: { src: string; name: string; mime: string; duration: number; path?: string }) => {
+      if (!editor) return
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'mediaBlock',
+          attrs: {
+            kind: 'audio',
+            src: recording.src,
+            name: recording.name,
+            label: recording.name.replace(/\.[^.]+$/, ''),
+            mime: recording.mime,
+            duration: recording.duration,
+            path: recording.path ?? '',
+          },
+        })
+        .run()
+      saveActiveDoc(editor.getJSON() as TiptapDoc)
+    },
+    [editor, saveActiveDoc],
+  )
+
   const pickLocalFile = useCallback((kind: 'image' | 'video' | 'file') => {
     return new Promise<JSONContent | null>((resolve) => {
       pendingFilePicker.current = { kind, resolve }
@@ -325,6 +355,89 @@ export function WorkspaceEditor() {
     },
     [editor, insertMenu.open],
   )
+
+  const blockRangeAtPos = useCallback(
+    (pos: number): BlockDragRange | null => {
+      if (!editor) return null
+      let found: BlockDragRange | null = null
+      editor.state.doc.forEach((node, offset) => {
+        const from = offset
+        const to = offset + node.nodeSize
+        if (pos >= from && pos <= to) found = { from, to, json: node.toJSON() }
+      })
+      return found
+    },
+    [editor],
+  )
+
+  const blockRangeFromPoint = useCallback(
+    (clientX: number, clientY: number): BlockDragRange | null => {
+      if (!editor) return null
+      const editorRect = editor.view.dom.getBoundingClientRect()
+      const coords = editor.view.posAtCoords({ left: Math.min(Math.max(clientX, editorRect.left + 8), editorRect.right - 8), top: clientY })
+      return coords ? blockRangeAtPos(coords.pos) : null
+    },
+    [blockRangeAtPos, editor],
+  )
+
+  const moveDraggedBlock = useCallback(
+    (target: BlockDragRange, placement: 'before' | 'after') => {
+      if (!editor || !draggedBlockRef.current) return
+      const source = draggedBlockRef.current
+      if (source.from === target.from) return
+
+      let insertAt = placement === 'before' ? target.from : target.to
+      if (insertAt > source.from) insertAt -= source.to - source.from
+
+      editor.chain().focus().deleteRange({ from: source.from, to: source.to }).insertContentAt(insertAt, source.json).run()
+      saveActiveDoc(editor.getJSON() as TiptapDoc)
+    },
+    [editor, saveActiveDoc],
+  )
+
+  useEffect(() => {
+    const handleMove = (event: PointerEvent) => {
+      const pointer = blockPointerDragRef.current
+      const source = draggedBlockRef.current
+      if (!pointer || !source || !editor) return
+      const distance = Math.hypot(event.clientX - pointer.startX, event.clientY - pointer.startY)
+      if (!pointer.dragging && distance < 6) return
+      pointer.dragging = true
+      const target = blockRangeFromPoint(event.clientX, event.clientY)
+      if (!target || target.from === source.from) {
+        setBlockDropTarget(null)
+        return
+      }
+      const dom = editor.view.nodeDOM(target.from) as HTMLElement | null
+      const rect = dom?.getBoundingClientRect()
+      const placement = rect && event.clientY > rect.top + rect.height / 2 ? 'after' : 'before'
+      setBlockDropTarget({ from: target.from, placement })
+      setBlockControls((controls) => ({
+        ...controls,
+        position: rect ? { left: controls.position.left, top: rect.top + (placement === 'after' ? rect.height : 0) } : controls.position,
+      }))
+    }
+
+    const handleUp = (event: PointerEvent) => {
+      const pointer = blockPointerDragRef.current
+      const target = blockRangeFromPoint(event.clientX, event.clientY)
+      const placement = blockDropTarget?.placement
+      blockPointerDragRef.current = null
+      if (pointer?.dragging && target && placement) {
+        moveDraggedBlock(target, placement)
+      }
+      draggedBlockRef.current = null
+      setBlockDropTarget(null)
+      setBlockControls((controls) => ({ ...controls, visible: false }))
+    }
+
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+    return () => {
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
+    }
+  }, [blockDropTarget?.placement, blockRangeFromPoint, editor, moveDraggedBlock])
 
   const scheduleBlockControlsHide = useCallback(() => {
     if (insertMenu.open) return
@@ -455,10 +568,25 @@ export function WorkspaceEditor() {
                   <Download size={13} /> Page + subpages
                 </button>
               </div>
+              <AudioRecorder pageTitle={activePage.title} onInsertRecording={insertAudioRecording} />
             </div>
           </div>
 
-          <div className="relative" onMouseMove={updateHoveredBlock} onMouseLeave={scheduleBlockControlsHide}>
+          <div
+            className="relative"
+            onMouseMove={updateHoveredBlock}
+            onMouseLeave={scheduleBlockControlsHide}
+          >
+            {blockDropTarget ? (
+              <div
+                className="pointer-events-none fixed z-40 h-0.5 rounded-full bg-[var(--accent)] shadow-[0_0_0_3px_rgba(91,77,255,.14)]"
+                style={{
+                  left: blockControls.position.left + blockControlsOffset,
+                  right: 32,
+                  top: blockControls.position.top + (blockDropTarget.placement === 'after' ? 34 : 0),
+                }}
+              />
+            ) : null}
             {blockControls.visible ? (
               <div
                 data-block-controls
@@ -495,7 +623,18 @@ export function WorkspaceEditor() {
                 >
                   <Plus size={16} />
                 </button>
-                <span className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-faint)]">
+                <span
+                  className="grid h-7 w-7 cursor-grab place-items-center rounded-md text-[var(--text-faint)] active:cursor-grabbing"
+                  onPointerDown={(event) => {
+                    if (!editor) return
+                    const node = editor.state.doc.nodeAt(blockControls.deleteFrom)
+                    if (!node) return
+                    event.preventDefault()
+                    event.stopPropagation()
+                    draggedBlockRef.current = { from: blockControls.deleteFrom, to: blockControls.deleteTo, json: node.toJSON() }
+                    blockPointerDragRef.current = { startX: event.clientX, startY: event.clientY, dragging: false }
+                  }}
+                >
                   <GripVertical size={17} />
                 </span>
                 <button

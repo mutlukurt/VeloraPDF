@@ -1,8 +1,10 @@
 # Velora PDF
 
+[![Buy Me a Coffee](assets/bmc-button.svg)](https://buymeacoffee.com/mutlukurt)
+
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.17-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.24-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.17-aarch64.dmg](downloads/Velora-PDF-1.0.17-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.24-aarch64.dmg](downloads/Velora-PDF-1.0.24-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.17.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.24.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.17_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.24_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.17.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.24.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.17
+1.0.24
 ```
 
 Bundle identifier:
@@ -482,6 +484,87 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.24
+
+Released to make Notes drag-and-drop movement reliable in the macOS WebView.
+
+Changes:
+
+- Replaced native HTML drag behavior with pointer-based movement for editor blocks.
+- Replaced native sidebar page drag behavior with pointer-based movement.
+- Prevents text selection/native drag interference while moving blocks or pages.
+- Keeps page reparenting before, after, and inside another page with SQLite persistence.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.24`.
+
+### 1.0.23
+
+Released to add drag-and-drop organization in Velora Notes.
+
+Changes:
+
+- Added drag-and-drop block reordering from the editor block handle.
+- Added drag-and-drop page movement in the Notes sidebar.
+- Supports moving pages before, after, or inside another page as a subpage.
+- Persists sidebar page order and parent/subpage changes to local SQLite.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.23`.
+
+### 1.0.22
+
+Released to fix playback for disk-backed Notes voice recordings.
+
+Changes:
+
+- Enabled Tauri's asset protocol for the local `voice-recordings` app data folder.
+- Allows saved voice memo files to be loaded back into the WebView audio player.
+- Keeps the long-recording disk streaming behavior introduced in `1.0.21`.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.22`.
+
+### 1.0.21
+
+Released to make Notes voice recording suitable for very long sessions.
+
+Changes:
+
+- Streams desktop voice recording chunks directly to local app data files instead of keeping the full recording in memory.
+- Saves finished voice notes as local audio-file references in the active note, avoiding large base64 audio blobs in SQLite.
+- Removes any app-defined recording duration cap; practical recording length is limited by available disk space and system resources.
+- Keeps browser preview fallback behavior for development, while the packaged macOS app uses disk-backed recording.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.21`.
+
+### 1.0.20
+
+Released to fix microphone startup for Notes voice recording on macOS.
+
+Changes:
+
+- Added the macOS `NSMicrophoneUsageDescription` bundle key so the desktop app can request microphone access.
+- Added a visible microphone-starting state while macOS/WebView permission is being prepared.
+- Keeps the voice recorder controls introduced in `1.0.19` unchanged after permission is granted.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.20`.
+
+### 1.0.19
+
+Released to add page-level voice recording to Velora Notes.
+
+Changes:
+
+- Added a native-device microphone recorder to the Notes editor using the browser/WebView media recording stack.
+- Added record, pause, resume, stop, playback, 10-second rewind/forward, and draggable seek controls.
+- Lets finished recordings be saved directly into the active note as local audio blocks.
+- Styled voice recording and saved audio blocks to match the Velora Notes workspace theme.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.19`.
+
+### 1.0.18
+
+Released to keep saved PDF stickers and sticky notes after the app is closed.
+
+Changes:
+
+- Added automatic local persistence for PDF annotations keyed to the opened PDF file.
+- Restores saved stickers, sticky notes, highlights, drawings, text notes, and signatures when the same PDF is opened again.
+- Keeps manual JSON sidecar export available while making sticker saves durable immediately.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.18`.
 
 ### 1.0.17
 

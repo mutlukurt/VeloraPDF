@@ -19,6 +19,7 @@ type WorkspaceStore = {
   openPage: (pageId: string) => Promise<void>
   createPage: (parentId?: string | null) => Promise<Page>
   updatePage: (page: Page) => Promise<void>
+  movePage: (pageId: string, targetId: string, placement: 'before' | 'after' | 'inside') => Promise<void>
   archiveActivePage: () => Promise<void>
   saveActiveDoc: (doc: TiptapDoc) => Promise<void>
   refreshPages: () => Promise<void>
@@ -81,6 +82,48 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       activePage: state.activePageId === updated.id ? updated : state.activePage,
       pages: state.pages.map((item) => (item.id === updated.id ? updated : item)),
     }))
+  },
+
+  movePage: async (pageId, targetId, placement) => {
+    const pages = get().pages
+    const moving = pages.find((page) => page.id === pageId)
+    const target = pages.find((page) => page.id === targetId)
+    if (!moving || !target || moving.id === target.id) return
+
+    let cursor: Page | undefined = target
+    while (cursor?.parentId) {
+      if (cursor.parentId === moving.id) return
+      cursor = pages.find((page) => page.id === cursor?.parentId)
+    }
+
+    const nextParentId = placement === 'inside' ? target.id : target.parentId ?? null
+    const siblings = pages
+      .filter((page) => page.id !== moving.id && (page.parentId ?? null) === nextParentId)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
+
+    let insertIndex = siblings.length
+    if (placement !== 'inside') {
+      const targetIndex = siblings.findIndex((page) => page.id === target.id)
+      if (targetIndex >= 0) insertIndex = placement === 'before' ? targetIndex : targetIndex + 1
+    }
+
+    const ordered = [...siblings]
+    ordered.splice(insertIndex, 0, { ...moving, parentId: nextParentId })
+
+    const changed = ordered
+      .map((page, index) => ({ ...page, parentId: nextParentId, sortOrder: index }))
+      .filter((page) => {
+        const original = pages.find((item) => item.id === page.id)
+        return original && ((original.parentId ?? null) !== (page.parentId ?? null) || original.sortOrder !== page.sortOrder)
+      })
+
+    for (const page of changed) {
+      await db.updatePageMetadata(page)
+    }
+
+    const refreshed = await db.listPages()
+    const active = get().activePageId ? refreshed.find((page) => page.id === get().activePageId) : undefined
+    set({ pages: refreshed, activePage: active ?? get().activePage })
   },
 
   archiveActivePage: async () => {

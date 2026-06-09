@@ -14,6 +14,8 @@ export const MediaBlock = Node.create({
       name: { default: '' },
       mime: { default: '' },
       label: { default: '' },
+      duration: { default: 0 },
+      path: { default: '' },
     }
   },
 
@@ -34,6 +36,15 @@ export const MediaBlock = Node.create({
         mergeAttributes(HTMLAttributes, { 'data-kairnly-media': 'video', class: 'kairnly-media-block' }),
         ['video', { src, controls: 'true', class: 'kairnly-media-video' }],
         ['figcaption', {}, label],
+      ]
+    }
+
+    if (kind === 'audio') {
+      return [
+        'figure',
+        mergeAttributes(HTMLAttributes, { 'data-kairnly-media': 'audio', class: 'kairnly-media-block kairnly-audio-block' }),
+        ['div', { class: 'kairnly-audio-heading' }, ['span', {}, 'Voice memo'], ['strong', {}, label]],
+        ['audio', { src, controls: 'true', class: 'kairnly-audio-player' }],
       ]
     }
 

@@ -263,6 +263,42 @@ input {
   padding: 1rem;
 }
 
+.kairnly-audio-block {
+  padding: 0.9rem;
+}
+
+.kairnly-audio-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+
+.kairnly-audio-heading span {
+  border-radius: 999px;
+  background: var(--accent-soft);
+  padding: 0.2rem 0.55rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.kairnly-audio-heading strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kairnly-audio-player {
+  display: block;
+  width: 100%;
+  accent-color: var(--accent);
+}
+
 .kairnly-media-card strong,
 .kairnly-media-card a {
   color: var(--text);
@@ -424,4 +460,3 @@ input {
   background: var(--surface-muted);
   font-weight: 600;
 }
-

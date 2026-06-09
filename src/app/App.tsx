@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { AppShell } from "../components/layout/AppShell";
+import { loadStoredAnnotations, persistStoredAnnotations } from "../lib/pdf/annotationStorage";
 import { exportAnnotatedPdf } from "../lib/pdf/exportPdf";
 import { loadPdfDocument } from "../lib/pdf/loadPdf";
 import { pickPdfFile, readPdfFile, saveJsonSidecar, savePdfBytes } from "../lib/tauri/fileDialog";
@@ -50,7 +51,7 @@ export function App() {
   const openPickedPdf = async (picked: { name: string; path?: string; data: Uint8Array }) => {
     const file = { ...picked, openedAt: Date.now() };
     usePdfStore.getState().setActiveFile(file);
-    useAnnotationStore.getState().setAnnotations([]);
+    useAnnotationStore.getState().setAnnotations(loadStoredAnnotations(file));
     const pdf = await loadPdfDocument(picked.data);
     usePdfStore.getState().setPdf(pdf);
     usePdfStore.getState().setPageCount(pdf.numPages);
@@ -76,6 +77,7 @@ export function App() {
 
   const saveAnnotations = async () => {
     if (!activeFile) return;
+    persistStoredAnnotations(activeFile, annotations);
     await saveJsonSidecar(activeFile.path, {
       app: "Velora PDF",
       file: { name: activeFile.name, path: activeFile.path },
@@ -112,6 +114,14 @@ export function App() {
       }),
     [currentPage, pageCount, redo, setActiveTool, setCurrentPage, setRightPanelOpen, setSidebarMode, setZoom, undo, zoom],
   );
+
+  useEffect(() => {
+    return useAnnotationStore.subscribe((state) => {
+      const currentFile = usePdfStore.getState().activeFile;
+      if (!currentFile) return;
+      persistStoredAnnotations(currentFile, state.annotations);
+    });
+  }, []);
 
   return <AppShell onOpenPdf={openPdf} onOpenRecentPdf={openRecentPdf} onSaveAnnotations={saveAnnotations} onExportPdf={exportPdf} />;
 }

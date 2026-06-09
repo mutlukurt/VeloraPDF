@@ -3,6 +3,8 @@ use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::fs;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
@@ -560,6 +562,75 @@ fn save_file_to_downloads(
     Ok(target_path.display().to_string())
 }
 
+fn safe_voice_filename(filename: &str) -> Result<String, String> {
+    let name = Path::new(filename)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .filter(|name| !name.trim().is_empty())
+        .ok_or_else(|| "Invalid voice recording file name".to_string())?;
+    let sanitized = name
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | '_') {
+                ch
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>();
+    Ok(sanitized.trim_matches('-').to_string())
+}
+
+fn voice_recordings_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    let dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| format!("Could not resolve app data directory: {error}"))?
+        .join("voice-recordings");
+    fs::create_dir_all(&dir).map_err(|error| format!("Could not create voice recordings directory: {error}"))?;
+    Ok(dir)
+}
+
+fn validate_voice_recording_path(app: &AppHandle, path: &str) -> Result<PathBuf, String> {
+    let dir = voice_recordings_dir(app)?;
+    let candidate = PathBuf::from(path);
+    if !candidate.starts_with(&dir) {
+        return Err("Voice recording path is outside the app data directory".to_string());
+    }
+    Ok(candidate)
+}
+
+#[tauri::command]
+fn create_voice_recording_file(filename: String, app: AppHandle) -> Result<String, String> {
+    let dir = voice_recordings_dir(&app)?;
+    let safe_name = safe_voice_filename(&filename)?;
+    let path = dir.join(safe_name);
+    fs::write(&path, []).map_err(|error| format!("Could not create voice recording: {error}"))?;
+    Ok(path.display().to_string())
+}
+
+#[tauri::command]
+fn append_voice_recording_chunk(path: String, data: Vec<u8>, app: AppHandle) -> Result<(), String> {
+    let path = validate_voice_recording_path(&app, &path)?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .map_err(|error| format!("Could not open voice recording: {error}"))?;
+    file.write_all(&data)
+        .map_err(|error| format!("Could not write voice recording chunk: {error}"))
+}
+
+#[tauri::command]
+fn delete_voice_recording_file(path: String, app: AppHandle) -> Result<(), String> {
+    let path = validate_voice_recording_path(&app, &path)?;
+    match fs::remove_file(path) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(format!("Could not delete voice recording: {error}")),
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -584,7 +655,10 @@ pub fn run() {
             search_workspace,
             export_workspace_backup,
             import_workspace_backup,
-            save_file_to_downloads
+            save_file_to_downloads,
+            create_voice_recording_file,
+            append_voice_recording_chunk,
+            delete_voice_recording_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running Velora PDF");

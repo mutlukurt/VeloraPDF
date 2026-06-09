@@ -12,7 +12,7 @@ import {
   Settings,
   Star,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Tooltip } from '../../components/ui/Tooltip'
 import { PageIcon } from '../../lib/icons/pageIcons'
@@ -24,34 +24,85 @@ import { useUiStore } from '../../stores/useUiStore'
 import type { Page } from '../../types'
 import { buildPageTree, type PageNode } from './pageTree'
 
-function PageRow({ node, depth = 0 }: { node: PageNode; depth?: number }) {
+type PageDropPlacement = 'before' | 'after' | 'inside'
+
+function PageRow({
+  node,
+  depth = 0,
+  draggedPageId,
+  dropTarget,
+  onPointerDownPage,
+  suppressClick,
+}: {
+  node: PageNode
+  depth?: number
+  draggedPageId: string | null
+  dropTarget: { id: string; placement: PageDropPlacement } | null
+  onPointerDownPage: (event: React.PointerEvent<HTMLDivElement>, node: PageNode) => void
+  suppressClick: boolean
+}) {
   const [open, setOpen] = useState(true)
   const { activePageId, openPage, createPage, updatePage } = useWorkspaceStore()
   const isActive = activePageId === node.id
   const hasChildren = node.children.length > 0
+  const isDragging = draggedPageId === node.id
+  const placement = dropTarget?.id === node.id ? dropTarget.placement : null
 
   return (
     <div>
       <div
+        data-page-id={node.id}
+        onPointerDown={(event) => onPointerDownPage(event, node)}
+        onClick={() => {
+          if (!suppressClick) openPage(node.id)
+        }}
         className={cn(
-          'group flex h-8 items-center gap-1 rounded-lg px-1.5 text-sm transition',
+          'group relative flex h-8 cursor-grab select-none items-center gap-1 rounded-lg px-1.5 text-sm transition active:cursor-grabbing',
           isActive ? 'bg-[var(--accent-soft)] text-[var(--text)]' : 'text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]',
+          isDragging && 'opacity-40',
+          placement === 'inside' && 'ring-2 ring-[var(--accent)]/30',
         )}
         style={{ paddingLeft: 6 + depth * 14 }}
       >
-        <button className="grid h-5 w-5 place-items-center rounded hover:bg-black/5" onClick={() => setOpen((value) => !value)} aria-label="Toggle page">
+        {placement === 'before' ? <span className="absolute left-2 right-2 top-0 h-0.5 rounded-full bg-[var(--accent)]" /> : null}
+        {placement === 'after' ? <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[var(--accent)]" /> : null}
+        <button
+          className="grid h-5 w-5 place-items-center rounded hover:bg-black/5"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation()
+            setOpen((value) => !value)
+          }}
+          aria-label="Toggle page"
+        >
           {hasChildren ? open ? <ChevronsLeft size={12} className="-rotate-90" /> : <ChevronsRight size={12} /> : <span className="h-1 w-1 rounded-full bg-current opacity-40" />}
         </button>
-        <button className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={() => openPage(node.id)}>
+        <div className="flex min-w-0 flex-1 items-center gap-2 text-left">
           <PageIcon value={node.icon} size={16} className="shrink-0" />
           <span className="truncate">{node.title || 'Untitled'}</span>
-        </button>
+        </div>
         <div className="flex opacity-0 transition group-hover:opacity-100">
           <Tooltip label="Add child page">
-            <Button size="icon" onClick={() => createPage(node.id)} icon={<FilePlus2 size={14} />} />
+            <Button
+              size="icon"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                createPage(node.id)
+              }}
+              icon={<FilePlus2 size={14} />}
+            />
           </Tooltip>
           <Tooltip label={node.isFavorite ? 'Unfavorite' : 'Favorite'}>
-            <Button size="icon" onClick={() => updatePage({ ...node, isFavorite: !node.isFavorite })} icon={<Star size={14} fill={node.isFavorite ? 'currentColor' : 'none'} />} />
+            <Button
+              size="icon"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                updatePage({ ...node, isFavorite: !node.isFavorite })
+              }}
+              icon={<Star size={14} fill={node.isFavorite ? 'currentColor' : 'none'} />}
+            />
           </Tooltip>
         </div>
       </div>
@@ -59,7 +110,15 @@ function PageRow({ node, depth = 0 }: { node: PageNode; depth?: number }) {
         {open && hasChildren ? (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
             {node.children.map((child) => (
-              <PageRow key={child.id} node={child} depth={depth + 1} />
+              <PageRow
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                draggedPageId={draggedPageId}
+                dropTarget={dropTarget}
+                onPointerDownPage={onPointerDownPage}
+                suppressClick={suppressClick}
+              />
             ))}
           </motion.div>
         ) : null}
@@ -95,6 +154,10 @@ export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) 
   const setActiveView = useUiStore((state) => state.setActiveView)
   const setPdfSidebarMode = useUiStore((state) => state.setSidebarMode)
   const tree = useMemo(() => buildPageTree(pages), [pages])
+  const [draggedPageId, setDraggedPageId] = useState<string | null>(null)
+  const [dropTarget, setDropTarget] = useState<{ id: string; placement: PageDropPlacement } | null>(null)
+  const pageDragRef = useRef<{ sourceId: string; startX: number; startY: number; dragging: boolean } | null>(null)
+  const suppressPageClickRef = useRef(false)
   const favorites = pages.filter((page) => page.isFavorite)
   const recent = pages
     .slice()
@@ -112,6 +175,73 @@ export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) 
       return
     }
     onOpenRecentPdf(lastPdf.path)
+  }
+
+  const isDescendant = (node: PageNode, candidateId: string): boolean =>
+    node.children.some((child) => child.id === candidateId || isDescendant(child, candidateId))
+
+  const pageDropPlacement = (row: HTMLElement, clientY: number): PageDropPlacement => {
+    const rect = row.getBoundingClientRect()
+    const offset = clientY - rect.top
+    if (offset < rect.height * 0.28) return 'before'
+    if (offset > rect.height * 0.72) return 'after'
+    return 'inside'
+  }
+
+  const handlePagePointerDown = (event: React.PointerEvent<HTMLDivElement>, node: PageNode) => {
+    if (event.button !== 0) return
+    pageDragRef.current = { sourceId: node.id, startX: event.clientX, startY: event.clientY, dragging: false }
+    suppressPageClickRef.current = false
+  }
+
+  useEffect(() => {
+    const handleMove = (event: PointerEvent) => {
+      const drag = pageDragRef.current
+      if (!drag) return
+      const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY)
+      if (!drag.dragging && distance < 6) return
+      drag.dragging = true
+      suppressPageClickRef.current = true
+      setDraggedPageId(drag.sourceId)
+      const row = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest<HTMLElement>('[data-page-id]')
+      if (!row) {
+        setDropTarget(null)
+        return
+      }
+      const targetId = row.dataset.pageId
+      const targetNode = targetId ? tree.flatMap(function flatten(node): PageNode[] { return [node, ...node.children.flatMap(flatten)] }).find((node) => node.id === targetId) : undefined
+      if (!targetNode || targetNode.id === drag.sourceId || isDescendant(targetNode, drag.sourceId)) {
+        setDropTarget(null)
+        return
+      }
+      setDropTarget({ id: targetNode.id, placement: pageDropPlacement(row, event.clientY) })
+    }
+
+    const handleUp = async () => {
+      const drag = pageDragRef.current
+      pageDragRef.current = null
+      const target = dropTarget
+      setDraggedPageId(null)
+      setDropTarget(null)
+      window.setTimeout(() => {
+        suppressPageClickRef.current = false
+      }, 0)
+      if (!drag?.dragging || !target) return
+      await useWorkspaceStore.getState().movePage(drag.sourceId, target.id, target.placement)
+    }
+
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+    return () => {
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
+    }
+  }, [dropTarget, tree])
+
+  const handlePageDrop = async (sourceId: string, targetId: string, placement: PageDropPlacement) => {
+    setDraggedPageId(null)
+    setDropTarget(null)
+    await useWorkspaceStore.getState().movePage(sourceId, targetId, placement)
   }
 
   if (sidebarCollapsed) {
@@ -188,7 +318,14 @@ export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) 
           </div>
           <div className="space-y-0.5">
             {tree.map((node) => (
-              <PageRow key={node.id} node={node} />
+              <PageRow
+                key={node.id}
+                node={node}
+                draggedPageId={draggedPageId}
+                dropTarget={dropTarget}
+                onPointerDownPage={handlePagePointerDown}
+                suppressClick={suppressPageClickRef.current}
+              />
             ))}
           </div>
         </section>
