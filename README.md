@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.10-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.11-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.10-aarch64.dmg](downloads/Velora-PDF-1.0.10-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.11-aarch64.dmg](downloads/Velora-PDF-1.0.11-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.10.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.11.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.10_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.11_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.10.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.11.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.10
+1.0.11
 ```
 
 Bundle identifier:
@@ -482,6 +482,17 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.11
+
+Released to keep the thumbnail page list synchronized with document scrolling.
+
+Changes:
+
+- Auto-scrolls the left thumbnail panel to follow the current visible PDF page.
+- Keeps the active page thumbnail in view while scrolling through the document.
+- Preserves manual thumbnail navigation while keeping the panel synchronized afterward.
+- Bumped application version to `1.0.11` and built the production macOS DMG.
 
 ### 1.0.10
 
