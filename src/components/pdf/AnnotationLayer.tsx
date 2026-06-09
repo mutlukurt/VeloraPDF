@@ -1,5 +1,5 @@
 import { MessageSquare, X } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnnotationToolbar } from "../annotations/AnnotationToolbar";
 import { createAnnotationId, type Annotation, type Point, useAnnotationStore } from "../../stores/useAnnotationStore";
 import { useUiStore } from "../../stores/useUiStore";
@@ -23,7 +23,9 @@ function pointFromEvent(event: React.PointerEvent<HTMLDivElement>, element: HTML
 
 export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const stickyInputRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [stickyDraft, setStickyDraft] = useState<{ point: Point; text: string } | null>(null);
   const activeTool = useUiStore((state) => state.activeTool);
   const annotations = useAnnotationStore((state) => state.annotations);
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
@@ -37,6 +39,27 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const [sigPos, setSigPos] = useState<Point | null>(null);
   const sigCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawingSig, setIsDrawingSig] = useState(false);
+
+  useEffect(() => {
+    if (!stickyDraft) return;
+    stickyInputRef.current?.focus();
+  }, [stickyDraft]);
+
+  const saveStickyDraft = () => {
+    if (!stickyDraft) return;
+    addAnnotation({
+      id: createAnnotationId(),
+      page,
+      ...pageMetrics,
+      type: "sticky",
+      x: stickyDraft.point.x,
+      y: stickyDraft.point.y,
+      text: stickyDraft.text.trim() || "Note",
+      color: "#FFE66D",
+      createdAt: Date.now(),
+    });
+    setStickyDraft(null);
+  };
 
   const begin = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -80,20 +103,9 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
       useUiStore.getState().setActiveTool("select");
     }
     if (activeTool === "sticky") {
-      const text = window.prompt("Sticky note");
-      if (text !== null) {
-        addAnnotation({
-          id: createAnnotationId(),
-          page,
-          ...pageMetrics,
-          type: "sticky",
-          x: point.x,
-          y: point.y,
-          text: text.trim() || "Note",
-          color: "#FFE66D",
-          createdAt: Date.now(),
-        });
-      }
+      setSelectedId(null);
+      setStickyDraft({ point, text: "" });
+      return;
     }
     if (activeTool === "signature") {
       setSigPos(point);
@@ -503,6 +515,45 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
           }
           return null;
         })}
+        {stickyDraft ? (
+          <div
+            className="absolute z-50 w-56 rounded-lg border border-black/10 bg-[#FFE66D] p-2.5 text-zinc-950 shadow-2xl"
+            style={{
+              left: Math.min(stickyDraft.point.x, Math.max(0, width - 224)),
+              top: Math.min(stickyDraft.point.y, Math.max(0, height - 164)),
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerMove={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+          >
+            <textarea
+              ref={stickyInputRef}
+              value={stickyDraft.text}
+              aria-label="Sticky note content"
+              className="h-24 w-full resize-none rounded-md border border-black/10 bg-white/55 p-2 text-xs font-semibold leading-relaxed outline-none placeholder:text-zinc-700/60"
+              placeholder="Write a note..."
+              onChange={(e) => setStickyDraft({ ...stickyDraft, text: e.target.value })}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  saveStickyDraft();
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  setStickyDraft(null);
+                }
+              }}
+            />
+            <div className="mt-2 flex justify-end gap-1.5">
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] text-zinc-800 hover:bg-black/10" onClick={() => setStickyDraft(null)}>
+                Cancel
+              </Button>
+              <Button variant="secondary" size="sm" className="h-7 border-black/10 bg-zinc-950 px-2 text-[11px] text-white hover:bg-zinc-800" onClick={saveStickyDraft}>
+                Save
+              </Button>
+            </div>
+          </div>
+        ) : null}
         {selectedId ? <AnnotationToolbar /> : null}
       </div>
 
