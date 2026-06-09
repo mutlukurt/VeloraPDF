@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.11-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.12-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.11-aarch64.dmg](downloads/Velora-PDF-1.0.11-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.12-aarch64.dmg](downloads/Velora-PDF-1.0.12-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.11.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.12.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.11_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.12_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.11.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.12.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.11
+1.0.12
 ```
 
 Bundle identifier:
@@ -482,6 +482,18 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.12
+
+Released to restyle and refine the sticky note user interface.
+
+Changes:
+
+- Redesigned placed sticky notes as modern rounded-xl cards with dynamic 135deg gradient depth and custom-blended borders matching the card color.
+- Refined the popup draft editor container with a larger w-64 layout, rounded-2xl corners, and custom-tinted headers adapting to the note color.
+- Fixed text readability inside the sticky note editor popover by utilizing native `text-primary` classes, fully supporting Light and Dark modes.
+- Upgraded the text editing textarea styling with rounded-xl corners, custom border highlights, and softer placeholders.
+- Bumped version to `1.0.12` and generated the production macOS installer to the Desktop.
 
 ### 1.0.11
 

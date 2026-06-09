@@ -558,14 +558,14 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               <button
                 key={annotation.id}
                 title={annotation.text}
-                className={`absolute flex min-h-[58px] w-44 cursor-grab touch-none items-start gap-2.5 overflow-hidden rounded-lg border px-3 py-2.5 text-left text-zinc-950 shadow-[0_16px_34px_rgba(15,15,20,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(15,15,20,.22)] active:cursor-grabbing ${
-                  selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white" : ""
+                className={`absolute flex min-h-[58px] w-44 cursor-grab touch-none items-start gap-2.5 overflow-hidden rounded-xl border px-3 py-2.5 text-left text-zinc-900 shadow-[0_12px_24px_rgba(15,15,20,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(15,15,20,0.12)] active:cursor-grabbing ${
+                  selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-900" : ""
                 }`}
                 style={{
                   left: draggedPosition?.x ?? annotation.x,
                   top: draggedPosition?.y ?? annotation.y,
-                  background: `linear-gradient(180deg, color-mix(in srgb, ${annotation.color} 86%, white), ${annotation.color})`,
-                  borderColor: `color-mix(in srgb, ${annotation.color} 62%, #0e0e12)`,
+                  background: `linear-gradient(135deg, color-mix(in srgb, ${annotation.color} 88%, white) 0%, color-mix(in srgb, ${annotation.color} 96%, white) 100%)`,
+                  borderColor: `color-mix(in srgb, ${annotation.color} 65%, #000000)`,
                 }}
                 onPointerDown={(e) => {
                   e.stopPropagation();
@@ -590,11 +590,11 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   openTextEditor(annotation);
                 }}
               >
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-black/10 bg-white/35 shadow-[inset_0_1px_0_rgba(255,255,255,.4)]">
-                  <MessageSquare size={14} />
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-white/50 bg-white/45 shadow-[inset_0_1px_0_rgba(255,255,255,.4),0_1px_2px_rgba(0,0,0,0.05)] text-zinc-900/80">
+                  <MessageSquare size={13} className="stroke-[2.2]" />
                 </span>
-                <span className="line-clamp-3 min-w-0 break-words pt-0.5 text-[11px] font-semibold leading-snug">{annotation.text || "Note"}</span>
-                <span className="pointer-events-none absolute right-0 top-0 h-5 w-5 rounded-bl-lg border-b border-l border-black/10 bg-white/30" />
+                <span className="line-clamp-3 min-w-0 break-words pt-0.5 text-[11px] font-semibold tracking-wide text-zinc-800 leading-snug">{annotation.text || "Note"}</span>
+                <span className="pointer-events-none absolute right-0 top-0 h-4 w-4 rounded-bl-md border-b border-l border-black/10 bg-white/25 shadow-[-1px_1px_2px_rgba(0,0,0,0.05)]" />
               </button>
             );
           }
@@ -602,56 +602,62 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         })}
         {stickyDraft ? (
           <div
-            className="absolute z-50 w-60 overflow-hidden rounded-lg border border-border bg-toolbar text-zinc-950 shadow-[0_24px_70px_rgba(15,15,20,.26)] backdrop-blur-xl"
+            className="absolute z-50 w-64 overflow-hidden rounded-2xl border border-border bg-panel text-primary shadow-velora-light dark:shadow-velora backdrop-blur-xl transition-all duration-200"
             style={{
-              left: Math.min(stickyDraft.point.x, Math.max(0, width - 240)),
-              top: Math.min(stickyDraft.point.y, Math.max(0, height - 186)),
+              left: Math.min(stickyDraft.point.x, Math.max(0, width - 256)),
+              top: Math.min(stickyDraft.point.y, Math.max(0, height - 200)),
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onPointerMove={(e) => e.stopPropagation()}
             onPointerUp={(e) => e.stopPropagation()}
           >
             <div
-              className="flex items-center gap-2 border-b border-black/10 px-3 py-2"
+              className="flex items-center gap-2.5 border-b border-border/80 px-4 py-3"
               style={{
                 background:
                   stickyDraft.type === "sticky"
-                    ? `linear-gradient(180deg, color-mix(in srgb, ${stickyDraft.color} 84%, white), ${stickyDraft.color})`
-                    : "var(--surface)",
+                    ? `linear-gradient(180deg, color-mix(in srgb, ${stickyDraft.color} 15%, var(--panel)), color-mix(in srgb, ${stickyDraft.color} 8%, var(--panel)))`
+                    : "var(--panel)",
               }}
             >
-              <span className="grid h-7 w-7 place-items-center rounded-lg border border-black/10 bg-white/40">
-                <MessageSquare size={14} />
+              <span
+                className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-white/40 dark:bg-black/10 shadow-sm"
+                style={{
+                  color: stickyDraft.type === "sticky" ? `color-mix(in srgb, ${stickyDraft.color} 80%, var(--primary))` : 'var(--accent)',
+                  borderColor: stickyDraft.type === "sticky" ? `color-mix(in srgb, ${stickyDraft.color} 30%, var(--border))` : 'var(--border)'
+                }}
+              >
+                <MessageSquare size={13} className="stroke-[2.2]" />
               </span>
-              <span className="text-xs font-bold text-zinc-950">{stickyDraft.type === "sticky" ? "Sticky Note" : "Text Note"}</span>
+              <span className="text-xs font-bold tracking-wide text-primary">{stickyDraft.type === "sticky" ? "Sticky Note" : "Text Note"}</span>
             </div>
-            <div className="bg-surface p-2.5">
-            <textarea
-              ref={stickyInputRef}
-              value={stickyDraft.text}
-              aria-label="Sticky note content"
-              className="h-24 w-full resize-none rounded-lg border border-border bg-elevated p-2.5 text-xs font-semibold leading-relaxed text-primary outline-none placeholder:text-secondary/70 focus:border-accent"
-              placeholder="Write a note..."
-              onChange={(e) => setStickyDraft({ ...stickyDraft, text: e.target.value })}
-              onKeyDown={(e) => {
-                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                  e.preventDefault();
-                  saveStickyDraft();
-                }
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  setStickyDraft(null);
-                }
-              }}
-            />
-            <div className="mt-2 flex justify-end gap-1.5">
-              <Button variant="ghost" size="sm" className="h-8 rounded-lg px-3 text-[11px]" onClick={() => setStickyDraft(null)}>
-                Cancel
-              </Button>
-              <Button variant="primary" size="sm" className="h-8 rounded-lg px-3 text-[11px]" onClick={saveStickyDraft}>
-                Save
-              </Button>
-            </div>
+            <div className="bg-panel p-3">
+              <textarea
+                ref={stickyInputRef}
+                value={stickyDraft.text}
+                aria-label="Sticky note content"
+                className="h-28 w-full resize-none rounded-xl border border-border bg-elevated p-3 text-xs font-semibold leading-relaxed text-primary outline-none placeholder:text-secondary/50 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 transition-all"
+                placeholder="Write a note..."
+                onChange={(e) => setStickyDraft({ ...stickyDraft, text: e.target.value })}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    saveStickyDraft();
+                  }
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    setStickyDraft(null);
+                  }
+                }}
+              />
+              <div className="mt-2.5 flex justify-end gap-1.5">
+                <Button variant="ghost" size="sm" className="h-8 rounded-lg px-3 text-[11px]" onClick={() => setStickyDraft(null)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" size="sm" className="h-8 rounded-lg px-3.5 text-[11px]" onClick={saveStickyDraft}>
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
         ) : null}
