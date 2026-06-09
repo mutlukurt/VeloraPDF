@@ -3,13 +3,15 @@ import { usePdfStore } from "../../stores/usePdfStore";
 import { useBookmarkStore } from "../../stores/useBookmarkStore";
 import { Button } from "../ui/Button";
 
+const EMPTY_ARRAY: number[] = [];
+
 export function PdfBookmarksPanel() {
   const activeFile = usePdfStore((state) => state.activeFile);
   const currentPage = usePdfStore((state) => state.currentPage);
   const setCurrentPage = usePdfStore((state) => state.setCurrentPage);
 
   const fileId = activeFile ? (activeFile.path ?? activeFile.name) : "";
-  const bookmarks = useBookmarkStore((state) => state.bookmarks[fileId] || []);
+  const bookmarks = useBookmarkStore((state) => state.bookmarks[fileId] || EMPTY_ARRAY);
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
   const isCurrentBookmarked = bookmarks.includes(currentPage);

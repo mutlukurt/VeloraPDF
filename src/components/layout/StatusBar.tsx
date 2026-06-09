@@ -3,6 +3,8 @@ import { IconButton } from "../ui/IconButton";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useBookmarkStore } from "../../stores/useBookmarkStore";
 
+const EMPTY_ARRAY: number[] = [];
+
 export function StatusBar({ displayZoom }: { displayZoom?: number }) {
   const currentPage = usePdfStore((state) => state.currentPage);
   const pageCount = usePdfStore((state) => state.pageCount);
@@ -11,7 +13,7 @@ export function StatusBar({ displayZoom }: { displayZoom?: number }) {
   const activeFile = usePdfStore((state) => state.activeFile);
 
   const fileId = activeFile ? (activeFile.path ?? activeFile.name) : "";
-  const bookmarks = useBookmarkStore((state) => state.bookmarks[fileId] || []);
+  const bookmarks = useBookmarkStore((state) => state.bookmarks[fileId] || EMPTY_ARRAY);
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
   const isBookmarked = bookmarks.includes(currentPage);
