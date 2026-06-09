@@ -88,6 +88,7 @@ export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annota
       const noteHeight = 154;
       const innerInset = 16;
       const pinRadius = 8;
+      const label = (annotation.label?.trim() || String(annotation.page).padStart(2, "0")).slice(0, 6);
       const x = annotation.x * sx;
       const y = height - (annotation.y + noteHeight) * sy;
 
@@ -118,9 +119,16 @@ export async function exportAnnotatedPdf(source: Uint8Array, annotations: Annota
         borderColor: rgb(0.76, 0.64, 0.22),
         borderWidth: 0.8,
       });
+      page.drawText(label, {
+        x: x + (innerInset + 10) * sx,
+        y: y + (noteHeight - 58) * sy,
+        size: 18 * Math.min(sx, sy),
+        color: hexToRgb(annotation.color),
+        maxWidth: 58 * sx,
+      });
       page.drawText(annotation.text || "Note", {
         x: x + (innerInset + 10) * sx,
-        y: y + (noteHeight - 74) * sy,
+        y: y + (noteHeight - 82) * sy,
         size: 11 * Math.min(sx, sy),
         color: rgb(0.12, 0.1, 0.05),
         maxWidth: (noteWidth - innerInset * 2 - 20) * sx,

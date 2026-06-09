@@ -70,6 +70,7 @@ export type Annotation =
       x: number;
       y: number;
       text: string;
+      label?: string;
       color: string;
       createdAt: number;
     });

@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.12-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.13-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.12-aarch64.dmg](downloads/Velora-PDF-1.0.12-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.13-aarch64.dmg](downloads/Velora-PDF-1.0.13-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.12.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.13.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.12_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.13_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.12.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.13.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.12
+1.0.13
 ```
 
 Bundle identifier:
@@ -482,6 +482,17 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.13
+
+Released to make sticky-note top labels editable directly on the note.
+
+Changes:
+
+- Added a per-sticky-note label field so the top number can be edited manually.
+- Enabled double-click editing directly on the sticky note label.
+- Preserved custom sticky labels in annotation state, duplication, and PDF export.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.13`.
 
 ### 1.0.12
 
