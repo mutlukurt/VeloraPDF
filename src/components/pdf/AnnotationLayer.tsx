@@ -51,6 +51,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     type: "sticky" | "text";
   } | null>(null);
   const [stickyLabelDraft, setStickyLabelDraft] = useState<{ id: string; value: string } | null>(null);
+  const [isEditingStickyDraftLabel, setIsEditingStickyDraftLabel] = useState(false);
   const activeTool = useUiStore((state) => state.activeTool);
   const annotations = useAnnotationStore((state) => state.annotations);
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
@@ -68,8 +69,9 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
 
   useEffect(() => {
     if (!stickyDraft) return;
+    if (isEditingStickyDraftLabel) return;
     stickyInputRef.current?.focus();
-  }, [stickyDraft]);
+  }, [stickyDraft?.id, stickyDraft?.point.x, stickyDraft?.point.y, isEditingStickyDraftLabel]);
 
   useEffect(() => {
     if (!stickyLabelDraft) return;
@@ -77,11 +79,21 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     stickyLabelInputRef.current?.select();
   }, [stickyLabelDraft]);
 
+  useEffect(() => {
+    if (!isEditingStickyDraftLabel) return;
+    stickyLabelInputRef.current?.focus();
+    stickyLabelInputRef.current?.select();
+  }, [isEditingStickyDraftLabel]);
+
   const saveStickyDraft = () => {
     if (!stickyDraft) return;
     if (stickyDraft.id) {
-      updateAnnotation(stickyDraft.id, { text: stickyDraft.text.trim() || "Note" });
+      updateAnnotation(stickyDraft.id, {
+        text: stickyDraft.text.trim() || "Note",
+        ...(stickyDraft.type === "sticky" ? { label: stickyDraft.label?.trim() || "01" } : {}),
+      });
       setStickyDraft(null);
+      setIsEditingStickyDraftLabel(false);
       return;
     }
     addAnnotation({
@@ -92,11 +104,12 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
       x: stickyDraft.point.x,
       y: stickyDraft.point.y,
       text: stickyDraft.text.trim() || "Note",
-      label: String(page).padStart(2, "0"),
+      label: stickyDraft.label?.trim() || String(page).padStart(2, "0"),
       color: stickyDraft.color,
       createdAt: Date.now(),
     });
     setStickyDraft(null);
+    setIsEditingStickyDraftLabel(false);
   };
 
   const stickyLabel = (annotation: Extract<Annotation, { type: "sticky" }>) =>
@@ -118,6 +131,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
       color: annotation.color,
       type: annotation.type,
     });
+    setIsEditingStickyDraftLabel(false);
   };
 
   const moveSticky = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -199,7 +213,8 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     }
     if (activeTool === "sticky") {
       setSelectedId(null);
-      setStickyDraft({ point, text: "", color: "#FFE66D", type: "sticky" });
+      setStickyDraft({ point, text: "", label: String(page).padStart(2, "0"), color: "#FFE66D", type: "sticky" });
+      setIsEditingStickyDraftLabel(false);
       return;
     }
     if (activeTool === "signature") {
@@ -728,19 +743,52 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
               }}
             >
               <div
-                className="mb-2 text-[22px] font-medium leading-none"
+                className="mb-2 inline-flex min-h-7 min-w-10 items-center rounded-md text-[22px] font-medium leading-none"
                 style={{ color: stickyDraft.type === "sticky" ? `color-mix(in srgb, ${stickyDraft.color} 78%, #111827)` : "#4f46e5" }}
+                onDoubleClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (stickyDraft.type === "sticky") {
+                    setIsEditingStickyDraftLabel(true);
+                  }
+                }}
               >
-                {stickyDraft.label ?? String(page).padStart(2, "0")}
+                {stickyDraft.type === "sticky" && isEditingStickyDraftLabel ? (
+                  <input
+                    ref={stickyLabelInputRef}
+                    value={stickyDraft.label ?? String(page).padStart(2, "0")}
+                    aria-label="Sticky note label"
+                    maxLength={6}
+                    className="h-8 w-16 rounded-md border border-white/70 bg-white/75 px-1 text-[20px] font-medium leading-none text-zinc-950 outline-none shadow-sm focus:ring-2 focus:ring-white/80"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setStickyDraft({ ...stickyDraft, label: e.target.value })}
+                    onBlur={() => setIsEditingStickyDraftLabel(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        setIsEditingStickyDraftLabel(false);
+                      }
+                      if (e.key === "Escape") {
+                        e.preventDefault();
+                        setStickyDraft({ ...stickyDraft, label: stickyDraft.label?.trim() || String(page).padStart(2, "0") });
+                        setIsEditingStickyDraftLabel(false);
+                      }
+                    }}
+                  />
+                ) : (
+                  stickyDraft.label ?? String(page).padStart(2, "0")
+                )}
               </div>
               <div className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-zinc-950">
                 <MessageSquare size={14} />
                 {stickyDraft.type === "sticky" ? "Sticky Note" : "Text Note"}
               </div>
-            <textarea
-              ref={stickyInputRef}
-              value={stickyDraft.text}
-              aria-label="Sticky note content"
+              <textarea
+                ref={stickyInputRef}
+                value={stickyDraft.text}
+                aria-label="Sticky note content"
                 className="h-32 w-full resize-none rounded-[8px] border border-white/60 bg-white/60 p-3 text-sm font-medium leading-relaxed text-zinc-800 outline-none placeholder:text-zinc-500/70 focus:border-white focus:ring-2 focus:ring-white/60"
                 placeholder="Write a note..."
                 onChange={(e) => setStickyDraft({ ...stickyDraft, text: e.target.value })}
@@ -752,11 +800,20 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   if (e.key === "Escape") {
                     e.preventDefault();
                     setStickyDraft(null);
+                    setIsEditingStickyDraftLabel(false);
                   }
                 }}
               />
               <div className="mt-3 flex justify-end gap-1.5">
-                <Button variant="ghost" size="sm" className="h-8 rounded-lg px-3 text-[11px] text-zinc-700 hover:bg-white/50" onClick={() => setStickyDraft(null)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 rounded-lg px-3 text-[11px] text-zinc-700 hover:bg-white/50"
+                  onClick={() => {
+                    setStickyDraft(null);
+                    setIsEditingStickyDraftLabel(false);
+                  }}
+                >
                   Cancel
                 </Button>
                 <Button variant="primary" size="sm" className="h-8 rounded-lg px-3.5 text-[11px]" onClick={saveStickyDraft}>
