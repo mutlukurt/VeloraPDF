@@ -4,6 +4,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Command,
+  FileText,
   FilePlus2,
   MoreHorizontal,
   PanelLeftClose,
@@ -18,6 +19,8 @@ import { PageIcon } from '../../lib/icons/pageIcons'
 import { useWorkspaceStore } from '../../lib/store/workspace'
 import { cn } from '../../lib/utils/cn'
 import { formatRelativeTime } from '../../lib/utils/text'
+import { usePdfStore } from '../../stores/usePdfStore'
+import { useUiStore } from '../../stores/useUiStore'
 import type { Page } from '../../types'
 import { buildPageTree, type PageNode } from './pageTree'
 
@@ -76,7 +79,7 @@ function MiniPage({ page }: { page: Page }) {
   )
 }
 
-export function Sidebar() {
+export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) => void }) {
   const {
     pages,
     activePage,
@@ -86,12 +89,30 @@ export function Sidebar() {
     setCommandPaletteOpen,
     setSettingsOpen,
   } = useWorkspaceStore()
+  const activeFile = usePdfStore((state) => state.activeFile)
+  const pdf = usePdfStore((state) => state.pdf)
+  const recentFiles = usePdfStore((state) => state.recentFiles)
+  const setActiveView = useUiStore((state) => state.setActiveView)
+  const setPdfSidebarMode = useUiStore((state) => state.setSidebarMode)
   const tree = useMemo(() => buildPageTree(pages), [pages])
   const favorites = pages.filter((page) => page.isFavorite)
   const recent = pages
     .slice()
     .sort((a, b) => (b.lastOpenedAt ?? b.updatedAt).localeCompare(a.lastOpenedAt ?? a.updatedAt))
     .slice(0, 4)
+  const lastPdf = activeFile
+    ? { name: activeFile.name, path: activeFile.path, pageCount: pdf?.numPages, lastOpened: activeFile.openedAt }
+    : recentFiles[0]
+
+  const openLastPdf = () => {
+    if (!lastPdf) return
+    if (activeFile && pdf) {
+      setActiveView('pdf')
+      setPdfSidebarMode('thumbnails')
+      return
+    }
+    onOpenRecentPdf(lastPdf.path)
+  }
 
   if (sidebarCollapsed) {
     return (
@@ -99,6 +120,7 @@ export function Sidebar() {
         <Button size="icon" onClick={toggleSidebar} icon={<PanelLeftClose size={17} />} />
         <div className="mt-4 flex flex-col gap-2">
           <Button size="icon" onClick={() => createPage()} icon={<FilePlus2 size={17} />} />
+          <Button size="icon" onClick={openLastPdf} disabled={!lastPdf} title={lastPdf ? `Open last PDF: ${lastPdf.name}` : 'No recent PDF'} icon={<FileText size={17} />} />
           <Button size="icon" onClick={() => setCommandPaletteOpen(true)} icon={<Command size={17} />} />
           <Button size="icon" onClick={() => setSettingsOpen(true)} icon={<Settings size={17} />} />
         </div>
@@ -120,6 +142,17 @@ export function Sidebar() {
       <div className="grid gap-2 px-3">
         <Button variant="primary" className="w-full justify-start" onClick={() => createPage()} icon={<FilePlus2 size={16} />}>
           New Page
+        </Button>
+        <Button
+          variant="secondary"
+          className="w-full justify-start"
+          onClick={openLastPdf}
+          disabled={!lastPdf}
+          title={lastPdf ? `Open last PDF: ${lastPdf.name}` : 'Open a PDF first'}
+          icon={<FileText size={16} />}
+        >
+          <span className="min-w-0 flex-1 truncate text-left">Last PDF</span>
+          {lastPdf?.pageCount ? <span className="text-[11px] font-medium text-[var(--text-faint)]">{lastPdf.pageCount}p</span> : null}
         </Button>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="soft" onClick={() => setCommandPaletteOpen(true)} icon={<Search size={15} />}>

@@ -56,6 +56,7 @@ export function App() {
     usePdfStore.getState().setPageCount(pdf.numPages);
     usePdfStore.getState().setCurrentPage(1);
     usePdfStore.getState().addRecentFile({ name: picked.name, path: picked.path, lastOpened: Date.now(), pageCount: pdf.numPages });
+    useUiStore.getState().setActiveView("pdf");
     useUiStore.getState().setSidebarMode("thumbnails");
   };
 

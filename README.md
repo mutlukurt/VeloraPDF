@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.14-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.15-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.14-aarch64.dmg](downloads/Velora-PDF-1.0.14-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.15-aarch64.dmg](downloads/Velora-PDF-1.0.15-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.14.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.15.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.14_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.15_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.14.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.15.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.14
+1.0.15
 ```
 
 Bundle identifier:
@@ -482,6 +482,18 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.15
+
+Released to add a fast return path from Velora Notes back to the most recently opened PDF.
+
+Changes:
+
+- Added a `Last PDF` action to the Velora Notes sidebar near the page creation and search controls.
+- Lets users jump directly from the Notion-style notes workspace back to the currently loaded PDF when it is still open.
+- Reopens the most recent local PDF from the recent-files list when the PDF is not currently loaded in memory.
+- Keeps the PDF thumbnail sidebar active after returning, so the document context is immediately visible.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.15`.
 
 ### 1.0.14
 

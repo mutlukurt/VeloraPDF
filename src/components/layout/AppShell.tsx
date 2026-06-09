@@ -24,7 +24,7 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
       <>
         <div className="flex h-screen w-screen overflow-hidden bg-app text-primary">
           <LeftRail />
-          <NotesWorkspace />
+          <NotesWorkspace onOpenRecentPdf={onOpenRecentPdf} />
         </div>
         <SettingsDialog />
       </>
