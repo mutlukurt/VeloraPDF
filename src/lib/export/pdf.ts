@@ -1,84 +1,73 @@
 import type { Page, TiptapDoc, TiptapNode } from '../../types'
 import { db } from '../db/client'
-import { getPageIconText } from '../icons/pageIconText'
 import { downloadBlob, safeFileName } from '../utils/files'
 
 const pageStyle = `
-  .kairnly-pdf-page {
+  .velora-pdf-page {
     width: 794px;
     min-height: 1123px;
     box-sizing: border-box;
     padding: 72px;
-    background: #fffdf8;
-    color: #1f1f1c;
+    background: #ffffff;
+    color: #111827;
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     line-height: 1.7;
     font-size: 15px;
   }
-  .kairnly-pdf-title {
+  .velora-pdf-title {
     margin: 0 0 28px;
     font-size: 38px;
     line-height: 1.15;
     letter-spacing: 0;
+    color: #111827;
   }
-  .kairnly-pdf-meta {
-    margin-bottom: 18px;
-    color: #8a8275;
-    font-size: 12px;
-  }
-  .kairnly-pdf-page h1 { margin: 28px 0 10px; font-size: 28px; line-height: 1.2; }
-  .kairnly-pdf-page h2 { margin: 24px 0 8px; font-size: 22px; line-height: 1.25; }
-  .kairnly-pdf-page h3 { margin: 20px 0 6px; font-size: 18px; line-height: 1.3; }
-  .kairnly-pdf-page p { margin: 9px 0; }
-  .kairnly-pdf-page ul, .kairnly-pdf-page ol { margin: 10px 0; padding-left: 26px; }
-  .kairnly-pdf-page li { margin: 4px 0; }
-  .kairnly-pdf-page blockquote {
+  .velora-pdf-page h1 { margin: 28px 0 10px; font-size: 28px; line-height: 1.2; }
+  .velora-pdf-page h2 { margin: 24px 0 8px; font-size: 22px; line-height: 1.25; }
+  .velora-pdf-page h3 { margin: 20px 0 6px; font-size: 18px; line-height: 1.3; }
+  .velora-pdf-page p { margin: 9px 0; }
+  .velora-pdf-page ul, .velora-pdf-page ol { margin: 10px 0; padding-left: 26px; }
+  .velora-pdf-page li { margin: 4px 0; }
+  .velora-pdf-page blockquote {
     margin: 16px 0;
     padding: 12px 16px;
-    border-left: 4px solid #8b6f47;
-    border-radius: 0 10px 10px 0;
-    background: #f0ebe2;
+    border-left: 3px solid #d1d5db;
+    background: #ffffff;
   }
-  .kairnly-pdf-page pre {
+  .velora-pdf-page pre {
     margin: 16px 0;
     padding: 14px;
-    border: 1px solid #e2dace;
-    border-radius: 10px;
+    border: 1px solid #e5e7eb;
     overflow: hidden;
-    background: #f0ebe2;
+    background: #ffffff;
     white-space: pre-wrap;
     font-size: 12px;
     line-height: 1.55;
   }
-  .kairnly-pdf-page code {
+  .velora-pdf-page code {
     padding: 2px 5px;
-    border-radius: 5px;
-    background: #f0ebe2;
+    background: #ffffff;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
-  .kairnly-pdf-page pre code { padding: 0; background: transparent; }
-  .kairnly-pdf-page hr { margin: 26px 0; border: 0; border-top: 1px solid #e2dace; }
-  .kairnly-pdf-page img {
+  .velora-pdf-page pre code { padding: 0; background: transparent; }
+  .velora-pdf-page hr { margin: 26px 0; border: 0; border-top: 1px solid #e5e7eb; }
+  .velora-pdf-page img {
     display: block;
     max-width: 100%;
     max-height: 620px;
     margin: 16px 0;
-    border-radius: 12px;
-    border: 1px solid #e2dace;
   }
-  .kairnly-pdf-page table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-  .kairnly-pdf-page td, .kairnly-pdf-page th { border: 1px solid #e2dace; padding: 8px; vertical-align: top; }
-  .kairnly-pdf-page th { background: #f0ebe2; }
-  .kairnly-pdf-media {
+  .velora-pdf-page table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .velora-pdf-page td, .velora-pdf-page th { border: 1px solid #e5e7eb; padding: 8px; vertical-align: top; }
+  .velora-pdf-page th { background: #ffffff; }
+  .velora-pdf-media {
     margin: 16px 0;
     padding: 14px;
-    border: 1px solid #e2dace;
-    border-radius: 12px;
+    border: 1px solid #e5e7eb;
     background: #ffffff;
   }
-  .kairnly-pdf-media small { display: block; color: #8a8275; margin-bottom: 5px; }
-  .kairnly-pdf-media strong { display: block; }
-  .kairnly-pdf-media span { display: block; overflow-wrap: anywhere; color: #6f6a60; font-size: 12px; }
+  .velora-pdf-media small { display: block; color: #6b7280; margin-bottom: 5px; }
+  .velora-pdf-media strong { display: block; }
+  .velora-pdf-media span { display: block; overflow-wrap: anywhere; color: #6b7280; font-size: 12px; }
 `
 
 function escapeHtml(value: string) {
@@ -149,9 +138,9 @@ function renderNode(node: TiptapNode): string {
     const name = escapeHtml(String(node.attrs?.name ?? node.attrs?.label ?? 'Attachment'))
     const src = escapeHtml(String(node.attrs?.src ?? ''))
     if (kind === 'video') {
-      return `<div class="kairnly-pdf-media"><small>Video</small><strong>${name}</strong><span>Video file is included in the workspace, but PDF export shows it as an attachment card.</span></div>`
+      return `<div class="velora-pdf-media"><small>Video</small><strong>${name}</strong><span>Video file is included in the workspace, but PDF export shows it as an attachment card.</span></div>`
     }
-    return `<div class="kairnly-pdf-media"><small>${kind}</small><strong>${name}</strong><span>${src}</span></div>`
+    return `<div class="velora-pdf-media"><small>${kind}</small><strong>${name}</strong><span>${src}</span></div>`
   }
   return renderChildren(node)
 }
@@ -160,9 +149,8 @@ function renderPageHtml(page: Page, doc: TiptapDoc) {
   const body = doc.content?.map(renderNode).join('') || '<p></p>'
   return `
     <style>${pageStyle}</style>
-    <article class="kairnly-pdf-page">
-      <div class="kairnly-pdf-meta">${escapeHtml(getPageIconText(page.icon))} · Kairnly · ${new Date(page.updatedAt).toLocaleString()}</div>
-      <h1 class="kairnly-pdf-title">${escapeHtml(page.title || 'Untitled')}</h1>
+    <article class="velora-pdf-page">
+      <h1 class="velora-pdf-title">${escapeHtml(page.title || 'Untitled')}</h1>
       ${body}
     </article>
   `
@@ -240,7 +228,7 @@ function makePdfPageCanvas(source: HTMLCanvasElement, sourceY: number, sourceHei
   const context = page.getContext('2d')
   if (!context) throw new Error('Could not prepare PDF page canvas.')
 
-  context.fillStyle = '#fffdf8'
+  context.fillStyle = '#ffffff'
   context.fillRect(0, 0, page.width, page.height)
   context.drawImage(source, 0, sourceY, source.width, sourceHeight, 0, destinationY, source.width, sourceHeight)
 
@@ -280,7 +268,7 @@ async function htmlToPdfBlob(html: string) {
   try {
     await waitForImages(host)
 
-    const targetEl = host.querySelector('.kairnly-pdf-page') as HTMLElement
+    const targetEl = host.querySelector('.velora-pdf-page') as HTMLElement
     if (!targetEl) {
       throw new Error('PDF page element not found in HTML template')
     }
@@ -291,7 +279,7 @@ async function htmlToPdfBlob(html: string) {
       height: targetEl.scrollHeight,
       windowWidth: 794,
       windowHeight: targetEl.scrollHeight,
-      backgroundColor: '#fffdf8',
+      backgroundColor: '#ffffff',
       useCORS: true,
       allowTaint: true,
       logging: false,
@@ -364,5 +352,5 @@ export async function exportPagesAsPdfZip(pages: Page[], filename: string) {
     zip.file(`${slugify(page.title)}-${page.id.slice(0, 6)}.pdf`, blob)
   }
   const archive = await zip.generateAsync({ type: 'blob' })
-  await downloadBlob(archive, safeFileName(filename, 'kairnly-pdfs.zip'))
+  await downloadBlob(archive, safeFileName(filename, 'velora-pdfs.zip'))
 }

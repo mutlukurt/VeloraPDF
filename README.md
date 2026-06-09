@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.15-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.16-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.15-aarch64.dmg](downloads/Velora-PDF-1.0.15-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.16-aarch64.dmg](downloads/Velora-PDF-1.0.16-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.15.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.16.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.15_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.16_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.15.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.16.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.15
+1.0.16
 ```
 
 Bundle identifier:
@@ -482,6 +482,19 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.16
+
+Released to make Velora Notes PDF export look like a normal clean PDF document.
+
+Changes:
+
+- Removed the legacy Kairnly metadata line from Notes PDF exports.
+- Changed Notes PDF export pages to a plain white PDF background.
+- Removed cream/card-like export styling so downloaded PDFs read like standard documents.
+- Preserved actual content formatting such as headings, lists, tables, links, text colors, and highlights.
+- Renamed the internal Notes PDF export template classes from Kairnly-specific names to Velora-specific names.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.16`.
 
 ### 1.0.15
 
