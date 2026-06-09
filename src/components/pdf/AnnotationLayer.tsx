@@ -25,10 +25,17 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const stickyInputRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [stickyDraft, setStickyDraft] = useState<{ point: Point; text: string } | null>(null);
+  const [stickyDraft, setStickyDraft] = useState<{
+    id?: string;
+    point: Point;
+    text: string;
+    color: string;
+    type: "sticky" | "text";
+  } | null>(null);
   const activeTool = useUiStore((state) => state.activeTool);
   const annotations = useAnnotationStore((state) => state.annotations);
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
+  const updateAnnotation = useAnnotationStore((state) => state.updateAnnotation);
   const selectedId = useAnnotationStore((state) => state.selectedId);
   const setSelectedId = useAnnotationStore((state) => state.setSelectedId);
   const pageAnnotations = useMemo(() => annotations.filter((item) => item.page === page), [annotations, page]);
@@ -47,6 +54,11 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
 
   const saveStickyDraft = () => {
     if (!stickyDraft) return;
+    if (stickyDraft.id) {
+      updateAnnotation(stickyDraft.id, { text: stickyDraft.text.trim() || "Note" });
+      setStickyDraft(null);
+      return;
+    }
     addAnnotation({
       id: createAnnotationId(),
       page,
@@ -55,10 +67,21 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
       x: stickyDraft.point.x,
       y: stickyDraft.point.y,
       text: stickyDraft.text.trim() || "Note",
-      color: "#FFE66D",
+      color: stickyDraft.color,
       createdAt: Date.now(),
     });
     setStickyDraft(null);
+  };
+
+  const openTextEditor = (annotation: Extract<Annotation, { type: "sticky" | "text" }>) => {
+    setSelectedId(annotation.id);
+    setStickyDraft({
+      id: annotation.id,
+      point: { x: annotation.x, y: annotation.y },
+      text: annotation.text,
+      color: annotation.color,
+      type: annotation.type,
+    });
   };
 
   const begin = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -104,7 +127,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     }
     if (activeTool === "sticky") {
       setSelectedId(null);
-      setStickyDraft({ point, text: "" });
+      setStickyDraft({ point, text: "", color: "#FFE66D", type: "sticky" });
       return;
     }
     if (activeTool === "signature") {
@@ -477,10 +500,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
-                  const newText = window.prompt("Edit note content", annotation.text);
-                  if (newText !== null && newText.trim() !== "") {
-                    useAnnotationStore.getState().updateAnnotation(annotation.id, { text: newText });
-                  }
+                  openTextEditor(annotation);
                 }}
               >
                 {annotation.text}
@@ -502,10 +522,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
-                  const newText = window.prompt("Edit note content", annotation.text);
-                  if (newText !== null && newText.trim() !== "") {
-                    useAnnotationStore.getState().updateAnnotation(annotation.id, { text: newText });
-                  }
+                  openTextEditor(annotation);
                 }}
               >
                 <MessageSquare className="mt-0.5 shrink-0" size={15} />
@@ -517,10 +534,11 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
         })}
         {stickyDraft ? (
           <div
-            className="absolute z-50 w-56 rounded-lg border border-black/10 bg-[#FFE66D] p-2.5 text-zinc-950 shadow-2xl"
+            className="absolute z-50 w-56 rounded-lg border border-black/10 p-2.5 text-zinc-950 shadow-2xl"
             style={{
               left: Math.min(stickyDraft.point.x, Math.max(0, width - 224)),
               top: Math.min(stickyDraft.point.y, Math.max(0, height - 164)),
+              background: stickyDraft.type === "sticky" ? stickyDraft.color : "#ffffff",
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onPointerMove={(e) => e.stopPropagation()}
@@ -554,7 +572,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
             </div>
           </div>
         ) : null}
-        {selectedId ? <AnnotationToolbar /> : null}
+        {selectedId ? <AnnotationToolbar onEditText={openTextEditor} /> : null}
       </div>
 
       {/* Signature Modal */}

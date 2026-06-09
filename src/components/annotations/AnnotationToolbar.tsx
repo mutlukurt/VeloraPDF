@@ -1,10 +1,14 @@
 import { Copy, Trash2, Edit2 } from "lucide-react";
 import { IconButton } from "../ui/IconButton";
-import { useAnnotationStore } from "../../stores/useAnnotationStore";
+import { type Annotation, useAnnotationStore } from "../../stores/useAnnotationStore";
 
 const colors = ["#FFE66D", "#89F7B4", "#C7B7FF", "#FFB5D8", "#A7D8FF", "#6657FF", "#FF5B5B"];
 
-export function AnnotationToolbar() {
+type AnnotationToolbarProps = {
+  onEditText?: (annotation: Extract<Annotation, { type: "text" | "sticky" }>) => void;
+};
+
+export function AnnotationToolbar({ onEditText }: AnnotationToolbarProps) {
   const selectedId = useAnnotationStore((state) => state.selectedId);
   const annotations = useAnnotationStore((state) => state.annotations);
   const updateAnnotation = useAnnotationStore((state) => state.updateAnnotation);
@@ -32,32 +36,59 @@ export function AnnotationToolbar() {
     <div
       className="absolute z-40 flex items-center gap-1 rounded-2xl border border-border bg-toolbar p-1 shadow-velora"
       style={{ left: x, top: Math.max(8, y - 54) }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
     >
       {colors.map((color) => (
         <button
           key={color}
+          type="button"
           aria-label={`Set color ${color}`}
-          className="h-6 w-6 rounded-lg border border-white/20"
+          className={`h-6 w-6 rounded-lg border border-white/20 ${"color" in selected && selected.color === color ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--toolbar)]" : ""}`}
           style={{ background: color }}
-          onClick={() => updateAnnotation(selected.id, { color } as Partial<typeof selected>)}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            updateAnnotation(selected.id, { color } as Partial<typeof selected>);
+          }}
         />
       ))}
       {hasText && (
         <IconButton
           label="Edit note content"
           className="h-8 w-8"
-          onClick={() => {
-            const newText = window.prompt("Edit note content", (selected as any).text);
-            if (newText !== null && newText.trim() !== "") {
-              updateAnnotation(selected.id, { text: newText });
-            }
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditText?.(selected as Extract<Annotation, { type: "text" | "sticky" }>);
           }}
         >
           <Edit2 size={14} />
         </IconButton>
       )}
-      <IconButton label="Duplicate annotation" className="h-8 w-8" onClick={() => duplicateAnnotation(selected.id)}><Copy size={14} /></IconButton>
-      <IconButton label="Delete annotation" className="h-8 w-8 text-red-400" onClick={() => deleteAnnotation(selected.id)}><Trash2 size={14} /></IconButton>
+      <IconButton
+        label="Duplicate annotation"
+        className="h-8 w-8"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          duplicateAnnotation(selected.id);
+        }}
+      >
+        <Copy size={14} />
+      </IconButton>
+      <IconButton
+        label="Delete annotation"
+        className="h-8 w-8 text-red-400"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          deleteAnnotation(selected.id);
+        }}
+      >
+        <Trash2 size={14} />
+      </IconButton>
     </div>
   );
 }

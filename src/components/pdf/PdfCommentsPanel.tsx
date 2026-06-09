@@ -12,6 +12,7 @@ import {
   Strikethrough as StrikeIcon,
   Image as ImageIcon
 } from "lucide-react";
+import { useState } from "react";
 import { useAnnotationStore, type Annotation } from "../../stores/useAnnotationStore";
 import { usePdfStore } from "../../stores/usePdfStore";
 
@@ -70,6 +71,7 @@ function getAnnotationLabel(type: string) {
 }
 
 export function PdfCommentsPanel() {
+  const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
   const annotations = useAnnotationStore((state) => state.annotations);
   const deleteAnnotation = useAnnotationStore((state) => state.deleteAnnotation);
   const updateAnnotation = useAnnotationStore((state) => state.updateAnnotation);
@@ -93,11 +95,15 @@ export function PdfCommentsPanel() {
   const handleEdit = (e: React.MouseEvent, annotation: Annotation) => {
     e.stopPropagation();
     if (annotation.type === "text" || annotation.type === "sticky") {
-      const text = window.prompt("Edit note content", annotation.text);
-      if (text !== null && text.trim() !== "") {
-        updateAnnotation(annotation.id, { text });
-      }
+      setEditing({ id: annotation.id, text: annotation.text });
     }
+  };
+
+  const saveEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!editing) return;
+    updateAnnotation(editing.id, { text: editing.text.trim() || "Note" });
+    setEditing(null);
   };
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
@@ -143,10 +149,51 @@ export function PdfCommentsPanel() {
                   <span className="text-[10px] font-semibold text-secondary">Page {annotation.page}</span>
                 </div>
 
-                {hasText && (
+                {hasText && editing?.id !== annotation.id && (
                   <p className="text-xs leading-5 text-primary break-words bg-[var(--surface-muted)] p-2 rounded-lg border border-border">
                     {annotation.text}
                   </p>
+                )}
+
+                {hasText && editing?.id === annotation.id && (
+                  <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                    <textarea
+                      value={editing.text}
+                      aria-label="Edit comment text"
+                      className="h-20 w-full resize-none rounded-lg border border-border bg-elevated p-2 text-xs leading-5 text-primary outline-none focus:border-accent"
+                      onChange={(e) => setEditing({ id: annotation.id, text: e.target.value })}
+                      onKeyDown={(e) => {
+                        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                          e.preventDefault();
+                          updateAnnotation(annotation.id, { text: editing.text.trim() || "Note" });
+                          setEditing(null);
+                        }
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          setEditing(null);
+                        }
+                      }}
+                    />
+                    <div className="flex justify-end gap-1.5">
+                      <button
+                        type="button"
+                        className="rounded-lg px-2 py-1 text-[10px] font-semibold text-secondary hover:bg-elevated"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditing(null);
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg bg-accent px-2 py-1 text-[10px] font-semibold text-white hover:brightness-110"
+                        onClick={saveEdit}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 <div className="flex items-center justify-between mt-1 pt-1 border-t border-border/40">

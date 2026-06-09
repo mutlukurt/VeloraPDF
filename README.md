@@ -492,6 +492,8 @@ Changes:
 - Stored source page render dimensions with new annotations so exported overlays scale to the actual PDF page size instead of the old fixed viewport fallback.
 - Updated sticky notes from icon-only markers to readable note cards with visible text previews and selection styling.
 - Exported sticky notes as colored note boxes with wrapped text in the annotated PDF output.
+- Fixed sticky-note toolbar actions so selected notes can change color and open an inline editor from the edit button.
+- Replaced sticky/text note prompt editing with inline editing in the PDF layer and Comments & Notes panel.
 - Bumped application version to `1.0.7` and built the production macOS DMG.
 
 ### 1.0.6
