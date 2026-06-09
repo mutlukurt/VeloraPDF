@@ -496,6 +496,7 @@ Changes:
 - Fixed coordinates computation and display bug for the Annotation Toolbar when selecting pen drawings.
 - Added canvas empty space deselection behavior.
 - Repositioned the page number badge inside the visible page boundaries to prevent container clipping.
+- Fixed an infinite re-render loop on the home screen when no active file is loaded (preventing blank/white screen crashes).
 - Bumped application version to `1.0.5` and built the production macOS DMG.
 
 ### 1.0.4
