@@ -24,6 +24,7 @@ type PdfState = {
   searchQuery: string;
   statusMessage: string;
   recentFiles: RecentFile[];
+  crops: Record<number, { x: number; y: number; width: number; height: number } | null>;
   setActiveFile: (file: ActiveFile) => void;
   setPdf: (pdf: PDFDocumentProxy | null) => void;
   setPageCount: (pageCount: number) => void;
@@ -34,6 +35,8 @@ type PdfState = {
   addRecentFile: (file: RecentFile) => void;
   removeRecentFile: (key: string) => void;
   clearRecentFiles: () => void;
+  setPageCrop: (page: number, crop: { x: number; y: number; width: number; height: number } | null) => void;
+  clearCrops: () => void;
   closePdf: () => void;
 };
 
@@ -61,7 +64,8 @@ export const usePdfStore = create<PdfState>((set, get) => ({
   searchQuery: "",
   statusMessage: "Ready",
   recentFiles: loadRecentFiles(),
-  setActiveFile: (file) => set({ activeFile: file, currentPage: 1, zoom: 1, statusMessage: "PDF loaded" }),
+  crops: {},
+  setActiveFile: (file) => set({ activeFile: file, currentPage: 1, zoom: 1, statusMessage: "PDF loaded", crops: {} }),
   setPdf: (pdf) => set({ pdf }),
   setPageCount: (pageCount) => set({ pageCount }),
   setCurrentPage: (page) => {
@@ -80,7 +84,8 @@ export const usePdfStore = create<PdfState>((set, get) => ({
     }),
   removeRecentFile: (key) =>
     set((state) => {
-      const next = state.recentFiles.filter((item) => (item.path ?? item.name) !== key);
+      const keyStr = key;
+      const next = state.recentFiles.filter((item) => (item.path ?? item.name) !== keyStr);
       persistRecentFiles(next);
       return { recentFiles: next };
     }),
@@ -88,5 +93,10 @@ export const usePdfStore = create<PdfState>((set, get) => ({
     persistRecentFiles([]);
     set({ recentFiles: [] });
   },
-  closePdf: () => set({ activeFile: null, pdf: null, pageCount: 0, currentPage: 1, searchQuery: "" }),
+  setPageCrop: (page, crop) =>
+    set((state) => ({
+      crops: { ...state.crops, [page]: crop },
+    })),
+  clearCrops: () => set({ crops: {} }),
+  closePdf: () => set({ activeFile: null, pdf: null, pageCount: 0, currentPage: 1, searchQuery: "", crops: {} }),
 }));

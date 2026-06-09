@@ -5,6 +5,7 @@ import { PdfThumbnailPanel } from "./PdfThumbnailPanel";
 import { SearchPanel } from "./SearchPanel";
 import { PdfBookmarksPanel } from "./PdfBookmarksPanel";
 import { PdfCommentsPanel } from "./PdfCommentsPanel";
+import { PdfAttachmentsPanel } from "./PdfAttachmentsPanel";
 import { StatusBar } from "../layout/StatusBar";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
@@ -120,6 +121,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       {sidebarMode === "search" ? <SearchPanel pdf={pdf} /> : null}
       {sidebarMode === "bookmarks" ? <PdfBookmarksPanel /> : null}
       {sidebarMode === "comments" ? <PdfCommentsPanel /> : null}
+      {sidebarMode === "attachments" ? <PdfAttachmentsPanel /> : null}
       <div
         ref={scrollerRef}
         className={`relative flex-1 overflow-auto overscroll-contain ${viewSettings.eyeProtection ? "bg-[#F4EFD9] dark:bg-[#1f1d16]" : "bg-pdf-canvas"}`}

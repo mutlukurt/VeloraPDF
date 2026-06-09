@@ -27,13 +27,24 @@ export type Annotation =
   | {
       id: string;
       page: number;
-      type: "rectangle" | "circle" | "arrow";
+      type: "rectangle" | "circle" | "arrow" | "underline" | "strike";
       x: number;
       y: number;
       width: number;
       height: number;
       color: string;
       strokeWidth: number;
+      createdAt: number;
+    }
+  | {
+      id: string;
+      page: number;
+      type: "signature";
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      dataUrl: string;
       createdAt: number;
     }
   | {

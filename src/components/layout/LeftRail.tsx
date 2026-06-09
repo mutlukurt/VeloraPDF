@@ -89,9 +89,9 @@ export function LeftRail() {
 
       <IconButton
         label="Attachments"
-        active={isPdf && sidebarMode === null}
+        active={isPdf && sidebarMode === "attachments"}
         disabled={!isPdf}
-        onClick={() => setSidebarMode(null)}
+        onClick={() => setSidebarMode(sidebarMode === "attachments" ? null : "attachments")}
       >
         <Paperclip size={18} />
       </IconButton>

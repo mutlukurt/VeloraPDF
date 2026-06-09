@@ -1,4 +1,17 @@
-import { Highlighter, MessageSquare, PenTool, Type, Square, Circle, ArrowUpRight, Trash2, Edit2 } from "lucide-react";
+import {
+  Highlighter,
+  MessageSquare,
+  PenTool,
+  Type,
+  Square,
+  Circle,
+  ArrowUpRight,
+  Trash2,
+  Edit2,
+  Underline as UnderlineIcon,
+  Strikethrough as StrikeIcon,
+  Image as ImageIcon
+} from "lucide-react";
 import { useAnnotationStore, type Annotation } from "../../stores/useAnnotationStore";
 import { usePdfStore } from "../../stores/usePdfStore";
 
@@ -6,6 +19,12 @@ function getAnnotationIcon(type: string) {
   switch (type) {
     case "highlight":
       return <Highlighter size={14} />;
+    case "underline":
+      return <UnderlineIcon size={14} />;
+    case "strike":
+      return <StrikeIcon size={14} />;
+    case "signature":
+      return <ImageIcon size={14} />;
     case "pen":
       return <PenTool size={14} />;
     case "text":
@@ -27,6 +46,12 @@ function getAnnotationLabel(type: string) {
   switch (type) {
     case "highlight":
       return "Highlight";
+    case "underline":
+      return "Underline";
+    case "strike":
+      return "Strikeout";
+    case "signature":
+      return "Signature";
     case "pen":
       return "Freehand Draw";
     case "text":
@@ -95,6 +120,8 @@ export function PdfCommentsPanel() {
         ) : (
           sortedAnnotations.map((annotation) => {
             const hasText = annotation.type === "text" || annotation.type === "sticky";
+            const annotationColor = "color" in annotation ? annotation.color : "#6657FF";
+
             return (
               <div
                 key={annotation.id}
@@ -105,7 +132,7 @@ export function PdfCommentsPanel() {
                   <div className="flex items-center gap-2">
                     <span
                       className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-accent border border-border"
-                      style={{ color: annotation.color }}
+                      style={{ color: annotationColor }}
                     >
                       {getAnnotationIcon(annotation.type)}
                     </span>
@@ -126,7 +153,7 @@ export function PdfCommentsPanel() {
                   <div className="flex items-center gap-1.5">
                     <span
                       className="h-2 w-2 rounded-full border border-black/10"
-                      style={{ background: annotation.color }}
+                      style={{ background: annotationColor }}
                     />
                     <span className="text-[10px] text-secondary">
                       {new Date(annotation.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

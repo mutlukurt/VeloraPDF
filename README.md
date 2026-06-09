@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.5-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.6-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.5-aarch64.dmg](downloads/Velora-PDF-1.0.5-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.6-aarch64.dmg](downloads/Velora-PDF-1.0.6-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.5.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.6.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.5_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.6_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.5.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.6.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.5
+1.0.6
 ```
 
 Bundle identifier:
@@ -482,6 +482,20 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.6
+
+Released to implement advanced drawing tools (Signature, Underline, Strike), Page Cropping, local document Attachments, search highlighting, and memory virtualization.
+
+Changes:
+
+- Added Underline and Strike drawing tool annotations that render native SVG lines on PDF pages.
+- Implemented a Signature drawing tool modal canvas signature pad and placed base64 vector signatures.
+- Added a Page Cropping tool that adjusts viewport dimensions and shifts page layouts using CSS translations, with a floating "Reset Crop" option.
+- Created an Attachments sidebar panel to list, download, and delete local files associated with specific PDFs.
+- Enabled Search Query Highlight Overlays using baseline coordinate mapping to highlight search matches dynamically.
+- Implemented canvas-level DOM virtualization via IntersectionObserver to automatically unmount canvas buffers and reduce memory usage on large documents.
+- Bumped application version to `1.0.6` and built the production macOS DMG.
 
 ### 1.0.5
 
