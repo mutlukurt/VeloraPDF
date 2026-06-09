@@ -2,7 +2,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.16-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.17-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -12,18 +12,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.16-aarch64.dmg](downloads/Velora-PDF-1.0.16-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.17-aarch64.dmg](downloads/Velora-PDF-1.0.17-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.16.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.17.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.16_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.17_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -442,13 +442,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.16.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.17.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.16
+1.0.17
 ```
 
 Bundle identifier:
@@ -482,6 +482,18 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.17
+
+Released to prevent Notes PDF exports from cutting text across page breaks.
+
+Changes:
+
+- Added canvas-level blank-row detection before slicing exported Notes pages into A4 PDF pages.
+- Uses real white-space bands between text lines and blocks as page-break candidates.
+- Falls back to DOM-based cut positions only when a safe blank canvas band cannot be found.
+- Keeps the clean white Notes PDF export style introduced in `1.0.16`.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.17`.
 
 ### 1.0.16
 

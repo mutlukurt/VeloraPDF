@@ -220,6 +220,58 @@ function findPdfCut(cuts: number[], from: number, desired: number, max: number) 
   return best || Math.min(desired, max)
 }
 
+function isMostlyBlankCanvasRow(data: Uint8ClampedArray, width: number, y: number) {
+  const stride = width * 4
+  const offset = y * stride
+  const sampleEvery = 8
+  let samples = 0
+  let ink = 0
+
+  for (let x = 0; x < width; x += sampleEvery) {
+    const index = offset + x * 4
+    const alpha = data[index + 3]
+    const red = data[index]
+    const green = data[index + 1]
+    const blue = data[index + 2]
+    samples += 1
+    if (alpha > 10 && (red < 248 || green < 248 || blue < 248)) ink += 1
+  }
+
+  return ink / Math.max(1, samples) < 0.01
+}
+
+function findCanvasBlankCut(source: HTMLCanvasElement, from: number, desired: number, max: number, scale: number) {
+  if (desired >= max) return max
+
+  const context = source.getContext('2d')
+  if (!context) return null
+
+  const startPx = Math.max(0, Math.round((from + 120) * scale))
+  const desiredPx = Math.min(source.height - 1, Math.round(desired * scale))
+  const bandPx = Math.max(10, Math.round(8 * scale))
+  let data: Uint8ClampedArray
+  try {
+    data = context.getImageData(0, 0, source.width, source.height).data
+  } catch {
+    return null
+  }
+
+  let blankRun = 0
+  for (let y = desiredPx; y >= startPx; y -= 1) {
+    if (isMostlyBlankCanvasRow(data, source.width, y)) {
+      blankRun += 1
+      if (blankRun >= bandPx) {
+        const cutPx = y + Math.floor(blankRun / 2)
+        return Math.max(from + 1, Math.round(cutPx / scale))
+      }
+    } else {
+      blankRun = 0
+    }
+  }
+
+  return null
+}
+
 function makePdfPageCanvas(source: HTMLCanvasElement, sourceY: number, sourceHeight: number, pageHeight: number, destinationY: number) {
   const page = document.createElement('canvas')
   page.width = source.width
@@ -294,12 +346,13 @@ async function htmlToPdfBlob(html: string) {
     const scale = canvas.width / targetEl.offsetWidth
     const cuts = collectPdfCutPositions(targetEl)
 
-    let y = 0
-    let pageIndex = 0
-    while (y < targetEl.scrollHeight) {
-      const desiredY = pageIndex === 0 ? y + pageHeightCss - pageMarginCss : y + contentHeightCss
-      const nextY = findPdfCut(cuts, y, desiredY, targetEl.scrollHeight)
-      const sourceY = Math.round(y * scale)
+	    let y = 0
+	    let pageIndex = 0
+	    while (y < targetEl.scrollHeight) {
+	      const desiredY = pageIndex === 0 ? y + pageHeightCss - pageMarginCss : y + contentHeightCss
+	      const safeCanvasCut = findCanvasBlankCut(canvas, y, desiredY, targetEl.scrollHeight, scale)
+	      const nextY = safeCanvasCut ?? findPdfCut(cuts, y, desiredY, targetEl.scrollHeight)
+	      const sourceY = Math.round(y * scale)
       const sourceHeight = Math.max(1, Math.round((nextY - y) * scale))
       const destinationY = pageIndex === 0 ? 0 : Math.round(pageMarginCss * scale)
       const pageCanvas = makePdfPageCanvas(canvas, sourceY, sourceHeight, Math.round(pageHeightCss * scale), destinationY)
