@@ -37,7 +37,9 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     startClient: Point;
     start: Point;
     moved: boolean;
+    element: HTMLButtonElement;
   } | null>(null);
+  const stickySuppressEditRef = useRef(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [stickyDraft, setStickyDraft] = useState<{
     id?: string;
@@ -45,13 +47,6 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     text: string;
     color: string;
     type: "sticky" | "text";
-  } | null>(null);
-  const [stickyDrag, setStickyDrag] = useState<{
-    id: string;
-    pointerId: number;
-    startClient: Point;
-    start: Point;
-    current: Point;
   } | null>(null);
   const activeTool = useUiStore((state) => state.activeTool);
   const annotations = useAnnotationStore((state) => state.annotations);
@@ -114,7 +109,9 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     const nextY = clamp(drag.start.y + event.clientY - drag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
     const moved = Math.abs(nextX - drag.start.x) > 1 || Math.abs(nextY - drag.start.y) > 1;
     stickyDragRef.current = { ...drag, moved: drag.moved || moved };
-    setStickyDrag((current) => (current?.id === drag.id ? { ...current, current: { x: nextX, y: nextY } } : current));
+    drag.element.style.left = `${nextX}px`;
+    drag.element.style.top = `${nextY}px`;
+    drag.element.style.transform = "rotate(0deg)";
   };
 
   const finishSticky = (event: React.PointerEvent<HTMLButtonElement>) => {
@@ -125,11 +122,13 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     const nextX = clamp(drag.start.x + event.clientX - drag.startClient.x, 0, Math.max(0, width - STICKY_CARD_WIDTH));
     const nextY = clamp(drag.start.y + event.clientY - drag.startClient.y, 0, Math.max(0, height - STICKY_CARD_HEIGHT));
     const moved = drag.moved || Math.abs(nextX - drag.start.x) > 1 || Math.abs(nextY - drag.start.y) > 1;
+    stickySuppressEditRef.current = moved;
     if (moved) {
       updateAnnotation(drag.id, { x: nextX, y: nextY });
     }
     stickyDragRef.current = null;
-    setStickyDrag(null);
+    event.currentTarget.style.transition = "";
+    event.currentTarget.style.transform = "rotate(-2deg)";
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {
@@ -561,7 +560,6 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
             );
           }
           if (annotation.type === "sticky") {
-            const draggedPosition = stickyDrag?.id === annotation.id ? stickyDrag.current : null;
             return (
               <button
                 key={annotation.id}
@@ -570,36 +568,35 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
                   selectedId === annotation.id ? "ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-900" : ""
                 }`}
                 style={{
-                  left: draggedPosition?.x ?? annotation.x,
-                  top: draggedPosition?.y ?? annotation.y,
-                  transform: stickyDrag?.id === annotation.id ? "rotate(0deg)" : "rotate(-2deg)",
+                  left: annotation.x,
+                  top: annotation.y,
+                  transform: "rotate(-2deg)",
                 }}
                 onPointerDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   setSelectedId(annotation.id);
                   e.currentTarget.setPointerCapture(e.pointerId);
+                  e.currentTarget.style.transition = "none";
+                  e.currentTarget.style.transform = "rotate(0deg)";
                   stickyDragRef.current = {
                     id: annotation.id,
                     pointerId: e.pointerId,
                     startClient: { x: e.clientX, y: e.clientY },
                     start: { x: annotation.x, y: annotation.y },
                     moved: false,
+                    element: e.currentTarget,
                   };
-                  setStickyDrag({
-                    id: annotation.id,
-                    pointerId: e.pointerId,
-                    startClient: { x: e.clientX, y: e.clientY },
-                    start: { x: annotation.x, y: annotation.y },
-                    current: { x: annotation.x, y: annotation.y },
-                  });
                 }}
                 onPointerMove={moveSticky}
                 onPointerUp={finishSticky}
                 onPointerCancel={finishSticky}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
-                  if (stickyDragRef.current?.moved) return;
+                  if (stickySuppressEditRef.current) {
+                    stickySuppressEditRef.current = false;
+                    return;
+                  }
                   openTextEditor(annotation);
                 }}
               >
