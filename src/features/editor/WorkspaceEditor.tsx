@@ -605,13 +605,17 @@ export function WorkspaceEditor() {
                   data-block-plus
                   aria-label="Add block"
                   className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-faint)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--text)]"
-                  onMouseDown={(event) => {
+                  onPointerDown={(event) => {
                     event.preventDefault()
+                    event.stopPropagation()
                     const rect = event.currentTarget.getBoundingClientRect()
                     setInsertMenu({
                       open: true,
                       query: '',
-                      position: { left: Math.min(rect.right + 8, window.innerWidth - 380), top: Math.min(rect.top, window.innerHeight - 480) },
+                      position: {
+                        left: Math.max(8, Math.min(rect.right + 8, window.innerWidth - Math.min(360, window.innerWidth - 16) - 8)),
+                        top: Math.max(8, Math.min(rect.top, window.innerHeight - 480)),
+                      },
                       context: {
                         source: 'plus',
                         insertAt: blockControls.insertAt,

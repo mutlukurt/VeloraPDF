@@ -21,6 +21,7 @@ const categoryOrder = ['Suggested', 'Basic blocks', 'Media', 'Advanced'] as cons
 export function BlockInsertMenu({ editor, open, query, position, context, helpers = {}, onQueryChange, onClose }: BlockInsertMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const searchRef = useRef<HTMLInputElement | null>(null)
+  const executingRef = useRef(false)
   const commands = useMemo(() => filterCommands(query), [query])
   const visibleCommands = useMemo(() => {
     if (query.trim()) return commands
@@ -76,14 +77,25 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
   if (!editor || !context) return null
 
   let runningIndex = -1
+  const menuWidth = Math.min(360, window.innerWidth - 16)
+  const menuLeft = Math.max(8, Math.min(position.left, window.innerWidth - menuWidth - 8))
+  const menuTop = Math.max(8, Math.min(position.top, window.innerHeight - 120))
+
+  const runCommand = async (command: (typeof visibleCommands)[number]) => {
+    if (executingRef.current) return
+    executingRef.current = true
+    await command.action(editor, context, helpers)
+    executingRef.current = false
+    onClose()
+  }
 
   return (
     <AnimatePresence>
       {open ? (
         <motion.div
           data-block-insert-menu
-          className="fixed z-50 w-[360px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-calm"
-          style={{ left: position.left, top: position.top }}
+          className="fixed z-50 max-h-[min(520px,calc(100dvh-1rem))] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-calm"
+          style={{ left: menuLeft, top: menuTop, width: menuWidth }}
           initial={{ opacity: 0, y: 8, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -120,10 +132,10 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
                           selected ? 'bg-[var(--accent-soft)] text-[var(--text)]' : 'hover:bg-[var(--surface-muted)]',
                         )}
                         onMouseEnter={() => setSelectedIndex(commandIndex)}
-                        onMouseDown={async (event) => {
+                        onPointerDown={async (event) => {
                           event.preventDefault()
-                          await command.action(editor, context, helpers)
-                          onClose()
+                          event.stopPropagation()
+                          await runCommand(command)
                         }}
                       >
                         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--surface-muted)] text-[var(--text-muted)]">
