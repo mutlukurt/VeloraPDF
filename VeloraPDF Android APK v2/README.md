@@ -27,12 +27,12 @@ Because every app asset is packaged inside the APK, the release does not request
 
 The current v2 APKs are stored in the root `downloads/` folder:
 
-```text
-downloads/Velora-PDF-Android-v2-armeabi-v7a.apk
-downloads/Velora-PDF-Android-v2-arm64-v8a.apk
-downloads/Velora-PDF-Android-v2-x86.apk
-downloads/Velora-PDF-Android-v2-x86_64.apk
-```
+| Device / CPU | APK |
+| --- | --- |
+| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2-x86.apk`](../downloads/Velora-PDF-Android-v2-x86.apk) |
+| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2-x86_64.apk`](../downloads/Velora-PDF-Android-v2-x86_64.apk) |
 
 They are also copied locally to:
 

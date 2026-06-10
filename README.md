@@ -53,15 +53,16 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.33_aarch64.dmg
 
 Velora PDF Android APK v2 is a real native Android APK wrapper around the same mobile web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
 
-Most modern Android phones and tablets should use the arm64-v8a build:
+All new Android APK v2 downloads:
 
-[Download Android APK v2 arm64-v8a](downloads/Velora-PDF-Android-v2-arm64-v8a.apk)
+| Device / CPU | APK |
+| --- | --- |
+| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2-arm64-v8a.apk](downloads/Velora-PDF-Android-v2-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2-armeabi-v7a.apk](downloads/Velora-PDF-Android-v2-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2-x86.apk](downloads/Velora-PDF-Android-v2-x86.apk) |
+| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2-x86_64.apk](downloads/Velora-PDF-Android-v2-x86_64.apk) |
 
-Other Android APK v2 CPU builds:
-
-- [Download Android APK v2 armeabi-v7a](downloads/Velora-PDF-Android-v2-armeabi-v7a.apk)
-- [Download Android APK v2 x86](downloads/Velora-PDF-Android-v2-x86.apk)
-- [Download Android APK v2 x86_64](downloads/Velora-PDF-Android-v2-x86_64.apk)
+For a normal Android phone, use `arm64-v8a`.
 
 Current Android APK v2 release build outputs:
 
