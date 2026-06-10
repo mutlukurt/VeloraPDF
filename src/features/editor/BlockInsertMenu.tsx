@@ -95,11 +95,31 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
     onClose()
   }
 
+  const closeFromBackdrop = () => {
+    if (Date.now() - openedAtRef.current < 450) return
+    onClose()
+  }
+
   return (
     <AnimatePresence>
       {open ? (
         <>
-          {isTouchDevice ? <motion.div className="fixed inset-0 z-[48] bg-black/30 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} /> : null}
+          {isTouchDevice ? (
+            <motion.div
+              className="fixed inset-0 z-[48] bg-black/30 backdrop-blur-[2px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onPointerDown={(event) => {
+                event.stopPropagation()
+              }}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                closeFromBackdrop()
+              }}
+            />
+          ) : null}
           <motion.div
             data-block-insert-menu
             className={cn(
@@ -129,7 +149,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
             />
             <kbd className="rounded-md border border-[var(--border)] px-1.5 py-1 text-[10px] text-[var(--text-faint)]">Esc</kbd>
           </div>
-          <div className={cn('overflow-y-auto p-1.5', isTouchDevice ? 'max-h-[calc(72dvh-57px)] overscroll-contain' : 'max-h-[430px]')}>
+          <div className={cn('overflow-y-auto p-1.5', isTouchDevice ? 'max-h-[calc(72dvh-57px)] touch-pan-y overscroll-contain' : 'max-h-[430px]')}>
             {categoryOrder.map((category) => {
               const group = visibleCommands.filter((command) => command.category === category)
               if (group.length === 0) return null
