@@ -1,6 +1,25 @@
 # Velora PDF
 
-[Live Website](https://veloraproject.app/)
+<p align="center">
+  <strong>Private, local-first PDF reading and annotation for macOS, Android phones, and tablets.</strong>
+</p>
+
+<p align="center">
+  <a href="https://veloraproject.app/">
+    <img alt="Website" src="https://img.shields.io/badge/Website-veloraproject.app-111827?style=for-the-badge&logo=safari&logoColor=white">
+  </a>
+  <a href="downloads/Velora-PDF-1.0.33-aarch64.dmg">
+    <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
+  </a>
+  <a href="downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk">
+    <img alt="Download for Android" src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white">
+  </a>
+</p>
+
+<p align="center">
+  <img alt="Local-first" src="https://img.shields.io/badge/Local--first-No_accounts_or_cloud_sync-10B981?style=flat-square">
+  <img alt="Privacy focused" src="https://img.shields.io/badge/Privacy-No_tracking_or_analytics-6366F1?style=flat-square">
+</p>
 
 [![Buy Me a Coffee](assets/bmc-button.svg)](https://buymeacoffee.com/mutlukurt)
 
