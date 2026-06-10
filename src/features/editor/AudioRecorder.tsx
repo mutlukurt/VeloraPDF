@@ -82,6 +82,51 @@ function supportedAudioMimeType() {
   return candidates.find((candidate) => MediaRecorder.isTypeSupported(candidate))
 }
 
+const microphoneConstraints: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: 1,
+}
+
+function isVirtualMicrophone(label: string) {
+  const normalized = label.toLowerCase()
+  return ['virtual', 'teams', 'zoom', 'blackhole', 'loopback', 'obs', 'aggregate', 'multi-output'].some((name) => normalized.includes(name))
+}
+
+function scoreMicrophone(device: MediaDeviceInfo) {
+  const label = device.label.toLowerCase()
+  if (!label || isVirtualMicrophone(label)) return 0
+  if (label.includes('built-in') || label.includes('macbook') || label.includes('internal')) return 4
+  if (label.includes('microphone') || label.includes('mic')) return 3
+  return 2
+}
+
+async function getMicrophoneStream() {
+  const firstStream = await navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints })
+  if (!navigator.mediaDevices.enumerateDevices) return firstStream
+
+  const firstTrack = firstStream.getAudioTracks()[0]
+  const firstLabel = firstTrack?.label ?? ''
+  const firstDeviceId = firstTrack?.getSettings().deviceId
+  const devices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === 'audioinput')
+  const preferredDevice = devices
+    .filter((device) => device.deviceId && device.deviceId !== firstDeviceId)
+    .sort((left, right) => scoreMicrophone(right) - scoreMicrophone(left))[0]
+
+  if (!firstLabel || !isVirtualMicrophone(firstLabel) || !preferredDevice || scoreMicrophone(preferredDevice) <= 0) {
+    return firstStream
+  }
+
+  firstStream.getTracks().forEach((track) => track.stop())
+  return navigator.mediaDevices.getUserMedia({
+    audio: {
+      ...microphoneConstraints,
+      deviceId: { exact: preferredDevice.deviceId },
+    },
+  })
+}
+
 function microphoneErrorMessage(cause: unknown) {
   const error = cause instanceof DOMException ? cause : null
   if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
@@ -286,9 +331,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
       setStatus('requesting')
       setError('')
       setMicWarning('')
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      })
+      const stream = await getMicrophoneStream()
       streamRef.current = stream
       const audioTrack = stream.getAudioTracks()[0]
       setInputLabel(audioTrack?.label || 'Microphone input')
