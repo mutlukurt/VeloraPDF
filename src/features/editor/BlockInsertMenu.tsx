@@ -22,6 +22,8 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
   const [selectedIndex, setSelectedIndex] = useState(0)
   const searchRef = useRef<HTMLInputElement | null>(null)
   const executingRef = useRef(false)
+  const openedAtRef = useRef(0)
+  const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
   const commands = useMemo(() => filterCommands(query), [query])
   const visibleCommands = useMemo(() => {
     if (query.trim()) return commands
@@ -32,8 +34,9 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
 
   useEffect(() => {
     if (!open) return
-    if (context?.source === 'plus') window.setTimeout(() => searchRef.current?.focus(), 0)
-  }, [context?.source, open])
+    openedAtRef.current = Date.now()
+    if (context?.source === 'plus' && !isTouchDevice) window.setTimeout(() => searchRef.current?.focus(), 0)
+  }, [context?.source, isTouchDevice, open])
 
   useEffect(() => {
     if (!open || !editor || !context) return
@@ -67,11 +70,12 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
   useEffect(() => {
     if (!open) return
     const onPointerDown = (event: PointerEvent) => {
+      if (Date.now() - openedAtRef.current < 180) return
       const target = event.target as HTMLElement
       if (!target.closest('[data-block-insert-menu]') && !target.closest('[data-block-plus]')) onClose()
     }
-    window.addEventListener('pointerdown', onPointerDown)
-    return () => window.removeEventListener('pointerdown', onPointerDown)
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [onClose, open])
 
   if (!editor || !context) return null
@@ -110,6 +114,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
               onInput={() => setSelectedIndex(0)}
               placeholder="Search blocks..."
               className="h-8 flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--text-faint)]"
+              inputMode="search"
             />
             <kbd className="rounded-md border border-[var(--border)] px-1.5 py-1 text-[10px] text-[var(--text-faint)]">Esc</kbd>
           </div>

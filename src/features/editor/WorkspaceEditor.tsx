@@ -608,6 +608,8 @@ export function WorkspaceEditor() {
                   onPointerDown={(event) => {
                     event.preventDefault()
                     event.stopPropagation()
+                    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+                    editor?.commands.blur()
                     const rect = event.currentTarget.getBoundingClientRect()
                     setInsertMenu({
                       open: true,
