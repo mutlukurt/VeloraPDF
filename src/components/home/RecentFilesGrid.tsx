@@ -39,8 +39,9 @@ export function RecentFilesGrid({ files, onOpenRecentPdf }: { files: RecentFile[
 
             {/* Individual delete action */}
             <button
-              className="absolute top-3 right-3 p-1.5 rounded-lg text-secondary hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 z-20"
+              className="absolute right-3 top-3 z-20 grid h-10 w-10 place-items-center rounded-xl bg-surface/95 text-red-500 shadow-velora-light transition hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500 md:h-8 md:w-8 md:text-secondary md:opacity-0 md:group-hover:opacity-100 md:hover:text-red-500 md:focus:opacity-100"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 removeRecentFile(fileKey);
               }}

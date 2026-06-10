@@ -87,7 +87,7 @@ export const usePdfStore = create<PdfState>((set, get) => ({
   removeRecentFile: (key) =>
     set((state) => {
       const keyStr = key;
-      const next = state.recentFiles.filter((item) => (item.path ?? item.name) !== keyStr);
+      const next = state.recentFiles.filter((item) => (item.path ?? item.browserId ?? item.name) !== keyStr);
       persistRecentFiles(next);
       return { recentFiles: next };
     }),
