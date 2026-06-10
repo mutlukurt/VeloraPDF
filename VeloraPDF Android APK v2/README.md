@@ -40,6 +40,28 @@ They are also copied locally to:
 /Users/mutlu/Desktop/Velora-PDF-Android-APK-v2/
 ```
 
+## Screenshots
+
+Phone captures:
+
+| Home | Notes workspace |
+| --- | --- |
+| <img src="../assets/screenshots/android-v2/velora-android-v2-phone-home.png" alt="Velora PDF Android APK v2 phone home screen" width="260"> | <img src="../assets/screenshots/android-v2/velora-android-v2-phone-workspace.png" alt="Velora PDF Android APK v2 phone notes workspace" width="260"> |
+
+| PDF editor | Settings |
+| --- | --- |
+| <img src="../assets/screenshots/android-v2/velora-android-v2-phone-pdf-editor.png" alt="Velora PDF Android APK v2 phone PDF editor" width="260"> | <img src="../assets/screenshots/android-v2/velora-android-v2-phone-settings-about.png" alt="Velora PDF Android APK v2 phone settings about screen" width="260"> |
+
+Tablet captures:
+
+| Home | Notes workspace |
+| --- | --- |
+| <img src="../assets/screenshots/android-v2/velora-android-v2-tablet-home.png" alt="Velora PDF Android APK v2 tablet home screen" width="360"> | <img src="../assets/screenshots/android-v2/velora-android-v2-tablet-workspace.png" alt="Velora PDF Android APK v2 tablet notes workspace" width="360"> |
+
+| PDF editor | Settings |
+| --- | --- |
+| <img src="../assets/screenshots/android-v2/velora-android-v2-tablet-pdf-editor.png" alt="Velora PDF Android APK v2 tablet PDF editor" width="360"> | <img src="../assets/screenshots/android-v2/velora-android-v2-tablet-settings-about.png" alt="Velora PDF Android APK v2 tablet settings about screen" width="360"> |
+
 ## Build
 
 From the repository root:

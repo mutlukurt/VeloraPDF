@@ -89,6 +89,30 @@ Android APK v2 includes:
 - Mobile settings modal scrolling and positioning tuned for Android screens.
 - ABI-specific release APKs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
 
+## Android APK v2 Screenshots
+
+These screenshots show the new offline Android APK v2 using phone and tablet viewport captures of the embedded mobile web experience.
+
+### Phone
+
+| Home | Notes workspace |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-phone-home.png" alt="Velora PDF Android APK v2 phone home screen" width="260"> | <img src="assets/screenshots/android-v2/velora-android-v2-phone-workspace.png" alt="Velora PDF Android APK v2 phone notes workspace" width="260"> |
+
+| PDF editor | Settings |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-phone-pdf-editor.png" alt="Velora PDF Android APK v2 phone PDF editor" width="260"> | <img src="assets/screenshots/android-v2/velora-android-v2-phone-settings-about.png" alt="Velora PDF Android APK v2 phone settings about screen" width="260"> |
+
+### Tablet
+
+| Home | Notes workspace |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-tablet-home.png" alt="Velora PDF Android APK v2 tablet home screen" width="360"> | <img src="assets/screenshots/android-v2/velora-android-v2-tablet-workspace.png" alt="Velora PDF Android APK v2 tablet notes workspace" width="360"> |
+
+| PDF editor | Settings |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-tablet-pdf-editor.png" alt="Velora PDF Android APK v2 tablet PDF editor" width="360"> | <img src="assets/screenshots/android-v2/velora-android-v2-tablet-settings-about.png" alt="Velora PDF Android APK v2 tablet settings about screen" width="360"> |
+
 ## Legacy Android Mobile APK
 
 Velora PDF Mobile is available as local Android APK builds for phones and tablets.
