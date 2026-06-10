@@ -175,7 +175,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
         }}
       >
         <div
-          className={`mx-auto min-h-full px-12 py-12 ${pageLayoutClass}`}
+          className={`mx-auto min-h-full px-4 py-6 sm:px-8 md:px-12 md:py-12 ${pageLayoutClass}`}
         >
           {renderedPages.map((page) => (
             <PdfPage

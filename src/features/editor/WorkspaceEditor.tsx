@@ -449,9 +449,9 @@ export function WorkspaceEditor() {
 
   if (!activePage) {
     return (
-      <motion.div className="grid h-full place-items-center px-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div className="grid h-full place-items-center px-4 md:px-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="max-w-md text-center">
-          <h2 className="font-serif text-4xl text-[var(--text)]">Build your private workspace.</h2>
+          <h2 className="font-serif text-3xl text-[var(--text)] md:text-4xl">Build your private workspace.</h2>
           <p className="mt-3 text-[var(--text-muted)]">Write notes, collect ideas, and organize your thinking locally.</p>
           <Button className="mt-6" variant="primary" onClick={() => createPage()}>
             Create your first page
@@ -467,19 +467,20 @@ export function WorkspaceEditor() {
     <motion.main key={activePage.id} className="h-full overflow-y-auto" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
       {activePage.cover ? <div className="h-40 border-b border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-muted),var(--accent-soft))]" /> : null}
       <DndContext sensors={sensors}>
-        <div className="mx-auto max-w-[var(--editor-max-width)] px-8 pb-28 pt-12">
-          <div className="mb-6 flex items-start gap-4">
+        <div className="mx-auto max-w-[var(--editor-max-width)] px-4 pb-28 pt-6 sm:px-6 md:px-8 md:pt-12">
+          <div className="mb-6 flex items-start gap-3 md:gap-4">
             <div ref={iconPickerRef} className="relative shrink-0">
               <button
-                className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--surface-muted)] text-[var(--text)] transition hover:bg-[var(--accent-soft)]"
+                className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--surface-muted)] text-[var(--text)] transition hover:bg-[var(--accent-soft)] md:h-14 md:w-14"
                 onClick={() => setIconPickerOpen((open) => !open)}
                 aria-expanded={iconPickerOpen}
                 aria-label="Change page icon"
               >
-                <PageIcon value={activePage.icon} size={30} />
+                <PageIcon value={activePage.icon} size={24} className="md:hidden" />
+                <PageIcon value={activePage.icon} size={30} className="hidden md:block" />
               </button>
               {iconPickerOpen ? (
-                <div className="absolute left-0 top-16 z-40 w-[336px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lift">
+                <div className="absolute left-0 top-14 z-40 w-[min(336px,calc(100vw-96px))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lift md:top-16">
                   <div className="border-b border-[var(--border)] p-2">
                     <label className="flex h-9 items-center gap-2 rounded-lg bg-[var(--surface-muted)] px-2 text-sm text-[var(--text-muted)]">
                       <Search size={15} />
@@ -532,10 +533,10 @@ export function WorkspaceEditor() {
                   setTitleDrafts((drafts) => ({ ...drafts, [activePage.id]: event.target.value }))
                   saveTitle(event.target.value)
                 }}
-                className="w-full bg-transparent text-5xl font-semibold leading-tight tracking-normal text-[var(--text)] outline-none placeholder:text-[var(--text-faint)]"
+                className="w-full bg-transparent text-3xl font-semibold leading-tight tracking-normal text-[var(--text)] outline-none placeholder:text-[var(--text-faint)] sm:text-4xl md:text-5xl"
                 placeholder="Untitled"
               />
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--text-faint)]">
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-faint)] md:gap-2">
                 <span>Private page</span>
                 <span>·</span>
                 <span className="editor-word-count">{plainTextFromNode(activeDoc).split(/\s+/).filter(Boolean).length} words</span>

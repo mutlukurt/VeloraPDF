@@ -23,7 +23,7 @@ export function RightInspector() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 24 }}
           transition={{ duration: 0.18 }}
-          className="m-4 ml-0 w-80 shrink-0 overflow-hidden rounded-[20px] border border-border bg-panel shadow-velora"
+          className="fixed bottom-3 right-3 top-20 z-30 w-[min(22rem,calc(100vw-5rem))] overflow-y-auto rounded-[20px] border border-border bg-panel shadow-velora md:static md:m-4 md:ml-0 md:w-80 md:shrink-0 md:overflow-hidden"
         >
           <div className="flex items-center justify-between border-b border-border p-4">
             <div>

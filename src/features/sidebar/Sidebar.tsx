@@ -8,6 +8,7 @@ import {
   FilePlus2,
   MoreHorizontal,
   PanelLeftClose,
+  X,
   Search,
   Settings,
   Star,
@@ -138,7 +139,15 @@ function MiniPage({ page }: { page: Page }) {
   )
 }
 
-export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) => void }) {
+export function Sidebar({
+  onOpenRecentPdf,
+  mobileOpen = false,
+  onMobileClose,
+}: {
+  onOpenRecentPdf: (path?: string) => void
+  mobileOpen?: boolean
+  onMobileClose?: () => void
+}) {
   const {
     pages,
     activePage,
@@ -244,9 +253,9 @@ export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) 
     await useWorkspaceStore.getState().movePage(sourceId, targetId, placement)
   }
 
-  if (sidebarCollapsed) {
+  if (sidebarCollapsed && !mobileOpen) {
     return (
-      <aside className="flex w-[58px] flex-col items-center border-r border-[var(--border)] bg-[var(--sidebar)] pt-12 pb-3">
+      <aside className="hidden w-[58px] flex-col items-center border-r border-[var(--border)] bg-[var(--sidebar)] pb-3 pt-12 md:flex">
         <Button size="icon" onClick={toggleSidebar} icon={<PanelLeftClose size={17} />} />
         <div className="mt-4 flex flex-col gap-2">
           <Button size="icon" onClick={() => createPage()} icon={<FilePlus2 size={17} />} />
@@ -259,14 +268,22 @@ export function Sidebar({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) 
   }
 
   return (
-    <motion.aside className="flex w-[292px] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--sidebar)]" initial={false} animate={{ width: 292 }}>
+    <motion.aside
+      className={cn(
+        'fixed bottom-0 left-14 top-0 z-40 flex w-[min(292px,calc(100vw-56px))] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--sidebar)] shadow-lift transition-transform duration-200 md:static md:z-auto md:w-[292px] md:shadow-none',
+        mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+      )}
+      initial={false}
+      animate={{ width: 292 }}
+    >
       <div className="flex items-center gap-3 px-4 pt-12 pb-4">
         <img src="/velora-icon.png" alt="Velora Notes" className="h-9 w-9 rounded-xl object-cover shadow-lift" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-sm font-semibold tracking-wide text-[var(--text)]">Velora Notes</h1>
           <p className="truncate text-xs text-[var(--text-faint)]">Private local workspace</p>
         </div>
-        <Button size="icon" onClick={toggleSidebar} icon={<PanelLeftClose size={16} />} />
+        <Button className="hidden md:inline-flex" size="icon" onClick={toggleSidebar} icon={<PanelLeftClose size={16} />} />
+        <Button className="md:hidden" size="icon" onClick={onMobileClose} icon={<X size={16} />} />
       </div>
 
       <div className="grid gap-2 px-3">

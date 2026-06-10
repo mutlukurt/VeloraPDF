@@ -29,24 +29,24 @@ export function HomeScreen({ onOpenPdf, onOpenRecentPdf }: { onOpenPdf: () => vo
   };
 
   return (
-    <main className="flex min-h-full flex-1 overflow-auto bg-workspace">
-      <div className="mx-auto flex w-full max-w-6xl flex-col px-8 py-10">
-        <div className="flex flex-1 flex-col justify-center py-10">
-          <VeloraLogo className="mb-8 h-20 w-20" />
-          <h1 className="max-w-3xl text-5xl font-extrabold leading-tight text-primary">One local PDF workspace. Every document.</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-secondary">
+    <main className="flex min-h-full min-w-0 flex-1 overflow-auto bg-workspace">
+      <div className="mx-auto flex min-w-0 w-full max-w-6xl flex-col px-4 py-6 sm:px-6 md:px-8 md:py-10">
+        <div className="flex flex-1 flex-col justify-center py-8 md:py-10">
+          <VeloraLogo className="mb-6 h-16 w-16 md:mb-8 md:h-20 md:w-20" />
+          <h1 className="max-w-3xl break-words text-[1.7rem] font-extrabold leading-tight text-primary sm:text-4xl md:text-5xl">One local PDF workspace. Every document.</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-secondary md:mt-5 md:text-lg md:leading-8">
             Read, annotate, organize and export PDFs on your Mac - privately and offline.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button variant="primary" onClick={onOpenPdf}>
+          <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap md:mt-8">
+            <Button className="w-full sm:w-auto" variant="primary" onClick={onOpenPdf}>
               <FolderOpen size={17} />
               Open PDF
             </Button>
-            <Button variant="secondary" onClick={handleCreateNote}>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={handleCreateNote}>
               <Plus size={17} />
               New Note
             </Button>
-            <Button variant="secondary" onClick={() => setActiveView("notes")}>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={() => setActiveView("notes")}>
               <Notebook size={17} />
               Open Workspace
             </Button>

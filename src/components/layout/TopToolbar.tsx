@@ -49,8 +49,8 @@ export function TopToolbar({ onOpenPdf, onSaveAnnotations, onExportPdf }: TopToo
   const setSidebarMode = useUiStore((state) => state.setSidebarMode);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-app py-0 pl-[92px] pr-4">
-      <div className="flex min-w-56 items-center gap-3">
+    <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-app px-2 py-2 md:h-14 md:flex-nowrap md:gap-4 md:py-0 md:pl-[92px] md:pr-4">
+      <div className="flex min-w-0 flex-1 items-center gap-2 md:min-w-56 md:flex-none md:gap-3">
         <VeloraLogo className="h-9 w-9 rounded-xl" />
         <div className="min-w-0">
           <div className="truncate text-sm font-bold text-primary">{activeFile?.name ?? "Velora PDF"}</div>
@@ -58,7 +58,7 @@ export function TopToolbar({ onOpenPdf, onSaveAnnotations, onExportPdf }: TopToo
         </div>
       </div>
 
-      <div className="mx-auto flex items-center gap-1 rounded-2xl border border-border bg-toolbar/90 p-1 shadow-velora backdrop-blur-xl">
+      <div className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-toolbar/90 p-1 shadow-velora backdrop-blur-xl md:order-none md:mx-auto md:w-auto md:overflow-visible">
         {tools.map(({ tool, label, icon: Icon }) => (
           <IconButton
             key={tool}
@@ -75,10 +75,10 @@ export function TopToolbar({ onOpenPdf, onSaveAnnotations, onExportPdf }: TopToo
         ))}
       </div>
 
-      <div className="flex min-w-56 items-center justify-end gap-2">
+      <div className="flex min-w-0 items-center justify-end gap-1 md:min-w-56 md:gap-2">
         <IconButton label="Theme" onClick={toggleTheme}>{theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}</IconButton>
         <IconButton label="View settings" onClick={toggleRightPanel}><Settings2 size={18} /></IconButton>
-        <Button variant="ghost" onClick={onSaveAnnotations} disabled={!activeFile}>Save JSON</Button>
+        <Button className="hidden sm:inline-flex" variant="ghost" onClick={onSaveAnnotations} disabled={!activeFile}>Save JSON</Button>
         <Button variant="primary" onClick={activeFile ? onExportPdf : onOpenPdf}>
           <Download size={16} />
           {activeFile ? "Export" : "Open PDF"}
