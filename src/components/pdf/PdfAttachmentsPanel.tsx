@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Paperclip, Trash2, Download, Plus } from "lucide-react";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useAttachmentStore } from "../../stores/useAttachmentStore";
@@ -6,29 +6,49 @@ import { Button } from "../ui/Button";
 
 export function PdfAttachmentsPanel() {
   const activeFile = usePdfStore((state) => state.activeFile);
+  const setStatusMessage = usePdfStore((state) => state.setStatusMessage);
   const fileId = activeFile ? (activeFile.path ?? activeFile.name) : "";
+  const [error, setError] = useState<string | null>(null);
 
   const attachments = useAttachmentStore(
     (state) => state.attachments[fileId] || []
   );
   const addAttachment = useAttachmentStore((state) => state.addAttachment);
   const deleteAttachment = useAttachmentStore((state) => state.deleteAttachment);
+  const storeError = useAttachmentStore((state) => state.lastError);
+  const clearAttachmentError = useAttachmentStore((state) => state.clearAttachmentError);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAttachClick = () => {
+    if (!fileId) {
+      setError("Open a PDF before attaching files.");
+      return;
+    }
     fileInputRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !fileId) return;
+    setError(null);
+    clearAttachmentError();
 
     const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = reader.result as string;
-      addAttachment(fileId, file.name, file.size, file.type, dataUrl);
-      // Reset input
+      if (typeof reader.result !== "string") {
+        setError("Attachment could not be read.");
+        setStatusMessage("Attachment could not be read");
+        return;
+      }
+
+      addAttachment(fileId, file.name, file.size, file.type || "application/octet-stream", reader.result);
+      setStatusMessage(`Attached ${file.name}`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+    reader.onerror = () => {
+      setError("Attachment could not be read.");
+      setStatusMessage("Attachment could not be read");
       if (fileInputRef.current) fileInputRef.current.value = "";
     };
     reader.readAsDataURL(file);
@@ -43,6 +63,8 @@ export function PdfAttachmentsPanel() {
   };
 
   const handleDownload = (name: string, dataUrl: string) => {
+    setError(null);
+    clearAttachmentError();
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = name;
@@ -73,6 +95,11 @@ export function PdfAttachmentsPanel() {
           onChange={handleFileChange}
           className="hidden"
         />
+        {error || storeError ? (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs leading-5 text-red-500">
+            {error ?? storeError}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -98,14 +125,14 @@ export function PdfAttachmentsPanel() {
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   aria-label="Download attachment"
-                  className="opacity-0 group-hover:opacity-100 p-1 text-secondary hover:text-accent rounded-lg transition"
+                  className="p-1 text-secondary transition hover:text-accent rounded-lg"
                   onClick={() => handleDownload(item.name, item.dataUrl)}
                 >
                   <Download size={13} />
                 </button>
                 <button
                   aria-label="Delete attachment"
-                  className="opacity-0 group-hover:opacity-100 p-1 text-secondary hover:text-red-400 rounded-lg transition"
+                  className="p-1 text-secondary transition hover:text-red-400 rounded-lg"
                   onClick={() => deleteAttachment(fileId, item.id)}
                 >
                   <Trash2 size={13} />

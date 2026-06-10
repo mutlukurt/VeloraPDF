@@ -18,6 +18,7 @@ type AppShellProps = {
 export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExportPdf }: AppShellProps) {
   const pdf = usePdfStore((state) => state.pdf);
   const activeView = useUiStore((state) => state.activeView);
+  const hasPdf = Boolean(pdf);
 
   if (activeView === "notes") {
     return (
@@ -34,11 +35,13 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
   return (
     <>
       <div className="flex h-screen w-screen flex-col overflow-hidden bg-app text-primary">
-        <TopToolbar onOpenPdf={onOpenPdf} onSaveAnnotations={onSaveAnnotations} onExportPdf={onExportPdf} />
+        {hasPdf ? (
+          <TopToolbar onOpenPdf={onOpenPdf} onSaveAnnotations={onSaveAnnotations} onExportPdf={onExportPdf} />
+        ) : null}
         <div className="flex min-h-0 flex-1">
           <LeftRail />
           {pdf ? <PdfViewer pdf={pdf} /> : <HomeScreen onOpenPdf={onOpenPdf} onOpenRecentPdf={onOpenRecentPdf} />}
-          <RightInspector />
+          {hasPdf ? <RightInspector /> : null}
         </div>
       </div>
       <SettingsDialog />

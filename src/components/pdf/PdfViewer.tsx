@@ -6,6 +6,7 @@ import { SearchPanel } from "./SearchPanel";
 import { PdfBookmarksPanel } from "./PdfBookmarksPanel";
 import { PdfCommentsPanel } from "./PdfCommentsPanel";
 import { PdfAttachmentsPanel } from "./PdfAttachmentsPanel";
+import { PdfSidePanelBoundary } from "./PdfSidePanelBoundary";
 import { StatusBar } from "../layout/StatusBar";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
@@ -157,11 +158,13 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
 
   return (
     <div className="relative flex min-w-0 flex-1 overflow-hidden">
-      {sidebarMode === "thumbnails" ? <PdfThumbnailPanel pdf={pdf} /> : null}
-      {sidebarMode === "search" ? <SearchPanel pdf={pdf} /> : null}
-      {sidebarMode === "bookmarks" ? <PdfBookmarksPanel /> : null}
-      {sidebarMode === "comments" ? <PdfCommentsPanel /> : null}
-      {sidebarMode === "attachments" ? <PdfAttachmentsPanel /> : null}
+      <PdfSidePanelBoundary panelName={sidebarMode ?? "none"}>
+        {sidebarMode === "thumbnails" ? <PdfThumbnailPanel pdf={pdf} /> : null}
+        {sidebarMode === "search" ? <SearchPanel pdf={pdf} /> : null}
+        {sidebarMode === "bookmarks" ? <PdfBookmarksPanel /> : null}
+        {sidebarMode === "comments" ? <PdfCommentsPanel /> : null}
+        {sidebarMode === "attachments" ? <PdfAttachmentsPanel /> : null}
+      </PdfSidePanelBoundary>
       <div
         ref={scrollerRef}
         className="relative flex-1 overflow-auto overscroll-contain transition-colors"

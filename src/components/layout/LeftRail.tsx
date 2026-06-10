@@ -10,9 +10,11 @@ export function LeftRail() {
   const setSidebarMode = useUiStore((state) => state.setSidebarMode);
   const activeView = useUiStore((state) => state.activeView);
   const setActiveView = useUiStore((state) => state.setActiveView);
+  const pdf = usePdfStore((state) => state.pdf);
   const closePdf = usePdfStore((state) => state.closePdf);
 
   const isPdf = activeView === "pdf";
+  const hasPdf = isPdf && Boolean(pdf);
 
   return (
     <aside
@@ -53,8 +55,8 @@ export function LeftRail() {
       {/* PDF specific tools */}
       <IconButton
         label="Thumbnails"
-        active={isPdf && sidebarMode === "thumbnails"}
-        disabled={!isPdf}
+        active={hasPdf && sidebarMode === "thumbnails"}
+        disabled={!hasPdf}
         onClick={() => setSidebarMode(sidebarMode === "thumbnails" ? null : "thumbnails")}
       >
         <Sidebar size={18} />
@@ -62,8 +64,8 @@ export function LeftRail() {
 
       <IconButton
         label="Search"
-        active={isPdf && sidebarMode === "search"}
-        disabled={!isPdf}
+        active={hasPdf && sidebarMode === "search"}
+        disabled={!hasPdf}
         onClick={() => setSidebarMode(sidebarMode === "search" ? null : "search")}
       >
         <Search size={18} />
@@ -71,8 +73,8 @@ export function LeftRail() {
 
       <IconButton
         label="Bookmarks"
-        active={isPdf && sidebarMode === "bookmarks"}
-        disabled={!isPdf}
+        active={hasPdf && sidebarMode === "bookmarks"}
+        disabled={!hasPdf}
         onClick={() => setSidebarMode(sidebarMode === "bookmarks" ? null : "bookmarks")}
       >
         <Star size={18} />
@@ -80,8 +82,8 @@ export function LeftRail() {
 
       <IconButton
         label="Comments"
-        active={isPdf && sidebarMode === "comments"}
-        disabled={!isPdf}
+        active={hasPdf && sidebarMode === "comments"}
+        disabled={!hasPdf}
         onClick={() => setSidebarMode(sidebarMode === "comments" ? null : "comments")}
       >
         <MessageSquareText size={18} />
@@ -89,8 +91,8 @@ export function LeftRail() {
 
       <IconButton
         label="Attachments"
-        active={isPdf && sidebarMode === "attachments"}
-        disabled={!isPdf}
+        active={hasPdf && sidebarMode === "attachments"}
+        disabled={!hasPdf}
         onClick={() => setSidebarMode(sidebarMode === "attachments" ? null : "attachments")}
       >
         <Paperclip size={18} />
