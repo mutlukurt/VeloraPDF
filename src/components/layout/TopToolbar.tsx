@@ -64,7 +64,7 @@ export function TopToolbar({ onOpenPdf, onSaveAnnotations, onExportPdf }: TopToo
             key={tool}
             label={label}
             active={activeTool === tool}
-            className="h-9 w-9"
+            className="h-8 w-8 shrink-0 md:h-9 md:w-9"
             onClick={() => {
               if (tool === "text-select") setSidebarMode("search");
               setActiveTool(tool);
@@ -79,9 +79,9 @@ export function TopToolbar({ onOpenPdf, onSaveAnnotations, onExportPdf }: TopToo
         <IconButton label="Theme" onClick={toggleTheme}>{theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}</IconButton>
         <IconButton label="View settings" onClick={toggleRightPanel}><Settings2 size={18} /></IconButton>
         <Button className="hidden sm:inline-flex" variant="ghost" onClick={onSaveAnnotations} disabled={!activeFile}>Save JSON</Button>
-        <Button variant="primary" onClick={activeFile ? onExportPdf : onOpenPdf}>
+        <Button className="px-3 sm:px-5" variant="primary" onClick={activeFile ? onExportPdf : onOpenPdf}>
           <Download size={16} />
-          {activeFile ? "Export" : "Open PDF"}
+          <span className="hidden min-[390px]:inline">{activeFile ? "Export" : "Open PDF"}</span>
         </Button>
       </div>
     </header>

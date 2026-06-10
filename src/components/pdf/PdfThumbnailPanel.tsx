@@ -61,7 +61,7 @@ export function PdfThumbnailPanel({ pdf }: { pdf: PDFDocumentProxy }) {
   }, [currentPage, pages]);
 
   return (
-    <aside ref={panelRef} className="w-60 shrink-0 overflow-y-auto border-r border-border bg-sidebar p-3">
+    <aside ref={panelRef} className="h-full w-full shrink-0 overflow-y-auto border-r border-border bg-sidebar p-3 md:w-60">
       <div className="mb-3 flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-secondary">
         <Search size={15} />
         <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Search pages" className="w-full bg-transparent text-sm text-primary outline-none placeholder:text-secondary" />

@@ -60,6 +60,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const setSelectedId = useAnnotationStore((state) => state.setSelectedId);
   const pageAnnotations = useMemo(() => annotations.filter((item) => item.page === page), [annotations, page]);
   const pageMetrics = { pageWidth: width, pageHeight: height };
+  const isReadingTool = activeTool === "select" || activeTool === "hand" || activeTool === "text-select";
 
   // Signature States
   const [isSignatureOpen, setIsSignatureOpen] = useState(false);
@@ -173,7 +174,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
   const begin = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!ref.current) return;
     const point = pointFromEvent(event, ref.current);
-    if (activeTool === "select") {
+    if (isReadingTool) {
       setSelectedId(null);
       return;
     }
@@ -359,8 +360,8 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     <>
       <div
         ref={ref}
-        className="absolute inset-0 touch-none"
-        style={{ width, height, cursor: activeTool === "select" ? "default" : "crosshair" }}
+        className={`absolute inset-0 ${isReadingTool ? "touch-pan-y" : "touch-none"}`}
+        style={{ width, height, cursor: isReadingTool ? "default" : "crosshair" }}
         onPointerDown={begin}
         onPointerMove={move}
         onPointerUp={finish}

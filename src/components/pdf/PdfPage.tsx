@@ -149,7 +149,7 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
       ref={containerRef}
       id={`page-${pageNumber}`}
       className={cn(
-        "relative mx-auto overflow-hidden bg-white shadow-[0_26px_80px_rgba(0,0,0,.28)]",
+        "relative mx-auto overflow-hidden bg-white shadow-[0_14px_38px_rgba(0,0,0,.18)] md:shadow-[0_26px_80px_rgba(0,0,0,.28)]",
         pageTone === "eye-protection" && "bg-[#FFF8DC]",
       )}
       style={{ width: cropWidth, height: cropHeight }}
@@ -198,7 +198,7 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
         </button>
       )}
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-border bg-toolbar px-3 py-1 text-xs font-semibold text-secondary shadow-velora z-20">
+      <div className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-border bg-toolbar px-2.5 py-1 text-[10px] font-semibold text-secondary shadow-velora md:bottom-4 md:px-3 md:text-xs">
         {pageNumber}
       </div>
     </div>

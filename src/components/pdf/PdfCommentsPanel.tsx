@@ -112,7 +112,7 @@ export function PdfCommentsPanel() {
   };
 
   return (
-    <aside className="w-72 shrink-0 flex flex-col border-r border-border bg-sidebar h-full overflow-hidden">
+    <aside className="flex h-full w-full shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar md:w-72">
       <div className="p-4 border-b border-border shrink-0">
         <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-secondary">Comments & Notes</h2>
         <p className="text-xs text-secondary mt-0.5">Summary of all document annotations</p>

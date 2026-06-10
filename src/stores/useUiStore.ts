@@ -75,7 +75,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   theme: initialTheme(),
   activeTool: "select",
   sidebarMode: null,
-  rightPanelOpen: true,
+  rightPanelOpen: window.innerWidth >= 768,
   viewSettings: initialSettings(),
   activeView: "pdf",
   toggleTheme: () => {

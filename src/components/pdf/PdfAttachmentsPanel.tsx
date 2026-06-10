@@ -76,7 +76,7 @@ export function PdfAttachmentsPanel() {
   };
 
   return (
-    <aside className="w-72 shrink-0 flex flex-col border-r border-border bg-sidebar h-full overflow-hidden">
+    <aside className="flex h-full w-full shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar md:w-72">
       <div className="p-4 border-b border-border flex flex-col gap-3 shrink-0">
         <div>
           <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-secondary">Attachments</h2>

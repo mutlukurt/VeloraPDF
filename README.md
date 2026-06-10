@@ -4,7 +4,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.31-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.32-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -14,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.31-aarch64.dmg](downloads/Velora-PDF-1.0.31-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.32-aarch64.dmg](downloads/Velora-PDF-1.0.32-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.31.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.32.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.31_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.32_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -444,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.31.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.32.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.31
+1.0.32
 ```
 
 Bundle identifier:
@@ -484,6 +484,19 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.32
+
+Released to make the PDF reader usable as a mobile-first web reading surface.
+
+Changes:
+
+- Fits PDF pages to phone width while keeping the zoom control as a readable multiplier.
+- Forces mobile PDF reading into continuous vertical scrolling so users can drag down through the document naturally.
+- Turns PDF side panels into mobile drawers instead of letting thumbnails, search, bookmarks, comments, or attachments squeeze the page.
+- Keeps the view settings panel closed by default on phones and opens it as a mobile sheet when requested.
+- Allows vertical touch scrolling through the PDF when the reader is in select, hand, or search mode.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.32`.
 
 ### 1.0.31
 

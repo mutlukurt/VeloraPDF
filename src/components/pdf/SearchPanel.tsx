@@ -29,7 +29,7 @@ export function SearchPanel({ pdf }: { pdf: PDFDocumentProxy }) {
   }, [pdf, query]);
 
   return (
-    <aside className="w-72 shrink-0 overflow-y-auto border-r border-border bg-sidebar p-3">
+    <aside className="h-full w-full shrink-0 overflow-y-auto border-r border-border bg-sidebar p-3 md:w-72">
       <div className="mb-3 flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-secondary">
         <Search size={15} />
         <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search document" className="w-full bg-transparent text-sm text-primary outline-none placeholder:text-secondary" />

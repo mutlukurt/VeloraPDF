@@ -112,6 +112,11 @@ body {
   letter-spacing: 0;
 }
 
+.pdf-reader-scroll {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
+}
+
 button,
 input {
   font: inherit;
@@ -497,5 +502,10 @@ input {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
+  }
+
+  .pdf-reader-scroll {
+    scroll-padding-bottom: 7rem;
+    scroll-padding-top: 0.75rem;
   }
 }

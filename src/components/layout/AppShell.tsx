@@ -23,7 +23,7 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
   if (activeView === "notes") {
     return (
       <>
-        <div className="flex h-screen w-screen overflow-hidden bg-app pb-14 text-primary md:pb-0">
+        <div className="flex h-dvh w-screen overflow-hidden bg-app pb-14 text-primary md:pb-0">
           <LeftRail />
           <NotesWorkspace onOpenRecentPdf={onOpenRecentPdf} />
         </div>
@@ -34,7 +34,7 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
 
   return (
     <>
-      <div className="flex h-screen w-screen flex-col overflow-hidden bg-app text-primary">
+      <div className="flex h-dvh w-screen flex-col overflow-hidden bg-app text-primary">
         {hasPdf ? (
           <TopToolbar onOpenPdf={onOpenPdf} onSaveAnnotations={onSaveAnnotations} onExportPdf={onExportPdf} />
         ) : null}

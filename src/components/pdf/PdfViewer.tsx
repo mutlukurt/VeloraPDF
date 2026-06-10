@@ -19,7 +19,11 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const currentPage = usePdfStore((state) => state.currentPage);
   const sidebarMode = useUiStore((state) => state.sidebarMode);
   const viewSettings = useUiStore((state) => state.viewSettings);
+  const setSidebarMode = useUiStore((state) => state.setSidebarMode);
   const [previewZoom, setPreviewZoom] = useState<number | null>(null);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [firstPageWidth, setFirstPageWidth] = useState(0);
+  const [isMobileReader, setIsMobileReader] = useState(() => window.innerWidth < 768);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pages = Array.from({ length: pageCount }, (_, index) => index + 1);
   const onVisible = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -30,15 +34,17 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const pendingScrollAnchor = useRef<{ ratio: number; left: number; top: number; width: number; height: number } | null>(null);
   const pagedWheelLock = useRef<number | null>(null);
   const effectiveZoom = previewZoom ?? zoom;
-  const pagedMode = !viewSettings.continuous;
-  const spreadMode = !viewSettings.singlePage;
+  const mobileFitZoom = firstPageWidth && viewportWidth ? Math.min(1, Math.max(0.28, (viewportWidth - 24) / (firstPageWidth * 1.35))) : 1;
+  const renderZoom = (isMobileReader ? mobileFitZoom : 1) * effectiveZoom;
+  const pagedMode = !isMobileReader && !viewSettings.continuous;
+  const spreadMode = !isMobileReader && !viewSettings.singlePage;
   const firstSpreadPage = currentPage % 2 === 0 ? Math.max(1, currentPage - 1) : currentPage;
   const renderedPages = pagedMode
     ? pages.filter((page) => (spreadMode ? page === firstSpreadPage || page === firstSpreadPage + 1 : page === currentPage))
     : pages;
   const workspaceBackground = viewSettings.eyeProtection ? "#F4EFD9" : viewSettings.pageBackground;
   const pageTone = viewSettings.eyeProtection ? "eye-protection" : "default";
-  const pageGapClass = viewSettings.showGaps ? "gap-16" : "gap-0";
+  const pageGapClass = viewSettings.showGaps ? "gap-5 md:gap-16" : "gap-0";
   const pageLayoutClass = spreadMode
     ? `grid w-fit max-w-full grid-cols-1 justify-items-center lg:grid-cols-2 ${pageGapClass}`
     : `flex w-fit flex-col items-center ${pageGapClass}`;
@@ -65,6 +71,35 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       previewFrame.current = null;
       setPreviewZoom(previewZoomRef.current);
     });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    pdf.getPage(1).then((page) => {
+      if (!cancelled) setFirstPageWidth(page.getViewport({ scale: 1 }).width);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pdf]);
+
+  useLayoutEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const updateSize = () => {
+      setViewportWidth(scroller.clientWidth);
+      setIsMobileReader(window.innerWidth < 768);
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(scroller);
+    window.addEventListener("resize", updateSize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateSize);
+    };
   }, []);
 
   const commitPreviewZoom = useCallback(() => {
@@ -156,18 +191,28 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     pageElement.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [currentPage, pagedMode]);
 
+  const sidePanel = (
+    <PdfSidePanelBoundary panelName={sidebarMode ?? "none"}>
+      {sidebarMode === "thumbnails" ? <PdfThumbnailPanel pdf={pdf} /> : null}
+      {sidebarMode === "search" ? <SearchPanel pdf={pdf} /> : null}
+      {sidebarMode === "bookmarks" ? <PdfBookmarksPanel /> : null}
+      {sidebarMode === "comments" ? <PdfCommentsPanel /> : null}
+      {sidebarMode === "attachments" ? <PdfAttachmentsPanel /> : null}
+    </PdfSidePanelBoundary>
+  );
+
   return (
     <div className="relative flex min-w-0 flex-1 overflow-hidden">
-      <PdfSidePanelBoundary panelName={sidebarMode ?? "none"}>
-        {sidebarMode === "thumbnails" ? <PdfThumbnailPanel pdf={pdf} /> : null}
-        {sidebarMode === "search" ? <SearchPanel pdf={pdf} /> : null}
-        {sidebarMode === "bookmarks" ? <PdfBookmarksPanel /> : null}
-        {sidebarMode === "comments" ? <PdfCommentsPanel /> : null}
-        {sidebarMode === "attachments" ? <PdfAttachmentsPanel /> : null}
-      </PdfSidePanelBoundary>
+      {sidebarMode ? (
+        <div className="fixed inset-0 z-40 bg-black/35 backdrop-blur-sm md:static md:z-auto md:bg-transparent md:backdrop-blur-0" onClick={() => setSidebarMode(null)}>
+          <div className="h-full w-[min(320px,86vw)] shadow-velora md:h-auto md:w-auto md:shadow-none" onClick={(event) => event.stopPropagation()}>
+            {sidePanel}
+          </div>
+        </div>
+      ) : null}
       <div
         ref={scrollerRef}
-        className="relative flex-1 overflow-auto overscroll-contain transition-colors"
+        className="pdf-reader-scroll relative flex-1 overflow-auto overscroll-contain transition-colors"
         style={{ background: workspaceBackground }}
         onWheel={(event) => {
           handleWheel(event);
@@ -175,15 +220,15 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
         }}
       >
         <div
-          className={`mx-auto min-h-full px-4 py-6 sm:px-8 md:px-12 md:py-12 ${pageLayoutClass}`}
+          className={`mx-auto min-h-full px-3 py-3 pb-28 sm:px-8 md:px-12 md:py-12 ${pageLayoutClass}`}
         >
           {renderedPages.map((page) => (
             <PdfPage
               key={page}
               pdf={pdf}
               pageNumber={page}
-              zoom={zoom}
-              displayZoom={effectiveZoom}
+              zoom={renderZoom}
+              displayZoom={renderZoom}
               onVisible={onVisible}
               pageTone={pageTone}
             />
