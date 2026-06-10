@@ -28,10 +28,12 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const pages = Array.from({ length: pageCount }, (_, index) => index + 1);
   const onVisible = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
   const gestureStartZoom = useRef(zoom);
+  const pinchStartDistance = useRef(0);
+  const pinchStartZoom = useRef(zoom);
   const previewZoomRef = useRef<number | null>(null);
   const wheelCommitTimer = useRef<number | null>(null);
   const previewFrame = useRef<number | null>(null);
-  const pendingScrollAnchor = useRef<{ ratio: number; left: number; top: number; width: number; height: number } | null>(null);
+  const pendingScrollAnchor = useRef<{ ratio: number; left: number; top: number; focalX: number; focalY: number } | null>(null);
   const pagedWheelLock = useRef<number | null>(null);
   const effectiveZoom = previewZoom ?? zoom;
   const mobileFitZoom = firstPageWidth && viewportWidth ? Math.min(1, Math.max(0.28, (viewportWidth - 24) / (firstPageWidth * 1.35))) : 1;
@@ -49,18 +51,21 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     ? `grid w-fit max-w-full grid-cols-1 justify-items-center lg:grid-cols-2 ${pageGapClass}`
     : `flex w-fit flex-col items-center ${pageGapClass}`;
 
-  const schedulePreviewZoom = useCallback((nextZoom: number) => {
+  const schedulePreviewZoom = useCallback((nextZoom: number, focalPoint?: { clientX: number; clientY: number }) => {
     const clamped = Math.min(Math.max(nextZoom, 0.45), 2.6);
     const previousZoom = previewZoomRef.current ?? usePdfStore.getState().zoom;
     const scroller = scrollerRef.current;
 
     if (scroller && previousZoom > 0) {
+      const rect = scroller.getBoundingClientRect();
+      const focalX = focalPoint ? focalPoint.clientX - rect.left : scroller.clientWidth / 2;
+      const focalY = focalPoint ? focalPoint.clientY - rect.top : scroller.clientHeight / 2;
       pendingScrollAnchor.current = {
         ratio: clamped / previousZoom,
         left: scroller.scrollLeft,
         top: scroller.scrollTop,
-        width: scroller.clientWidth,
-        height: scroller.clientHeight,
+        focalX,
+        focalY,
       };
     }
 
@@ -116,8 +121,8 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     if (!anchor || !scroller) return;
 
     pendingScrollAnchor.current = null;
-    scroller.scrollLeft = Math.max(0, (anchor.left + anchor.width / 2) * anchor.ratio - anchor.width / 2);
-    scroller.scrollTop = Math.max(0, (anchor.top + anchor.height / 2) * anchor.ratio - anchor.height / 2);
+    scroller.scrollLeft = Math.max(0, (anchor.left + anchor.focalX) * anchor.ratio - anchor.focalX);
+    scroller.scrollTop = Math.max(0, (anchor.top + anchor.focalY) * anchor.ratio - anchor.focalY);
   }, [previewZoom, zoom]);
 
   const handleWheel = useCallback(
@@ -180,6 +185,54 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       if (previewFrame.current !== null) window.cancelAnimationFrame(previewFrame.current);
       if (wheelCommitTimer.current !== null) window.clearTimeout(wheelCommitTimer.current);
       if (pagedWheelLock.current !== null) window.clearTimeout(pagedWheelLock.current);
+    };
+  }, [commitPreviewZoom, schedulePreviewZoom]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const distance = (touches: TouchList) => {
+      const first = touches[0];
+      const second = touches[1];
+      return Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY);
+    };
+
+    const center = (touches: TouchList) => ({
+      clientX: (touches[0].clientX + touches[1].clientX) / 2,
+      clientY: (touches[0].clientY + touches[1].clientY) / 2,
+    });
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 2) return;
+      event.preventDefault();
+      pinchStartDistance.current = distance(event.touches);
+      pinchStartZoom.current = previewZoomRef.current ?? usePdfStore.getState().zoom;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 2 || pinchStartDistance.current <= 0) return;
+      event.preventDefault();
+      schedulePreviewZoom(pinchStartZoom.current * (distance(event.touches) / pinchStartDistance.current), center(event.touches));
+    };
+
+    const finishTouchPinch = (event: TouchEvent) => {
+      if (pinchStartDistance.current <= 0) return;
+      if (event.touches.length >= 2) return;
+      pinchStartDistance.current = 0;
+      commitPreviewZoom();
+    };
+
+    scroller.addEventListener("touchstart", handleTouchStart, { passive: false });
+    scroller.addEventListener("touchmove", handleTouchMove, { passive: false });
+    scroller.addEventListener("touchend", finishTouchPinch, { passive: false });
+    scroller.addEventListener("touchcancel", finishTouchPinch, { passive: false });
+
+    return () => {
+      scroller.removeEventListener("touchstart", handleTouchStart);
+      scroller.removeEventListener("touchmove", handleTouchMove);
+      scroller.removeEventListener("touchend", finishTouchPinch);
+      scroller.removeEventListener("touchcancel", finishTouchPinch);
     };
   }, [commitPreviewZoom, schedulePreviewZoom]);
 
