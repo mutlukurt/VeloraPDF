@@ -69,6 +69,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
 
   useEffect(() => {
     if (!open) return
+    if (isTouchDevice) return
     const onPointerDown = (event: PointerEvent) => {
       if (Date.now() - openedAtRef.current < 180) return
       const target = event.target as HTMLElement
@@ -76,7 +77,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
     }
     window.addEventListener('pointerdown', onPointerDown, true)
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
-  }, [onClose, open])
+  }, [isTouchDevice, onClose, open])
 
   if (!editor || !context) return null
 
@@ -84,6 +85,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
   const menuWidth = Math.min(360, window.innerWidth - 16)
   const menuLeft = Math.max(8, Math.min(position.left, window.innerWidth - menuWidth - 8))
   const menuTop = Math.max(8, Math.min(position.top, window.innerHeight - 120))
+  const menuStyle = isTouchDevice ? undefined : { left: menuLeft, top: menuTop, width: menuWidth }
 
   const runCommand = async (command: (typeof visibleCommands)[number]) => {
     if (executingRef.current) return
@@ -96,15 +98,24 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
   return (
     <AnimatePresence>
       {open ? (
-        <motion.div
-          data-block-insert-menu
-          className="fixed z-50 max-h-[min(520px,calc(100dvh-1rem))] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-calm"
-          style={{ left: menuLeft, top: menuTop, width: menuWidth }}
-          initial={{ opacity: 0, y: 8, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 6, scale: 0.98 }}
-          transition={{ duration: 0.13 }}
-        >
+        <>
+          {isTouchDevice ? <motion.div className="fixed inset-0 z-[48] bg-black/30 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} /> : null}
+          <motion.div
+            data-block-insert-menu
+            className={cn(
+              'fixed z-50 overflow-hidden border border-[var(--border)] bg-[var(--surface)] shadow-calm',
+              isTouchDevice
+                ? 'inset-x-2 bottom-2 max-h-[72dvh] rounded-2xl'
+                : 'max-h-[min(520px,calc(100dvh-1rem))] rounded-2xl',
+            )}
+            style={menuStyle}
+            initial={isTouchDevice ? { opacity: 0, y: 24 } : { opacity: 0, y: 8, scale: 0.98 }}
+            animate={isTouchDevice ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isTouchDevice ? { opacity: 0, y: 18 } : { opacity: 0, y: 6, scale: 0.98 }}
+            transition={{ duration: 0.13 }}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+          >
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2.5">
             <Search size={15} className="text-[var(--text-faint)]" />
             <input
@@ -118,7 +129,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
             />
             <kbd className="rounded-md border border-[var(--border)] px-1.5 py-1 text-[10px] text-[var(--text-faint)]">Esc</kbd>
           </div>
-          <div className="max-h-[430px] overflow-y-auto p-1.5">
+          <div className={cn('overflow-y-auto p-1.5', isTouchDevice ? 'max-h-[calc(72dvh-57px)] overscroll-contain' : 'max-h-[430px]')}>
             {categoryOrder.map((category) => {
               const group = visibleCommands.filter((command) => command.category === category)
               if (group.length === 0) return null
@@ -137,7 +148,13 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
                           selected ? 'bg-[var(--accent-soft)] text-[var(--text)]' : 'hover:bg-[var(--surface-muted)]',
                         )}
                         onMouseEnter={() => setSelectedIndex(commandIndex)}
-                        onPointerDown={async (event) => {
+                        onPointerDown={(event) => {
+                          event.stopPropagation()
+                        }}
+                        onMouseDown={(event) => {
+                          if (!isTouchDevice) event.preventDefault()
+                        }}
+                        onClick={async (event) => {
                           event.preventDefault()
                           event.stopPropagation()
                           await runCommand(command)
@@ -159,7 +176,8 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
             })}
             {visibleCommands.length === 0 ? <div className="px-3 py-8 text-center text-sm text-[var(--text-muted)]">No matching block</div> : null}
           </div>
-        </motion.div>
+          </motion.div>
+        </>
       ) : null}
     </AnimatePresence>
   )
