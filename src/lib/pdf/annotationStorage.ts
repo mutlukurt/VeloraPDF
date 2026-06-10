@@ -8,7 +8,7 @@ function encodeKeyPart(value: string) {
 }
 
 export function annotationStorageKey(file: ActiveFile) {
-  const identity = file.path ? `path:${file.path}` : `browser:${file.name}:${file.data.byteLength}`;
+  const identity = file.path ? `path:${file.path}` : `browser:${file.browserId ?? `${file.name}:${file.data.byteLength}`}`;
   return `${STORAGE_PREFIX}${encodeKeyPart(identity)}`;
 }
 

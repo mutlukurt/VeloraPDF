@@ -4,6 +4,7 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 export type ActiveFile = {
   name: string;
   path?: string;
+  browserId?: string;
   data: Uint8Array;
   openedAt: number;
 };
@@ -11,6 +12,7 @@ export type ActiveFile = {
 export type RecentFile = {
   name: string;
   path?: string;
+  browserId?: string;
   lastOpened: number;
   pageCount?: number;
 };
@@ -77,8 +79,8 @@ export const usePdfStore = create<PdfState>((set, get) => ({
   setStatusMessage: (message) => set({ statusMessage: message }),
   addRecentFile: (file) =>
     set((state) => {
-      const key = file.path ?? file.name;
-      const next = [file, ...state.recentFiles.filter((item) => (item.path ?? item.name) !== key)].slice(0, 12);
+      const key = file.path ?? file.browserId ?? file.name;
+      const next = [file, ...state.recentFiles.filter((item) => (item.path ?? item.browserId ?? item.name) !== key)].slice(0, 12);
       persistRecentFiles(next);
       return { recentFiles: next };
     }),

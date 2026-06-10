@@ -6,11 +6,12 @@ import { PdfViewer } from "../pdf/PdfViewer";
 import { NotesWorkspace } from "../notes/NotesWorkspace";
 import { SettingsDialog } from "../../features/settings/SettingsDialog";
 import { usePdfStore } from "../../stores/usePdfStore";
+import type { RecentFile } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
 
 type AppShellProps = {
   onOpenPdf: () => void;
-  onOpenRecentPdf: (path?: string) => void;
+  onOpenRecentPdf: (file: RecentFile) => void;
   onSaveAnnotations: () => void;
   onExportPdf: () => void;
 };

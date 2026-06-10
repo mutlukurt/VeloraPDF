@@ -3,12 +3,13 @@ import { VeloraLogo } from "../brand/VeloraLogo";
 import { Button } from "../ui/Button";
 import { RecentFilesGrid } from "./RecentFilesGrid";
 import { usePdfStore } from "../../stores/usePdfStore";
+import type { RecentFile } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
 import { useWorkspaceStore } from "../../lib/store/workspace";
 import { PageIcon } from "../../lib/icons/pageIcons";
 import { formatRelativeTime } from "../../lib/utils/text";
 
-export function HomeScreen({ onOpenPdf, onOpenRecentPdf }: { onOpenPdf: () => void; onOpenRecentPdf: (path?: string) => void }) {
+export function HomeScreen({ onOpenPdf, onOpenRecentPdf }: { onOpenPdf: () => void; onOpenRecentPdf: (file: RecentFile) => void }) {
   const recentFiles = usePdfStore((state) => state.recentFiles);
   const { pages, createPage, openPage } = useWorkspaceStore();
   const setActiveView = useUiStore((state) => state.setActiveView);

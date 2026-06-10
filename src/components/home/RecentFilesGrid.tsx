@@ -2,7 +2,7 @@ import { FileText, Trash2 } from "lucide-react";
 import type { RecentFile } from "../../stores/usePdfStore";
 import { usePdfStore } from "../../stores/usePdfStore";
 
-export function RecentFilesGrid({ files, onOpenRecentPdf }: { files: RecentFile[]; onOpenRecentPdf: (path?: string) => void }) {
+export function RecentFilesGrid({ files, onOpenRecentPdf }: { files: RecentFile[]; onOpenRecentPdf: (file: RecentFile) => void }) {
   const removeRecentFile = usePdfStore((state) => state.removeRecentFile);
 
   if (files.length === 0) {
@@ -12,16 +12,16 @@ export function RecentFilesGrid({ files, onOpenRecentPdf }: { files: RecentFile[
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {files.map((file) => {
-        const fileKey = file.path ?? file.name;
+        const fileKey = file.path ?? file.browserId ?? file.name;
         return (
           <div
-            key={`${file.path}-${file.lastOpened}`}
+            key={`${fileKey}-${file.lastOpened}`}
             className="group relative rounded-2xl border border-border bg-surface p-4 text-left shadow-velora-light transition hover:-translate-y-0.5 hover:border-accent/40"
           >
             {/* Main click action */}
             <button
               className="absolute inset-0 w-full h-full rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--accent)] z-0"
-              onClick={() => onOpenRecentPdf(file.path)}
+              onClick={() => onOpenRecentPdf(file)}
               aria-label={`Open ${file.name}`}
             />
             
@@ -31,7 +31,7 @@ export function RecentFilesGrid({ files, onOpenRecentPdf }: { files: RecentFile[
                 <FileText size={22} />
               </div>
               <div className="truncate text-sm font-bold text-primary">{file.name}</div>
-              <div className="mt-1 truncate text-xs text-secondary">{file.path ?? "Browser import"}</div>
+              <div className="mt-1 truncate text-xs text-secondary">{file.path ?? (file.browserId ? "Browser file access saved" : "Browser import")}</div>
               <div className="mt-3 text-xs text-secondary">
                 {new Date(file.lastOpened).toLocaleDateString()} {file.pageCount ? `· ${file.pageCount} pages` : "· PDF"}
               </div>

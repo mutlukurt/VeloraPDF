@@ -1,9 +1,11 @@
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readFile, writeFile } from "@tauri-apps/plugin-fs";
+import { pickBrowserPdfFile, readBrowserRecentPdf } from "../browser/browserPdfAccess";
 
 export type PickedPdf = {
   name: string;
   path?: string;
+  browserId?: string;
   data: Uint8Array;
 };
 
@@ -15,25 +17,8 @@ function fileNameFromPath(path: string) {
   return path.split(/[\\/]/).pop() || "Untitled.pdf";
 }
 
-async function pickFromBrowser(): Promise<PickedPdf | null> {
-  return new Promise((resolve) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/pdf,.pdf";
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) {
-        resolve(null);
-        return;
-      }
-      resolve({ name: file.name, data: new Uint8Array(await file.arrayBuffer()) });
-    };
-    input.click();
-  });
-}
-
 export async function pickPdfFile(): Promise<PickedPdf | null> {
-  if (!isTauriRuntime()) return pickFromBrowser();
+  if (!isTauriRuntime()) return pickBrowserPdfFile();
 
   const selected = await open({
     multiple: false,
@@ -45,10 +30,14 @@ export async function pickPdfFile(): Promise<PickedPdf | null> {
   return { name: fileNameFromPath(selected), path: selected, data };
 }
 
-export async function readPdfFile(path: string): Promise<PickedPdf> {
+export async function readPdfFile(path?: string, browserId?: string): Promise<PickedPdf> {
+  if (!isTauriRuntime() && browserId) return readBrowserRecentPdf(browserId);
+
   if (!isTauriRuntime()) {
-    throw new Error("Recent files with local paths can only be reopened in the Tauri desktop app.");
+    throw new Error("This browser recent file needs to be opened once again.");
   }
+
+  if (!path) throw new Error("Missing PDF file path.");
 
   const data = await readFile(path);
   return { name: fileNameFromPath(path), path, data };

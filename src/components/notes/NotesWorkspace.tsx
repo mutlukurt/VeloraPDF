@@ -5,8 +5,9 @@ import { EditorHeader } from "../../features/editor/EditorHeader";
 import { WorkspaceEditor } from "../../features/editor/WorkspaceEditor";
 import { CommandPalette } from "../../features/search/CommandPalette";
 import { useWorkspaceStore } from "../../lib/store/workspace";
+import type { RecentFile } from "../../stores/usePdfStore";
 
-export function NotesWorkspace({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: string) => void }) {
+export function NotesWorkspace({ onOpenRecentPdf }: { onOpenRecentPdf: (file: RecentFile) => void }) {
   const initialize = useWorkspaceStore((state) => state.initialize);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 

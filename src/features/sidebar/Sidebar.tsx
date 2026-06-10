@@ -21,6 +21,7 @@ import { useWorkspaceStore } from '../../lib/store/workspace'
 import { cn } from '../../lib/utils/cn'
 import { formatRelativeTime } from '../../lib/utils/text'
 import { usePdfStore } from '../../stores/usePdfStore'
+import type { RecentFile } from '../../stores/usePdfStore'
 import { useUiStore } from '../../stores/useUiStore'
 import type { Page } from '../../types'
 import { buildPageTree, type PageNode } from './pageTree'
@@ -144,7 +145,7 @@ export function Sidebar({
   mobileOpen = false,
   onMobileClose,
 }: {
-  onOpenRecentPdf: (path?: string) => void
+  onOpenRecentPdf: (file: RecentFile) => void
   mobileOpen?: boolean
   onMobileClose?: () => void
 }) {
@@ -173,7 +174,7 @@ export function Sidebar({
     .sort((a, b) => (b.lastOpenedAt ?? b.updatedAt).localeCompare(a.lastOpenedAt ?? a.updatedAt))
     .slice(0, 4)
   const lastPdf = activeFile
-    ? { name: activeFile.name, path: activeFile.path, pageCount: pdf?.numPages, lastOpened: activeFile.openedAt }
+    ? { name: activeFile.name, path: activeFile.path, browserId: activeFile.browserId, pageCount: pdf?.numPages, lastOpened: activeFile.openedAt }
     : recentFiles[0]
 
   const openLastPdf = () => {
@@ -183,7 +184,7 @@ export function Sidebar({
       setPdfSidebarMode('thumbnails')
       return
     }
-    onOpenRecentPdf(lastPdf.path)
+    onOpenRecentPdf(lastPdf)
   }
 
   const isDescendant = (node: PageNode, candidateId: string): boolean =>

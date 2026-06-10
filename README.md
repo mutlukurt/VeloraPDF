@@ -4,7 +4,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.32-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.33-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -14,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.32-aarch64.dmg](downloads/Velora-PDF-1.0.32-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.33-aarch64.dmg](downloads/Velora-PDF-1.0.33-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.32.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.33.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.32_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.33_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -444,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.32.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.33.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.32
+1.0.33
 ```
 
 Bundle identifier:
@@ -484,6 +484,19 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.33
+
+Released to restore browser-imported recent PDFs without forcing users to pick the same file every time.
+
+Changes:
+
+- Stores browser PDF file handles in local IndexedDB when the browser supports the File System Access API.
+- Reopens recent browser PDFs from the original file after reload, with a browser permission prompt only when needed.
+- Keeps a local cached fallback for imported browser PDFs so recent files can still open when direct file access is unavailable.
+- Updates recent PDF cards and the Notes sidebar Last PDF action to use the full recent-file identity instead of path-only reopening.
+- Keeps Tauri desktop path reopening unchanged.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.33`.
 
 ### 1.0.32
 

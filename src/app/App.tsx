@@ -6,7 +6,7 @@ import { loadPdfDocument } from "../lib/pdf/loadPdf";
 import { pickPdfFile, readPdfFile, saveJsonSidecar, savePdfBytes } from "../lib/tauri/fileDialog";
 import { registerShortcuts } from "../lib/utils/shortcuts";
 import { useAnnotationStore } from "../stores/useAnnotationStore";
-import { usePdfStore } from "../stores/usePdfStore";
+import { type RecentFile, usePdfStore } from "../stores/usePdfStore";
 import { useUiStore } from "../stores/useUiStore";
 import { useWorkspaceStore } from "../lib/store/workspace";
 
@@ -48,7 +48,7 @@ export function App() {
     }
   };
 
-  const openPickedPdf = async (picked: { name: string; path?: string; data: Uint8Array }) => {
+  const openPickedPdf = async (picked: { name: string; path?: string; browserId?: string; data: Uint8Array }) => {
     const file = { ...picked, openedAt: Date.now() };
     usePdfStore.getState().setActiveFile(file);
     useAnnotationStore.getState().setAnnotations(loadStoredAnnotations(file));
@@ -56,22 +56,17 @@ export function App() {
     usePdfStore.getState().setPdf(pdf);
     usePdfStore.getState().setPageCount(pdf.numPages);
     usePdfStore.getState().setCurrentPage(1);
-    usePdfStore.getState().addRecentFile({ name: picked.name, path: picked.path, lastOpened: Date.now(), pageCount: pdf.numPages });
+    usePdfStore.getState().addRecentFile({ name: picked.name, path: picked.path, browserId: picked.browserId, lastOpened: Date.now(), pageCount: pdf.numPages });
     useUiStore.getState().setActiveView("pdf");
     useUiStore.getState().setSidebarMode("thumbnails");
   };
 
-  const openRecentPdf = async (path?: string) => {
-    if (!path) {
-      window.alert("This recent file was opened from the browser preview and cannot be reopened by path. Please use Open PDF.");
-      return;
-    }
-
+  const openRecentPdf = async (file: RecentFile) => {
     try {
-      await openPickedPdf(await readPdfFile(path));
+      await openPickedPdf(await readPdfFile(file.path, file.browserId));
     } catch (error) {
       console.error(error);
-      window.alert("Velora PDF could not reopen this recent file. It may have moved or macOS permissions may need to be refreshed.");
+      window.alert("Velora PDF could not reopen this recent file. Please choose it once with Open PDF to refresh browser access.");
     }
   };
 
