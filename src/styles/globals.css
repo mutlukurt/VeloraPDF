@@ -114,7 +114,7 @@ body {
 
 .pdf-reader-scroll {
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y pinch-zoom;
+  touch-action: none;
 }
 
 button,

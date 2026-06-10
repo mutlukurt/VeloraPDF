@@ -18,6 +18,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const setZoom = usePdfStore((state) => state.setZoom);
   const currentPage = usePdfStore((state) => state.currentPage);
   const sidebarMode = useUiStore((state) => state.sidebarMode);
+  const activeTool = useUiStore((state) => state.activeTool);
   const viewSettings = useUiStore((state) => state.viewSettings);
   const setSidebarMode = useUiStore((state) => state.setSidebarMode);
   const [previewZoom, setPreviewZoom] = useState<number | null>(null);
@@ -30,6 +31,13 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const gestureStartZoom = useRef(zoom);
   const pinchStartDistance = useRef(0);
   const pinchStartZoom = useRef(zoom);
+  const touchPanRef = useRef<{
+    active: boolean;
+    startX: number;
+    startY: number;
+    scrollLeft: number;
+    scrollTop: number;
+  } | null>(null);
   const previewZoomRef = useRef<number | null>(null);
   const wheelCommitTimer = useRef<number | null>(null);
   const previewFrame = useRef<number | null>(null);
@@ -191,6 +199,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
+    const isReadingTool = activeTool === "select" || activeTool === "hand" || activeTool === "text-select";
 
     const distance = (touches: TouchList) => {
       const first = touches[0];
@@ -203,24 +212,53 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       clientY: (touches[0].clientY + touches[1].clientY) / 2,
     });
 
+    const isInteractiveTarget = (target: EventTarget | null) =>
+      target instanceof HTMLElement &&
+      Boolean(target.closest("button, input, textarea, select, a, [role='button'], [contenteditable='true']"));
+
     const handleTouchStart = (event: TouchEvent) => {
-      if (event.touches.length !== 2) return;
+      if (event.touches.length === 2) {
+        event.preventDefault();
+        touchPanRef.current = null;
+        pinchStartDistance.current = distance(event.touches);
+        pinchStartZoom.current = previewZoomRef.current ?? usePdfStore.getState().zoom;
+        return;
+      }
+
+      if (!isMobileReader || !isReadingTool || event.touches.length !== 1 || isInteractiveTarget(event.target)) return;
+      const touch = event.touches[0];
       event.preventDefault();
-      pinchStartDistance.current = distance(event.touches);
-      pinchStartZoom.current = previewZoomRef.current ?? usePdfStore.getState().zoom;
+      touchPanRef.current = {
+        active: true,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        scrollLeft: scroller.scrollLeft,
+        scrollTop: scroller.scrollTop,
+      };
     };
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (event.touches.length !== 2 || pinchStartDistance.current <= 0) return;
+      if (event.touches.length === 2 && pinchStartDistance.current > 0) {
+        event.preventDefault();
+        touchPanRef.current = null;
+        schedulePreviewZoom(pinchStartZoom.current * (distance(event.touches) / pinchStartDistance.current), center(event.touches));
+        return;
+      }
+
+      const pan = touchPanRef.current;
+      if (!pan?.active || event.touches.length !== 1) return;
+      const touch = event.touches[0];
       event.preventDefault();
-      schedulePreviewZoom(pinchStartZoom.current * (distance(event.touches) / pinchStartDistance.current), center(event.touches));
+      scroller.scrollLeft = pan.scrollLeft - (touch.clientX - pan.startX);
+      scroller.scrollTop = pan.scrollTop - (touch.clientY - pan.startY);
     };
 
     const finishTouchPinch = (event: TouchEvent) => {
-      if (pinchStartDistance.current <= 0) return;
-      if (event.touches.length >= 2) return;
-      pinchStartDistance.current = 0;
-      commitPreviewZoom();
+      if (event.touches.length === 0) touchPanRef.current = null;
+      if (pinchStartDistance.current > 0 && event.touches.length < 2) {
+        pinchStartDistance.current = 0;
+        commitPreviewZoom();
+      }
     };
 
     scroller.addEventListener("touchstart", handleTouchStart, { passive: false });
@@ -234,7 +272,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       scroller.removeEventListener("touchend", finishTouchPinch);
       scroller.removeEventListener("touchcancel", finishTouchPinch);
     };
-  }, [commitPreviewZoom, schedulePreviewZoom]);
+  }, [activeTool, commitPreviewZoom, isMobileReader, schedulePreviewZoom]);
 
   const sidePanel = (
     <PdfSidePanelBoundary panelName={sidebarMode ?? "none"}>
