@@ -17,7 +17,7 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 import { motion } from 'framer-motion'
-import { Bold, Check, Code2, Download, GripVertical, Highlighter, Italic, Link2, Plus, Search, Strikethrough, Trash2, Underline as UnderlineIcon } from 'lucide-react'
+import { Bold, Check, Code2, Download, GripVertical, Highlighter, Italic, Link2, Plus, Redo2, Search, Strikethrough, Trash2, Type, Underline as UnderlineIcon, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { db } from '../../lib/db/client'
@@ -228,6 +228,33 @@ export function WorkspaceEditor() {
   const closeInsertMenu = useCallback(() => {
     setInsertMenu((menu) => ({ ...menu, open: false, query: '', context: null }))
   }, [])
+
+  const openMobileInsertMenu = useCallback(() => {
+    if (!editor || !activePage) return
+    const { state } = editor
+    let insertAt = state.selection.to
+    try {
+      if (state.selection.$from.depth > 0) insertAt = state.selection.$from.after(1)
+    } catch {
+      insertAt = state.selection.to
+    }
+    insertAt = Math.min(Math.max(insertAt, 0), state.doc.content.size)
+    setIconPickerOpen(false)
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    editor.commands.blur()
+    setBlockControls((controls) => ({ ...controls, visible: false }))
+    setInsertMenu({
+      open: true,
+      query: '',
+      position: { left: 8, top: window.innerHeight - 360 },
+      context: {
+        source: 'plus',
+        insertAt,
+        pageId: activePage.id,
+        parentBlockId: null,
+      },
+    })
+  }, [activePage, editor])
 
   const createSubpageLink = useCallback(async () => {
     if (!activePage) return
@@ -591,7 +618,7 @@ export function WorkspaceEditor() {
             {blockControls.visible ? (
               <div
                 data-block-controls
-                className="fixed z-30 flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5 opacity-95 shadow-lift"
+                className="fixed z-30 hidden items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5 opacity-95 shadow-lift md:flex"
                 style={{ left: blockControls.position.left, top: blockControls.position.top }}
                 onMouseEnter={() => {
                   if (blockControlsHideTimer.current) {
@@ -723,6 +750,45 @@ export function WorkspaceEditor() {
           </div>
         </div>
       </DndContext>
+      {editor ? (
+        <div className="fixed inset-x-0 bottom-14 z-40 flex h-14 items-center gap-2 border-t border-[var(--border)] bg-[var(--surface)] px-3 shadow-[0_-10px_30px_rgba(15,15,20,.12)] md:hidden">
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface-muted)] text-[var(--text)]"
+            onClick={openMobileInsertMenu}
+            aria-label="Add block"
+          >
+            <Plus size={23} />
+          </button>
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)]"
+            onClick={openMobileInsertMenu}
+            aria-label="Open text blocks"
+          >
+            <Type size={22} />
+          </button>
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35"
+            onClick={() => editor.chain().undo().run()}
+            disabled={!editor.can().undo()}
+            aria-label="Undo"
+          >
+            <Undo2 size={21} />
+          </button>
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35"
+            onClick={() => editor.chain().redo().run()}
+            disabled={!editor.can().redo()}
+            aria-label="Redo"
+          >
+            <Redo2 size={21} />
+          </button>
+          <div className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--text-faint)]">Blocks</div>
+        </div>
+      ) : null}
       <BlockInsertMenu
         editor={editor}
         open={insertMenu.open}
