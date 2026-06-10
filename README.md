@@ -87,6 +87,8 @@ Android APK v2 includes:
 - Android-native microphone recording bridge for voice memos.
 - Android-native Downloads bridge for Settings exports and generated archives.
 - Android-specific top spacing for the Notes workspace and PDF editor so status bar/camera areas do not cover controls.
+- Smoother Android PDF editor gestures with native WebView momentum scrolling, two-finger pinch zoom, and crisp canvas re-rendering after zoom.
+- Hardware-accelerated WebView PDF rendering for clearer page movement on phones and tablets.
 - Mobile settings modal scrolling and positioning tuned for Android screens.
 - ABI-specific release APKs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
 

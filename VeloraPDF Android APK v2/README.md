@@ -21,6 +21,8 @@ Because every app asset is packaged inside the APK, the release does not request
 - Android-native microphone recorder bridge exposed to the web app as `window.VeloraAndroidRecorder`.
 - Android-native Downloads bridge exposed as `window.VeloraAndroidFiles` for Settings exports.
 - Android-specific spacing for the Notes workspace and PDF editor toolbar.
+- Smoother PDF editor gestures in Android WebView: native momentum scrolling, two-finger pinch zoom, and clear canvas re-rendering after zoom.
+- Hardware-accelerated WebView drawing for sharper PDF page movement on phones and tablets.
 - Settings modal layout that scrolls correctly on Android screens.
 - ABI split APKs for 32-bit and 64-bit Android targets.
 
