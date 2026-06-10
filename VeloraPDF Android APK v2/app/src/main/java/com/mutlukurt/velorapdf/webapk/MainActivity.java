@@ -3,12 +3,16 @@ package com.mutlukurt.velorapdf.webapk;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.Manifest;
+import android.content.ContentValues;
+import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.view.Window;
@@ -25,7 +29,9 @@ import android.webkit.WebViewClient;
 import androidx.webkit.WebViewAssetLoader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import org.json.JSONObject;
 
 public class MainActivity extends Activity {
@@ -67,6 +73,7 @@ public class MainActivity extends Activity {
     settings.setBuiltInZoomControls(false);
     settings.setDisplayZoomControls(false);
     webView.addJavascriptInterface(new VeloraAndroidRecorderBridge(), "VeloraAndroidRecorder");
+    webView.addJavascriptInterface(new VeloraAndroidFilesBridge(), "VeloraAndroidFiles");
 
     assetLoader = new WebViewAssetLoader.Builder()
       .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
@@ -334,6 +341,16 @@ public class MainActivity extends Activity {
     return payload;
   }
 
+  private JSONObject successPayload(String path) {
+    JSONObject payload = new JSONObject();
+    try {
+      payload.put("ok", true);
+      payload.put("path", path);
+    } catch (Exception ignored) {
+    }
+    return payload;
+  }
+
   private void sendRecorderResult(String callbackId, JSONObject payload) {
     if (webView == null) return;
     String script = "window.__veloraAndroidRecorderCallback && window.__veloraAndroidRecorderCallback(" +
@@ -365,6 +382,51 @@ public class MainActivity extends Activity {
     @JavascriptInterface
     public void cancelRecording(String callbackId) {
       runOnUiThread(() -> cancelNativeRecorder(callbackId));
+    }
+  }
+
+  public class VeloraAndroidFilesBridge {
+    @JavascriptInterface
+    public String saveDownload(String filename, String mimeType, String base64Data) {
+      try {
+        byte[] bytes = Base64.decode(base64Data, Base64.DEFAULT);
+        String safeName = filename == null || filename.trim().isEmpty() ? "velora-download" : filename.replaceAll("[\\\\/:*?\"<>|]", "_");
+        String safeMime = mimeType == null || mimeType.trim().isEmpty() ? "application/octet-stream" : mimeType;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+          ContentValues values = new ContentValues();
+          values.put(MediaStore.Downloads.DISPLAY_NAME, safeName);
+          values.put(MediaStore.Downloads.MIME_TYPE, safeMime);
+          values.put(MediaStore.Downloads.IS_PENDING, 1);
+          values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+          ContentResolver resolver = getContentResolver();
+          Uri uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+          if (uri == null) throw new Exception("Could not create download file.");
+
+          OutputStream output = resolver.openOutputStream(uri);
+          if (output == null) throw new Exception("Could not open download file.");
+          output.write(bytes);
+          output.close();
+
+          values.clear();
+          values.put(MediaStore.Downloads.IS_PENDING, 0);
+          resolver.update(uri, values, null, null);
+          return successPayload(uri.toString()).toString();
+        }
+
+        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (!downloadsDir.exists() && !downloadsDir.mkdirs()) {
+          throw new Exception("Could not open Downloads folder.");
+        }
+        File file = new File(downloadsDir, safeName);
+        FileOutputStream output = new FileOutputStream(file);
+        output.write(bytes);
+        output.close();
+        return successPayload(file.getAbsolutePath()).toString();
+      } catch (Exception error) {
+        return errorPayload("Could not save download on Android.").toString();
+      }
     }
   }
 }

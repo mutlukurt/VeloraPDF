@@ -19,6 +19,7 @@ Because every app asset is packaged inside the APK, the release does not request
 - Local Inter and Fraunces fonts.
 - Bundled Velora icon image assets for Home, Sidebar, Settings, and PDF editor chrome.
 - Android-native microphone recorder bridge exposed to the web app as `window.VeloraAndroidRecorder`.
+- Android-native Downloads bridge exposed as `window.VeloraAndroidFiles` for Settings exports.
 - Android-specific spacing for the Notes workspace and PDF editor toolbar.
 - Settings modal layout that scrolls correctly on Android screens.
 - ABI split APKs for 32-bit and 64-bit Android targets.

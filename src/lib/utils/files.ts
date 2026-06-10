@@ -1,4 +1,26 @@
 export async function downloadBlob(blob: Blob, filename: string) {
+  const androidFiles = typeof window !== "undefined" ? (window as Window & {
+    VeloraAndroidFiles?: {
+      saveDownload: (filename: string, mimeType: string, base64Data: string) => string;
+    };
+  }).VeloraAndroidFiles : undefined;
+
+  if (androidFiles) {
+    const buffer = new Uint8Array(await blob.arrayBuffer());
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < buffer.length; offset += chunkSize) {
+      binary += String.fromCharCode(...buffer.subarray(offset, offset + chunkSize));
+    }
+    const result = JSON.parse(androidFiles.saveDownload(filename, blob.type || "application/octet-stream", btoa(binary))) as {
+      ok?: boolean;
+      path?: string;
+      error?: string;
+    };
+    if (!result.ok) throw new Error(result.error || "Android download failed.");
+    return;
+  }
+
   const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   if (isTauri()) {
     try {
@@ -14,7 +36,7 @@ export async function downloadBlob(blob: Blob, filename: string) {
       console.error("Tauri save failed, falling back to browser download:", error);
     }
   }
-  
+
   // Browser fallback
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

@@ -85,6 +85,7 @@ Android APK v2 includes:
 - Offline startup and app usage without the Android `INTERNET` permission.
 - Local bundled fonts and Velora icon assets so home, sidebar, and settings artwork render correctly offline.
 - Android-native microphone recording bridge for voice memos.
+- Android-native Downloads bridge for Settings exports and generated archives.
 - Android-specific top spacing for the Notes workspace and PDF editor so status bar/camera areas do not cover controls.
 - Mobile settings modal scrolling and positioning tuned for Android screens.
 - ABI-specific release APKs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
