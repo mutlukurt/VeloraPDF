@@ -202,9 +202,6 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
       if (statusRef.current === 'recording') {
         if (rms < 0.006) {
           if (!micSilenceStartedAtRef.current) micSilenceStartedAtRef.current = Date.now()
-          if (Date.now() - micSilenceStartedAtRef.current > 2500) {
-            setMicWarning('No microphone signal detected. Check your input device and system mic level.')
-          }
         } else {
           micSilenceStartedAtRef.current = 0
           setMicWarning('')
