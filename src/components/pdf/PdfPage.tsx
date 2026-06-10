@@ -152,6 +152,7 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
       id={`page-${pageNumber}`}
       className={cn(
         "relative mx-auto overflow-hidden bg-white shadow-[0_14px_38px_rgba(0,0,0,.18)] md:shadow-[0_26px_80px_rgba(0,0,0,.28)]",
+        "pdf-page-surface",
         pageTone === "eye-protection" && "bg-[#FFF8DC]",
       )}
       style={{ width: cropWidth, height: cropHeight }}
@@ -165,7 +166,7 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
           transformOrigin: "top left",
         }}
       >
-        <canvas ref={canvasRef} className="block h-full w-full" />
+        <canvas ref={canvasRef} className="pdf-page-canvas block h-full w-full" />
         {!hasPainted ? <div className="absolute inset-0 bg-white" /> : null}
 
         {/* Search highlights overlay */}

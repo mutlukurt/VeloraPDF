@@ -176,7 +176,25 @@ body {
 
 .pdf-reader-scroll {
   -webkit-overflow-scrolling: touch;
-  touch-action: none;
+  touch-action: pan-x pan-y;
+  scroll-behavior: auto;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.pdf-reading-touch {
+  touch-action: pan-x pan-y;
+}
+
+.pdf-page-surface {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: width, height;
+}
+
+.pdf-page-canvas {
+  image-rendering: auto;
+  transform: translateZ(0);
 }
 
 button,

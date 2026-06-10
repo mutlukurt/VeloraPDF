@@ -31,13 +31,6 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const gestureStartZoom = useRef(zoom);
   const pinchStartDistance = useRef(0);
   const pinchStartZoom = useRef(zoom);
-  const touchPanRef = useRef<{
-    active: boolean;
-    startX: number;
-    startY: number;
-    scrollLeft: number;
-    scrollTop: number;
-  } | null>(null);
   const previewZoomRef = useRef<number | null>(null);
   const wheelCommitTimer = useRef<number | null>(null);
   const previewFrame = useRef<number | null>(null);
@@ -45,7 +38,8 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const pagedWheelLock = useRef<number | null>(null);
   const effectiveZoom = previewZoom ?? zoom;
   const mobileFitZoom = firstPageWidth && viewportWidth ? Math.min(1, Math.max(0.28, (viewportWidth - 24) / (firstPageWidth * 1.35))) : 1;
-  const renderZoom = (isMobileReader ? mobileFitZoom : 1) * effectiveZoom;
+  const committedRenderZoom = (isMobileReader ? mobileFitZoom : 1) * zoom;
+  const displayZoom = (isMobileReader ? mobileFitZoom : 1) * effectiveZoom;
   const pagedMode = !isMobileReader && !viewSettings.continuous;
   const spreadMode = !isMobileReader && !viewSettings.singlePage;
   const firstSpreadPage = currentPage % 2 === 0 ? Math.max(1, currentPage - 1) : currentPage;
@@ -219,42 +213,21 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     const handleTouchStart = (event: TouchEvent) => {
       if (event.touches.length === 2) {
         event.preventDefault();
-        touchPanRef.current = null;
         pinchStartDistance.current = distance(event.touches);
         pinchStartZoom.current = previewZoomRef.current ?? usePdfStore.getState().zoom;
-        return;
       }
-
-      if (!isMobileReader || !isReadingTool || event.touches.length !== 1 || isInteractiveTarget(event.target)) return;
-      const touch = event.touches[0];
-      event.preventDefault();
-      touchPanRef.current = {
-        active: true,
-        startX: touch.clientX,
-        startY: touch.clientY,
-        scrollLeft: scroller.scrollLeft,
-        scrollTop: scroller.scrollTop,
-      };
     };
 
     const handleTouchMove = (event: TouchEvent) => {
       if (event.touches.length === 2 && pinchStartDistance.current > 0) {
         event.preventDefault();
-        touchPanRef.current = null;
         schedulePreviewZoom(pinchStartZoom.current * (distance(event.touches) / pinchStartDistance.current), center(event.touches));
+      } else if (!isMobileReader || !isReadingTool || event.touches.length !== 1 || isInteractiveTarget(event.target)) {
         return;
       }
-
-      const pan = touchPanRef.current;
-      if (!pan?.active || event.touches.length !== 1) return;
-      const touch = event.touches[0];
-      event.preventDefault();
-      scroller.scrollLeft = pan.scrollLeft - (touch.clientX - pan.startX);
-      scroller.scrollTop = pan.scrollTop - (touch.clientY - pan.startY);
     };
 
     const finishTouchPinch = (event: TouchEvent) => {
-      if (event.touches.length === 0) touchPanRef.current = null;
       if (pinchStartDistance.current > 0 && event.touches.length < 2) {
         pinchStartDistance.current = 0;
         commitPreviewZoom();
@@ -310,8 +283,8 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
               key={page}
               pdf={pdf}
               pageNumber={page}
-              zoom={renderZoom}
-              displayZoom={renderZoom}
+              zoom={committedRenderZoom}
+              displayZoom={displayZoom}
               onVisible={onVisible}
               pageTone={pageTone}
             />

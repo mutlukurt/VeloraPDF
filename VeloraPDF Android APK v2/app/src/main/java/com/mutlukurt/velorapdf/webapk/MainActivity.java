@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     webView = new WebView(this);
     webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     webView.setClipToPadding(true);
+    webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     webView.setOnApplyWindowInsetsListener((view, insets) -> {
       safeTopPx = 0;
       injectSafeTop();
@@ -72,6 +73,10 @@ public class MainActivity extends Activity {
     settings.setMediaPlaybackRequiresUserGesture(false);
     settings.setBuiltInZoomControls(false);
     settings.setDisplayZoomControls(false);
+    settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      settings.setOffscreenPreRaster(true);
+    }
     webView.addJavascriptInterface(new VeloraAndroidRecorderBridge(), "VeloraAndroidRecorder");
     webView.addJavascriptInterface(new VeloraAndroidFilesBridge(), "VeloraAndroidFiles");
 

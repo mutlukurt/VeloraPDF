@@ -11,6 +11,7 @@
     android:icon="@drawable/velora_icon"
     android:label="Velora PDF"
     android:roundIcon="@drawable/velora_icon"
+    android:hardwareAccelerated="true"
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
     <activity

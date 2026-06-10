@@ -360,7 +360,7 @@ export function AnnotationLayer({ page, width, height }: AnnotationLayerProps) {
     <>
       <div
         ref={ref}
-        className={`absolute inset-0 ${isReadingTool ? "touch-pan-y" : "touch-none"}`}
+        className={`absolute inset-0 ${isReadingTool ? "pdf-reading-touch" : "touch-none"}`}
         style={{ width, height, cursor: isReadingTool ? "default" : "crosshair" }}
         onPointerDown={begin}
         onPointerMove={move}
