@@ -4,7 +4,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.30-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.31-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -14,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.30-aarch64.dmg](downloads/Velora-PDF-1.0.30-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.31-aarch64.dmg](downloads/Velora-PDF-1.0.31-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.30.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.31.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.30_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.31_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -444,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.30.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.31.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.30
+1.0.31
 ```
 
 Bundle identifier:
@@ -484,6 +484,18 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.31
+
+Released to make browser voice recording more reliable on desktop systems.
+
+Changes:
+
+- Added live microphone signal detection to the Notes voice recorder so silent desktop input is visible immediately.
+- Added clearer errors for blocked, missing, busy, muted, or non-secure microphone access in desktop browsers.
+- Requests final recorder data before stopping and records smaller chunks to avoid empty captures on Chrome, Edge, Safari, and Firefox desktop.
+- Protects saved notes from zero-byte voice recordings when the browser starts recording but no audio data arrives.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.31`.
 
 ### 1.0.30
 

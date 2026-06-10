@@ -16,6 +16,7 @@ type AudioRecorderProps = {
 }
 
 type RecorderStatus = 'idle' | 'requesting' | 'recording' | 'paused' | 'ready'
+type WindowWithWebkitAudio = Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -33,6 +34,20 @@ function audioExtension(mime: string) {
 function supportedAudioMimeType() {
   const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac', 'audio/ogg;codecs=opus']
   return candidates.find((candidate) => MediaRecorder.isTypeSupported(candidate))
+}
+
+function microphoneErrorMessage(cause: unknown) {
+  const error = cause instanceof DOMException ? cause : null
+  if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
+    return 'Microphone is blocked. Allow it in the browser and system privacy settings.'
+  }
+  if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
+    return 'No microphone input was found on this device.'
+  }
+  if (error?.name === 'NotReadableError' || error?.name === 'TrackStartError') {
+    return 'The microphone is busy or blocked by the operating system.'
+  }
+  return 'Microphone permission is needed to record audio.'
 }
 
 function recordingName(pageTitle: string, mime: string) {
@@ -59,6 +74,9 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [inputLabel, setInputLabel] = useState('')
+  const [micLevel, setMicLevel] = useState(0)
+  const [micWarning, setMicWarning] = useState('')
   const recorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<BlobPart[]>([])
@@ -70,6 +88,15 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   const finalElapsedRef = useRef(0)
   const timerRef = useRef<number | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const micLevelFrameRef = useRef<number | null>(null)
+  const micSilenceStartedAtRef = useRef(0)
+  const capturedBytesRef = useRef(0)
+  const statusRef = useRef<RecorderStatus>('idle')
+
+  useEffect(() => {
+    statusRef.current = status
+  }, [status])
 
   const progress = useMemo(() => {
     const total = status === 'ready' ? duration : elapsed
@@ -82,9 +109,65 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
     timerRef.current = null
   }
 
+  const stopMicMonitor = () => {
+    if (micLevelFrameRef.current) window.cancelAnimationFrame(micLevelFrameRef.current)
+    micLevelFrameRef.current = null
+    audioContextRef.current?.close().catch(() => undefined)
+    audioContextRef.current = null
+    micSilenceStartedAtRef.current = 0
+    setMicLevel(0)
+  }
+
   const stopStream = () => {
+    stopMicMonitor()
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
+  }
+
+  const startMicMonitor = (stream: MediaStream) => {
+    const AudioContextCtor = window.AudioContext ?? (window as WindowWithWebkitAudio).webkitAudioContext
+    if (!AudioContextCtor) return
+
+    const audioContext = new AudioContextCtor()
+    const analyser = audioContext.createAnalyser()
+    analyser.fftSize = 1024
+    audioContext.createMediaStreamSource(stream).connect(analyser)
+    audioContextRef.current = audioContext
+
+    const samples = new Uint8Array(analyser.fftSize)
+    let lastPaintedLevel = -1
+
+    const tick = () => {
+      analyser.getByteTimeDomainData(samples)
+      let sum = 0
+      samples.forEach((sample) => {
+        const centered = (sample - 128) / 128
+        sum += centered * centered
+      })
+      const rms = Math.sqrt(sum / samples.length)
+      const nextLevel = Math.min(100, Math.round(rms * 520))
+
+      if (Math.abs(nextLevel - lastPaintedLevel) > 2) {
+        lastPaintedLevel = nextLevel
+        setMicLevel(nextLevel)
+      }
+
+      if (statusRef.current === 'recording') {
+        if (rms < 0.006) {
+          if (!micSilenceStartedAtRef.current) micSilenceStartedAtRef.current = Date.now()
+          if (Date.now() - micSilenceStartedAtRef.current > 2500) {
+            setMicWarning('No microphone signal detected. Check your input device and system mic level.')
+          }
+        } else {
+          micSilenceStartedAtRef.current = 0
+          setMicWarning('')
+        }
+      }
+
+      micLevelFrameRef.current = window.requestAnimationFrame(tick)
+    }
+
+    tick()
   }
 
   const resetRecording = (deleteStreamedFile = true) => {
@@ -93,6 +176,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
     recorderRef.current = null
     chunksRef.current = []
     pendingWritesRef.current = []
+    capturedBytesRef.current = 0
     elapsedBeforePauseRef.current = 0
     finalElapsedRef.current = 0
     startedAtRef.current = 0
@@ -108,6 +192,8 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
     setDuration(0)
     setCurrentTime(0)
     setIsPlaying(false)
+    setInputLabel('')
+    setMicWarning('')
     setError('')
   }
 
@@ -128,12 +214,25 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
         setError('Audio recording is not available on this device.')
         return
       }
+      if (!window.isSecureContext) {
+        setError('Microphone recording requires HTTPS or localhost.')
+        return
+      }
       setStatus('requesting')
       setError('')
+      setMicWarning('')
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       })
       streamRef.current = stream
+      const audioTrack = stream.getAudioTracks()[0]
+      setInputLabel(audioTrack?.label || 'Microphone input')
+      if (audioTrack) {
+        audioTrack.onmute = () => setMicWarning('Microphone input is muted by the system.')
+        audioTrack.onunmute = () => setMicWarning('')
+        audioTrack.onended = () => setError('Microphone input stopped.')
+      }
+      startMicMonitor(stream)
       const preferredMime = supportedAudioMimeType()
       const recorder = preferredMime ? new MediaRecorder(stream, { mimeType: preferredMime }) : new MediaRecorder(stream)
       const activeMime = recorder.mimeType || preferredMime || 'audio/webm'
@@ -146,6 +245,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
       chunksRef.current = []
       recorder.ondataavailable = (event) => {
         if (event.data.size <= 0) return
+        capturedBytesRef.current += event.data.size
         if (streamedFileRef.current) {
           const targetPath = streamedFileRef.current.path
           const write = event.data
@@ -165,6 +265,13 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
         stopStream()
         const finalDuration = finalElapsedRef.current || elapsedBeforePauseRef.current
         await Promise.all(pendingWritesRef.current)
+        if (capturedBytesRef.current <= 0) {
+          if (streamedFileRef.current?.path) deleteVoiceRecordingFile(streamedFileRef.current.path).catch((cause) => console.error(cause))
+          streamedFileRef.current = null
+          setError('No audio data was captured. Check the selected microphone and try again.')
+          setStatus('idle')
+          return
+        }
         const streamedFile = streamedFileRef.current
         if (streamedFile) {
           readyRecordingRef.current = {
@@ -190,13 +297,13 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
         setCurrentTime(0)
         setStatus('ready')
       }
-      recorder.start(2000)
+      recorder.start(500)
       setStatus('recording')
       startElapsedTimer()
     } catch (cause) {
       console.error(cause)
       resetRecording()
-      setError('Microphone permission is needed to record audio.')
+      setError(microphoneErrorMessage(cause))
     }
   }
 
@@ -221,6 +328,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   const stopRecording = () => {
     const recorder = recorderRef.current
     if (!recorder || recorder.state === 'inactive') return
+    recorder.requestData()
     recorder.stop()
   }
 
@@ -269,7 +377,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
           </span>
           <div className="min-w-0">
             <div className="text-xs font-semibold text-[var(--text)]">{status === 'requesting' ? 'Preparing mic' : status === 'recording' ? 'Recording' : status === 'paused' ? 'Paused' : status === 'ready' ? 'Voice memo ready' : 'Voice memo'}</div>
-            <div className="text-[11px] text-[var(--text-faint)]">{error || (status === 'requesting' ? 'Waiting for macOS microphone access' : status === 'ready' ? `${formatTime(duration)} captured locally` : 'Local microphone recording')}</div>
+            <div className="text-[11px] text-[var(--text-faint)]">{error || micWarning || (status === 'requesting' ? 'Waiting for microphone access' : status === 'ready' ? `${formatTime(duration)} captured locally` : 'Local microphone recording')}</div>
           </div>
         </div>
 
@@ -342,6 +450,14 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
                 setCurrentTime(next)
               }}
             />
+          ) : null}
+          {status === 'requesting' || status === 'recording' || status === 'paused' ? (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                <div className="h-full rounded-full bg-[var(--accent)] transition-[width]" style={{ width: `${status === 'paused' ? 0 : micLevel}%` }} />
+              </div>
+              <span className="truncate text-[10px] font-medium text-[var(--text-faint)]">{inputLabel || 'Microphone input'}</span>
+            </div>
           ) : null}
         </div>
 
