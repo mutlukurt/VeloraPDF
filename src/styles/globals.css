@@ -460,3 +460,42 @@ input {
   background: var(--surface-muted);
   font-weight: 600;
 }
+
+@media (max-width: 767px) {
+  :root {
+    --editor-font-size: 16px;
+    --editor-line-height: 1.68;
+  }
+
+  .kairnly-editor {
+    min-height: 56vh;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .kairnly-editor h1 {
+    font-size: 1.8rem;
+    line-height: 1.15;
+  }
+
+  .kairnly-editor h2 {
+    font-size: 1.45rem;
+  }
+
+  .kairnly-editor img,
+  .kairnly-media-video {
+    max-height: 360px;
+  }
+
+  .kairnly-media-block,
+  .kairnly-editor blockquote,
+  .kairnly-editor pre {
+    border-radius: 12px;
+  }
+
+  .kairnly-editor table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

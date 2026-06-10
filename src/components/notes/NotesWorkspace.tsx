@@ -18,7 +18,7 @@ export function NotesWorkspace({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: s
     <div className="relative flex flex-1 overflow-hidden bg-[var(--background)] text-[var(--text)]">
       <button
         type="button"
-        className="fixed left-[68px] top-3 z-40 grid h-10 w-10 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] shadow-lift md:hidden"
+        className="fixed left-3 top-3 z-[80] grid h-10 w-10 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] shadow-lift md:hidden"
         onClick={() => setMobileSidebarOpen(true)}
         aria-label="Open notes sidebar"
       >
@@ -27,7 +27,7 @@ export function NotesWorkspace({ onOpenRecentPdf }: { onOpenRecentPdf: (path?: s
       {mobileSidebarOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-black/35 backdrop-blur-[2px] md:hidden"
+          className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-[2px] md:hidden"
           onClick={() => setMobileSidebarOpen(false)}
           aria-label="Close notes sidebar overlay"
         />

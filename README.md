@@ -4,7 +4,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.29-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.30-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -14,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.29-aarch64.dmg](downloads/Velora-PDF-1.0.29-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.30-aarch64.dmg](downloads/Velora-PDF-1.0.30-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.29.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.30.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.29_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.30_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -444,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.29.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.30.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.29
+1.0.30
 ```
 
 Bundle identifier:
@@ -484,6 +484,18 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.30
+
+Released to make the mobile web workspace behave more like a real Notion-style document app.
+
+Changes:
+
+- Moved the app rail to a compact bottom navigation on mobile so the editor can use the full phone width.
+- Changed the Notes sidebar to a true mobile drawer that opens over the document instead of squeezing it.
+- Improved mobile editor spacing, typography, action tap targets, table overflow, media sizing, and drawer layering.
+- Keeps the desktop layout unchanged while making phone and tablet layouts more usable for `veloraproject.app` visitors.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.30`.
 
 ### 1.0.29
 

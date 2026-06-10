@@ -31,10 +31,10 @@ export function EditorHeader() {
         {saveState === 'saving' ? 'Saving…' : saveState === 'error' ? 'Save issue' : `Saved locally · Edited ${formatRelativeTime(activePage.updatedAt)}`}
       </span>
       <div className="flex shrink-0 items-center gap-1">
-        <Button size="icon" onClick={() => updatePage({ ...activePage, isFavorite: !activePage.isFavorite })} icon={<Star size={16} fill={activePage.isFavorite ? 'currentColor' : 'none'} />} />
-        <Button size="icon" onClick={() => createPage(activePage.id)} icon={<FilePlus2 size={16} />} />
+        <Button className="h-9 w-9 md:h-8 md:w-8" size="icon" onClick={() => updatePage({ ...activePage, isFavorite: !activePage.isFavorite })} icon={<Star size={15} fill={activePage.isFavorite ? 'currentColor' : 'none'} />} />
+        <Button className="h-9 w-9 md:h-8 md:w-8" size="icon" onClick={() => createPage(activePage.id)} icon={<FilePlus2 size={15} />} />
         <Button className="hidden sm:inline-flex" size="icon" onClick={() => updatePage({ ...activePage, cover: activePage.cover ? null : 'stone' })} icon={<PanelTop size={16} />} />
-        <Button size="icon" variant="danger" onClick={archiveActivePage} icon={<Archive size={16} />} />
+        <Button className="h-9 w-9 md:h-8 md:w-8" size="icon" variant="danger" onClick={archiveActivePage} icon={<Archive size={15} />} />
       </div>
     </header>
   )

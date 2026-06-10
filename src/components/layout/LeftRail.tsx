@@ -19,11 +19,11 @@ export function LeftRail() {
   return (
     <aside
       className={cn(
-        "flex w-14 shrink-0 flex-col items-center gap-2 border-r border-border bg-rail pb-4",
-        activeView === "notes" ? "pt-12" : "pt-4"
+        "fixed inset-x-0 bottom-0 z-50 flex h-14 w-full shrink-0 items-center gap-1 overflow-x-auto border-t border-border bg-rail px-2 pb-[env(safe-area-inset-bottom)] md:static md:h-auto md:w-14 md:flex-col md:gap-2 md:overflow-visible md:border-r md:border-t-0 md:px-0 md:pb-4",
+        activeView === "notes" ? "md:pt-12" : "md:pt-4"
       )}
     >
-      <FileText className="mb-3 h-5 w-5 text-accent" />
+      <FileText className="mb-3 hidden h-5 w-5 text-accent md:block" />
       
       {/* Home Button */}
       <IconButton
@@ -50,7 +50,7 @@ export function LeftRail() {
         <Notebook size={18} />
       </IconButton>
 
-      <div className="my-2 h-[1px] w-8 bg-border" />
+      <div className="mx-1 h-8 w-[1px] shrink-0 bg-border md:my-2 md:h-[1px] md:w-8" />
 
       {/* PDF specific tools */}
       <IconButton
@@ -98,7 +98,7 @@ export function LeftRail() {
         <Paperclip size={18} />
       </IconButton>
 
-      <div className="flex-1" />
+      <div className="hidden flex-1 md:block" />
 
       <IconButton
         label="Settings"

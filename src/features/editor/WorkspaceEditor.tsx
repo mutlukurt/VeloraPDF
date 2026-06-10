@@ -467,7 +467,7 @@ export function WorkspaceEditor() {
     <motion.main key={activePage.id} className="h-full overflow-y-auto" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
       {activePage.cover ? <div className="h-40 border-b border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-muted),var(--accent-soft))]" /> : null}
       <DndContext sensors={sensors}>
-        <div className="mx-auto max-w-[var(--editor-max-width)] px-4 pb-28 pt-6 sm:px-6 md:px-8 md:pt-12">
+        <div className="mx-auto max-w-[var(--editor-max-width)] px-4 pb-28 pt-5 sm:px-6 md:px-8 md:pt-12">
           <div className="mb-6 flex items-start gap-3 md:gap-4">
             <div ref={iconPickerRef} className="relative shrink-0">
               <button
@@ -541,29 +541,29 @@ export function WorkspaceEditor() {
                 <span>·</span>
                 <span className="editor-word-count">{plainTextFromNode(activeDoc).split(/\s+/).filter(Boolean).length} words</span>
                 <span className="editor-word-count">·</span>
-                <button className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]" onClick={() => createPage(activePage.id)}>
+                <button className="inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]" onClick={() => createPage(activePage.id)}>
                   <Plus size={13} /> Subpage
                 </button>
                 <button
-                  className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
+                  className="inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
                   onClick={() => downloadText(`${activePage.title || 'kairnly-page'}.html`, exportPageHtml(activePage, editor?.getJSON() as TiptapDoc), 'text/html').catch((error) => alert(error instanceof Error ? error.message : 'HTML export failed.'))}
                 >
                   <Download size={13} /> HTML
                 </button>
                 <button
-                  className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
+                  className="inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
                   onClick={() => downloadText(`${activePage.title || 'kairnly-page'}.md`, exportPageMarkdown(activePage, editor?.getJSON() as TiptapDoc), 'text/markdown').catch((error) => alert(error instanceof Error ? error.message : 'Markdown export failed.'))}
                 >
                   <Download size={13} /> Markdown
                 </button>
                 <button
-                  className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
+                  className="inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
                   onClick={() => exportPagePdf(activePage, editor?.getJSON() as TiptapDoc).catch((error) => alert(error instanceof Error ? error.message : 'PDF export failed.'))}
                 >
                   <Download size={13} /> PDF
                 </button>
                 <button
-                  className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
+                  className="inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 py-1 hover:bg-[var(--surface-muted)]"
                   onClick={() => exportPagesAsPdfZip(collectPageFamily(activePage.id, pages), `${activePage.title || 'kairnly-page'}-pdfs.zip`).catch((error) => alert(error instanceof Error ? error.message : 'PDF ZIP export failed.'))}
                 >
                   <Download size={13} /> Page + subpages

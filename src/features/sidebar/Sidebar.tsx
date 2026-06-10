@@ -270,7 +270,7 @@ export function Sidebar({
   return (
     <motion.aside
       className={cn(
-        'fixed bottom-0 left-14 top-0 z-40 flex w-[min(292px,calc(100vw-56px))] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--sidebar)] shadow-lift transition-transform duration-200 md:static md:z-auto md:w-[292px] md:shadow-none',
+        'fixed bottom-0 left-0 top-0 z-[70] flex w-[min(320px,100vw)] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--sidebar)] shadow-lift transition-transform duration-200 md:static md:z-auto md:w-[292px] md:shadow-none',
         mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
       )}
       initial={false}
