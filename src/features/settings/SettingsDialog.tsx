@@ -7,6 +7,7 @@ import { exportPagesAsPdfZip } from '../../lib/export/pdf'
 import { useWorkspaceStore } from '../../lib/store/workspace'
 import { cn } from '../../lib/utils/cn'
 import { downloadBlob } from '../../lib/utils/files'
+import veloraIconUrl from '../../assets/velora-icon.png'
 
 type SettingsTab = 'appearance' | 'data' | 'editor' | 'about'
 
@@ -96,13 +97,13 @@ export function SettingsDialog() {
   ]
 
   return (
-    <Modal open={settingsOpen} onClose={() => setSettingsOpen(false)} className="max-w-4xl">
-      <div className="border-b border-[var(--border)] px-6 py-5">
+    <Modal open={settingsOpen} onClose={() => setSettingsOpen(false)} className="flex max-h-[calc(100dvh-1.5rem)] max-w-4xl flex-col" overlayClassName="pt-[6vh] pb-4">
+      <div className="shrink-0 border-b border-[var(--border)] px-6 py-5">
         <h2 className="text-lg font-semibold text-[var(--text)]">Settings</h2>
         <p className="mt-1 text-sm text-[var(--text-muted)]">Your workspace is stored locally on this device.</p>
       </div>
-      <div className="grid max-h-[72vh] gap-6 overflow-hidden p-6 md:grid-cols-[220px_1fr]">
-        <nav className="space-y-1 text-sm text-[var(--text-muted)]">
+      <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-6 overflow-hidden p-6 md:grid-cols-[220px_1fr] md:grid-rows-1">
+        <nav className="shrink-0 space-y-1 text-sm text-[var(--text-muted)]">
           {navItems.map((item) => {
             const Icon = item.icon
             return (
@@ -121,7 +122,7 @@ export function SettingsDialog() {
           })}
         </nav>
 
-        <div className="min-h-0 overflow-y-auto pr-1">
+        <div className="min-h-0 overflow-y-auto overscroll-contain pb-12 pr-1 touch-pan-y">
           {activeTab === 'appearance' ? (
             <div className="space-y-6">
               <section>
@@ -229,7 +230,7 @@ export function SettingsDialog() {
             <div className="space-y-5">
               <section className="rounded-2xl bg-[var(--surface-muted)] p-5">
                 <div className="flex items-center gap-3">
-                  <img src="/velora-icon.png" alt="Velora Notes" className="h-12 w-12 rounded-xl object-cover shadow-lift" />
+                  <img src={veloraIconUrl} alt="Velora Notes" className="h-12 w-12 rounded-xl object-cover shadow-lift" />
                   <div>
                     <h3 className="text-base font-semibold text-[var(--text)]">Velora Notes</h3>
                     <p className="text-xs text-[var(--text-muted)]">Version 1.0.2 · Local-first desktop workspace</p>

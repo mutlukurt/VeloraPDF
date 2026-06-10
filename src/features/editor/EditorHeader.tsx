@@ -17,7 +17,7 @@ export function EditorHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--background-translucent)] py-2 pl-16 pr-3 backdrop-blur-xl md:h-14 md:gap-3 md:px-6">
+    <header className="kairnly-editor-header sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--background-translucent)] py-2 pl-16 pr-3 backdrop-blur-xl md:h-14 md:gap-3 md:px-6">
       <div className="flex min-w-0 flex-1 items-center gap-2 text-xs text-[var(--text-muted)] md:text-sm">
         {breadcrumbs.map((page) => (
           <span key={page.id} className="flex items-center gap-2">

@@ -24,6 +24,7 @@ import { usePdfStore } from '../../stores/usePdfStore'
 import type { RecentFile } from '../../stores/usePdfStore'
 import { useUiStore } from '../../stores/useUiStore'
 import type { Page } from '../../types'
+import veloraIconUrl from '../../assets/velora-icon.png'
 import { buildPageTree, type PageNode } from './pageTree'
 
 type PageDropPlacement = 'before' | 'after' | 'inside'
@@ -285,7 +286,7 @@ export function Sidebar({
       animate={{ width: 292 }}
     >
       <div className="flex items-center gap-3 px-4 pt-12 pb-4">
-        <img src="/velora-icon.png" alt="Velora Notes" className="h-9 w-9 rounded-xl object-cover shadow-lift" />
+        <img src={veloraIconUrl} alt="Velora Notes" className="h-9 w-9 rounded-xl object-cover shadow-lift" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-sm font-semibold tracking-wide text-[var(--text)]">Velora Notes</h1>
           <p className="truncate text-xs text-[var(--text-faint)]">Private local workspace</p>

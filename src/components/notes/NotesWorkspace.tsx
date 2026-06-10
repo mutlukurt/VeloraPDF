@@ -19,7 +19,7 @@ export function NotesWorkspace({ onOpenRecentPdf }: { onOpenRecentPdf: (file: Re
     <div className="relative flex flex-1 overflow-hidden bg-[var(--background)] text-[var(--text)]">
       <button
         type="button"
-        className="fixed left-3 top-3 z-[80] grid h-10 w-10 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] shadow-lift md:hidden"
+        className="kairnly-mobile-sidebar-button fixed left-3 top-3 z-[80] grid h-10 w-10 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] shadow-lift md:hidden"
         onClick={() => setMobileSidebarOpen(true)}
         aria-label="Open notes sidebar"
       >

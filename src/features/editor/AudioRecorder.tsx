@@ -17,6 +17,52 @@ type AudioRecorderProps = {
 
 type RecorderStatus = 'idle' | 'requesting' | 'recording' | 'paused' | 'ready'
 type WindowWithWebkitAudio = Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }
+type AndroidRecorderPayload = {
+  ok: boolean
+  event?: 'started' | 'stopped' | 'paused' | 'resumed' | 'cancelled'
+  error?: string
+  src?: string
+  name?: string
+  mime?: string
+  duration?: number
+}
+type WindowWithAndroidRecorder = Window &
+  typeof globalThis & {
+    VeloraAndroidRecorder?: {
+      startRecording: (callbackId: string) => void
+      stopRecording: (callbackId: string) => void
+      pauseRecording: (callbackId: string) => void
+      resumeRecording: (callbackId: string) => void
+      cancelRecording: (callbackId: string) => void
+    }
+    __veloraAndroidRecorderCallback?: (callbackId: string, payload: AndroidRecorderPayload) => void
+  }
+
+const androidRecorderCallbacks = new Map<string, (payload: AndroidRecorderPayload) => void>()
+let androidRecorderCallbackSequence = 0
+
+function androidRecorder() {
+  return (window as WindowWithAndroidRecorder).VeloraAndroidRecorder
+}
+
+function callAndroidRecorder(action: keyof NonNullable<WindowWithAndroidRecorder['VeloraAndroidRecorder']>) {
+  const recorder = androidRecorder()
+  if (!recorder) return Promise.reject(new Error('Android recorder is not available.'))
+  const callbackId = `velora-recorder-${Date.now()}-${androidRecorderCallbackSequence++}`
+  return new Promise<AndroidRecorderPayload>((resolve) => {
+    androidRecorderCallbacks.set(callbackId, resolve)
+    recorder[action](callbackId)
+  })
+}
+
+if (typeof window !== 'undefined') {
+  ;(window as WindowWithAndroidRecorder).__veloraAndroidRecorderCallback = (callbackId, payload) => {
+    const resolve = androidRecorderCallbacks.get(callbackId)
+    if (!resolve) return
+    androidRecorderCallbacks.delete(callbackId)
+    resolve(payload)
+  }
+}
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -93,6 +139,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   const micSilenceStartedAtRef = useRef(0)
   const capturedBytesRef = useRef(0)
   const statusRef = useRef<RecorderStatus>('idle')
+  const nativeRecorderActiveRef = useRef(false)
 
   useEffect(() => {
     statusRef.current = status
@@ -173,6 +220,10 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   const resetRecording = (deleteStreamedFile = true) => {
     stopTimer()
     stopStream()
+    if (nativeRecorderActiveRef.current && deleteStreamedFile) {
+      callAndroidRecorder('cancelRecording').catch((cause) => console.error(cause))
+    }
+    nativeRecorderActiveRef.current = false
     recorderRef.current = null
     chunksRef.current = []
     pendingWritesRef.current = []
@@ -210,6 +261,23 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   const startRecording = async () => {
     try {
       resetRecording()
+      if (androidRecorder()) {
+        setStatus('requesting')
+        setError('')
+        setMicWarning('')
+        setInputLabel('Android microphone')
+        setMime('audio/mp4')
+        const response = await callAndroidRecorder('startRecording')
+        if (!response.ok) {
+          setError(response.error || 'Could not start Android audio recording.')
+          setStatus('idle')
+          return
+        }
+        nativeRecorderActiveRef.current = true
+        setStatus('recording')
+        startElapsedTimer()
+        return
+      }
       if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
         setError('Audio recording is not available on this device.')
         return
@@ -308,6 +376,21 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   }
 
   const pauseRecording = () => {
+    if (nativeRecorderActiveRef.current) {
+      callAndroidRecorder('pauseRecording')
+        .then((response) => {
+          if (!response.ok) {
+            setError(response.error || 'Could not pause recording.')
+            return
+          }
+          elapsedBeforePauseRef.current = elapsed
+          finalElapsedRef.current = elapsed
+          stopTimer()
+          setStatus('paused')
+        })
+        .catch(() => setError('Could not pause recording.'))
+      return
+    }
     const recorder = recorderRef.current
     if (!recorder || recorder.state !== 'recording') return
     recorder.pause()
@@ -318,6 +401,19 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   }
 
   const resumeRecording = () => {
+    if (nativeRecorderActiveRef.current) {
+      callAndroidRecorder('resumeRecording')
+        .then((response) => {
+          if (!response.ok) {
+            setError(response.error || 'Could not resume recording.')
+            return
+          }
+          setStatus('recording')
+          startElapsedTimer()
+        })
+        .catch(() => setError('Could not resume recording.'))
+      return
+    }
     const recorder = recorderRef.current
     if (!recorder || recorder.state !== 'paused') return
     recorder.resume()
@@ -326,6 +422,37 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   }
 
   const stopRecording = () => {
+    if (nativeRecorderActiveRef.current) {
+      callAndroidRecorder('stopRecording')
+        .then((response) => {
+          stopTimer()
+          nativeRecorderActiveRef.current = false
+          const finalDuration = finalElapsedRef.current || elapsedBeforePauseRef.current || elapsed || response.duration || 0
+          if (!response.ok || !response.src) {
+            setError(response.error || 'No audio data was captured.')
+            setStatus('idle')
+            return
+          }
+          readyRecordingRef.current = {
+            src: response.src,
+            name: response.name || recordingName(pageTitle, response.mime || 'audio/mp4'),
+            mime: response.mime || 'audio/mp4',
+            duration: finalDuration,
+          }
+          setRecordingUrl(response.src)
+          setMime(response.mime || 'audio/mp4')
+          setDuration(finalDuration)
+          setCurrentTime(0)
+          setStatus('ready')
+        })
+        .catch(() => {
+          stopTimer()
+          nativeRecorderActiveRef.current = false
+          setError('Could not finish Android audio recording.')
+          setStatus('idle')
+        })
+      return
+    }
     const recorder = recorderRef.current
     if (!recorder || recorder.state === 'inactive') return
     recorder.requestData()

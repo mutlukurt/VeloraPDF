@@ -7,14 +7,15 @@ type ModalProps = {
   onClose: () => void
   children: ReactNode
   className?: string
+  overlayClassName?: string
 }
 
-export function Modal({ open, onClose, children, className }: ModalProps) {
+export function Modal({ open, onClose, children, className, overlayClassName }: ModalProps) {
   return (
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="fixed inset-0 z-[100] grid place-items-start justify-center bg-black/20 px-4 pt-[12vh] backdrop-blur-sm"
+          className={cn('fixed inset-0 z-[100] grid place-items-start justify-center bg-black/20 px-4 pt-[12vh] backdrop-blur-sm', overlayClassName)}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

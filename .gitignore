@@ -22,6 +22,10 @@ VeloraPDF Mobile/android/.kotlin/
 VeloraPDF Mobile/android/build/
 VeloraPDF Mobile/android/app/build/
 VeloraPDF Mobile/android/app/.cxx/
+VeloraPDF Android APK v2/.gradle/
+VeloraPDF Android APK v2/build/
+VeloraPDF Android APK v2/app/build/
+VeloraPDF Android APK v2/app/.cxx/
 
 # Logs
 *.log

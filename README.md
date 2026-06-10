@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.33-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk">
+  <a href="downloads/Velora-PDF-Android-v2-arm64-v8a.apk">
     <img alt="Download for Android" src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white">
   </a>
 </p>
@@ -27,7 +27,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.33-aarch64.dmg)
 
-[Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
+[Download Velora PDF Android APK v2 for arm64-v8a](downloads/Velora-PDF-Android-v2-arm64-v8a.apk)
 
 Velora PDF is a private, local-first desktop PDF reader and lightweight annotation workspace for macOS.
 
@@ -49,7 +49,46 @@ Tauri build output:
 src-tauri/target/release/bundle/dmg/Velora PDF_1.0.33_aarch64.dmg
 ```
 
-## Download Android APK
+## Download Android APK v2
+
+Velora PDF Android APK v2 is a real native Android APK wrapper around the same mobile web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
+
+Most modern Android phones and tablets should use the arm64-v8a build:
+
+[Download Android APK v2 arm64-v8a](downloads/Velora-PDF-Android-v2-arm64-v8a.apk)
+
+Other Android APK v2 CPU builds:
+
+- [Download Android APK v2 armeabi-v7a](downloads/Velora-PDF-Android-v2-armeabi-v7a.apk)
+- [Download Android APK v2 x86](downloads/Velora-PDF-Android-v2-x86.apk)
+- [Download Android APK v2 x86_64](downloads/Velora-PDF-Android-v2-x86_64.apk)
+
+Current Android APK v2 release build outputs:
+
+```text
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2/Velora-PDF-Android-v2-armeabi-v7a.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2/Velora-PDF-Android-v2-arm64-v8a.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2/Velora-PDF-Android-v2-x86.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2/Velora-PDF-Android-v2-x86_64.apk
+```
+
+Android APK v2 project source:
+
+```text
+VeloraPDF Android APK v2/
+```
+
+Android APK v2 includes:
+
+- The root VeloraPDF mobile web UI embedded directly inside the APK.
+- Offline startup and app usage without the Android `INTERNET` permission.
+- Local bundled fonts and Velora icon assets so home, sidebar, and settings artwork render correctly offline.
+- Android-native microphone recording bridge for voice memos.
+- Android-specific top spacing for the Notes workspace and PDF editor so status bar/camera areas do not cover controls.
+- Mobile settings modal scrolling and positioning tuned for Android screens.
+- ABI-specific release APKs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+
+## Legacy Android Mobile APK
 
 Velora PDF Mobile is available as local Android APK builds for phones and tablets.
 
@@ -195,6 +234,15 @@ Desktop integration:
 - `@tauri-apps/plugin-fs`
 - Rust Tauri shell
 - macOS DMG bundle target
+
+Android APK v2 integration:
+
+- Native Android application module.
+- Android WebView with `androidx.webkit`.
+- `WebViewAssetLoader` serving embedded Vite assets from APK storage.
+- Android JavaScript bridge for native microphone recording.
+- ABI split APK release outputs for 32-bit and 64-bit Android targets.
+- No Android `INTERNET` permission.
 
 UI and interaction:
 
@@ -413,6 +461,13 @@ velora-pdf/
     icons/
     src/
     tauri.conf.json
+  VeloraPDF Android APK v2/
+    app/
+      src/main/
+        assets/web/
+        java/
+        res/
+      build.gradle
   public/
   package.json
   README.md
@@ -460,6 +515,25 @@ The generated DMG is located at:
 
 ```text
 src-tauri/target/release/bundle/dmg/
+```
+
+Build the Android APK v2 app:
+
+```bash
+npm run build
+rm -rf "VeloraPDF Android APK v2/app/src/main/assets/web"
+mkdir -p "VeloraPDF Android APK v2/app/src/main/assets/web"
+cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
+"VeloraPDF Mobile/android/gradlew" -p "VeloraPDF Android APK v2" assembleRelease
+```
+
+The Android APK v2 release outputs are copied to:
+
+```text
+downloads/Velora-PDF-Android-v2-armeabi-v7a.apk
+downloads/Velora-PDF-Android-v2-arm64-v8a.apk
+downloads/Velora-PDF-Android-v2-x86.apk
+downloads/Velora-PDF-Android-v2-x86_64.apk
 ```
 
 The current copied desktop installer is:
@@ -513,6 +587,11 @@ Released to fix the mobile web Notes sidebar action layering.
 Changes:
 
 - Opens Search and Quick directly above the mobile drawer by closing the drawer first and keeping command modals above mobile overlays.
+- Added Android APK v2 as a native offline WebView APK that embeds the root VeloraPDF mobile web app instead of using a PWA or the legacy Expo mobile UI.
+- Added APK v2 release builds for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+- Added an Android-native voice recording bridge so Notes voice memos record correctly inside the APK.
+- Bundled local fonts and Velora image assets so the APK works offline without broken logos or remote font requests.
+- Tuned Android APK spacing for the Notes workspace, PDF editor toolbar, and Settings modal so status bars, camera areas, and bottom navigation do not cover controls.
 
 ### 1.0.33
 

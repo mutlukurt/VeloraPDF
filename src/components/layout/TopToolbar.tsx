@@ -49,7 +49,7 @@ export function TopToolbar({ onOpenPdf, onSaveAnnotations, onExportPdf }: TopToo
   const setSidebarMode = useUiStore((state) => state.setSidebarMode);
 
   return (
-    <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-app px-2 py-2 md:h-14 md:flex-nowrap md:gap-4 md:py-0 md:pl-[92px] md:pr-4">
+    <header className="velora-pdf-top-toolbar flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-app px-2 py-2 md:h-14 md:flex-nowrap md:gap-4 md:py-0 md:pl-[92px] md:pr-4">
       <div className="flex min-w-0 flex-1 items-center gap-2 md:min-w-56 md:flex-none md:gap-3">
         <VeloraLogo className="h-9 w-9 rounded-xl" />
         <div className="min-w-0">
