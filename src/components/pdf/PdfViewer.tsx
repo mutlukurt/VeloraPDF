@@ -183,14 +183,6 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     };
   }, [commitPreviewZoom, schedulePreviewZoom]);
 
-  useEffect(() => {
-    const scroller = scrollerRef.current;
-    if (!scroller || pagedMode) return;
-    const pageElement = document.getElementById(`page-${currentPage}`);
-    if (!pageElement) return;
-    pageElement.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [currentPage, pagedMode]);
-
   const sidePanel = (
     <PdfSidePanelBoundary panelName={sidebarMode ?? "none"}>
       {sidebarMode === "thumbnails" ? <PdfThumbnailPanel pdf={pdf} /> : null}

@@ -18,7 +18,8 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
   const containerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);
   const [size, setSize] = useState({ width: 760 * displayZoom, height: 980 * displayZoom });
-  const [shouldRender, setShouldRender] = useState(pageNumber <= 3);
+  const [shouldRender, setShouldRender] = useState(pageNumber <= 8);
+  const [hasPainted, setHasPainted] = useState(false);
   const [textItems, setTextItems] = useState<any[]>([]);
 
   const searchQuery = usePdfStore((state) => state.searchQuery);
@@ -78,6 +79,7 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
         canvas.style.height = "100%";
         visibleContext.setTransform(1, 0, 0, 1, 0, 0);
         visibleContext.drawImage(buffer, 0, 0);
+        setHasPainted(true);
       })
       .catch(() => undefined);
     return () => task.cancel();
@@ -96,14 +98,14 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
     return () => observer.disconnect();
   }, [onVisible, pageNumber]);
 
-  // Virtualization scroll listener: load/unload canvases
+  // Preload nearby pages without clearing canvases that were already painted.
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         setShouldRender(entry.isIntersecting);
       },
-      { rootMargin: "1200px 0px" },
+      { rootMargin: "4200px 0px" },
     );
     observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -163,13 +165,8 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
           transformOrigin: "top left",
         }}
       >
-        {shouldRender ? (
-          <canvas ref={canvasRef} className="block h-full w-full" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-zinc-50 dark:bg-zinc-900 text-secondary text-xs">
-            Loading Page {pageNumber}...
-          </div>
-        )}
+        <canvas ref={canvasRef} className="block h-full w-full" />
+        {!hasPainted ? <div className="absolute inset-0 bg-white" /> : null}
 
         {/* Search highlights overlay */}
         {searchMatches.map((match) => (
