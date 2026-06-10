@@ -1,8 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Paperclip, Trash2, Download, Plus } from "lucide-react";
 import { usePdfStore } from "../../stores/usePdfStore";
-import { useAttachmentStore } from "../../stores/useAttachmentStore";
+import { useAttachmentStore, type AttachmentItem } from "../../stores/useAttachmentStore";
 import { Button } from "../ui/Button";
+
+const EMPTY_ATTACHMENTS: AttachmentItem[] = [];
 
 export function PdfAttachmentsPanel() {
   const activeFile = usePdfStore((state) => state.activeFile);
@@ -11,7 +13,7 @@ export function PdfAttachmentsPanel() {
   const [error, setError] = useState<string | null>(null);
 
   const attachments = useAttachmentStore(
-    (state) => state.attachments[fileId] || []
+    (state) => state.attachments[fileId] || EMPTY_ATTACHMENTS
   );
   const addAttachment = useAttachmentStore((state) => state.addAttachment);
   const deleteAttachment = useAttachmentStore((state) => state.deleteAttachment);

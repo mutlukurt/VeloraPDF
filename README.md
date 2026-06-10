@@ -4,7 +4,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.27-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.28-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -14,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.27-aarch64.dmg](downloads/Velora-PDF-1.0.27-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.28-aarch64.dmg](downloads/Velora-PDF-1.0.28-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.27.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.28.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.27_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.28_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -444,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.27.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.28.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.27
+1.0.28
 ```
 
 Bundle identifier:
@@ -484,6 +484,16 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.28
+
+Released to make the Attachments side panel open and work correctly when a PDF has no saved attachments yet.
+
+Changes:
+
+- Fixed the empty attachment list state so opening Attachments no longer trips the side-panel error boundary.
+- Keeps the Attachments panel functional for adding, downloading, and deleting document-associated files.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.28`.
 
 ### 1.0.27
 
