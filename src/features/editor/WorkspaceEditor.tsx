@@ -605,7 +605,10 @@ export function WorkspaceEditor() {
                   data-block-plus
                   aria-label="Add block"
                   className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-faint)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--text)]"
-                  onPointerDown={(event) => {
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                  }}
+                  onClick={(event) => {
                     event.preventDefault()
                     event.stopPropagation()
                     if (document.activeElement instanceof HTMLElement) document.activeElement.blur()

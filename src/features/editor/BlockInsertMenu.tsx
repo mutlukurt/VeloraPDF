@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from '../../lib/utils/cn'
 import { filterCommands, type CommandHelpers, type InsertContext } from './editorCommands'
@@ -95,11 +95,6 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
     onClose()
   }
 
-  const closeFromBackdrop = () => {
-    if (Date.now() - openedAtRef.current < 450) return
-    onClose()
-  }
-
   return (
     <AnimatePresence>
       {open ? (
@@ -116,7 +111,6 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
               onClick={(event) => {
                 event.preventDefault()
                 event.stopPropagation()
-                closeFromBackdrop()
               }}
             />
           ) : null}
@@ -147,7 +141,22 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
               className="h-8 flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--text-faint)]"
               inputMode="search"
             />
-            <kbd className="rounded-md border border-[var(--border)] px-1.5 py-1 text-[10px] text-[var(--text-faint)]">Esc</kbd>
+            {isTouchDevice ? (
+              <button
+                type="button"
+                className="grid h-8 w-8 place-items-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-muted)]"
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onClose()
+                }}
+                aria-label="Close block menu"
+              >
+                <X size={16} />
+              </button>
+            ) : (
+              <kbd className="rounded-md border border-[var(--border)] px-1.5 py-1 text-[10px] text-[var(--text-faint)]">Esc</kbd>
+            )}
           </div>
           <div className={cn('overflow-y-auto p-1.5', isTouchDevice ? 'max-h-[calc(72dvh-57px)] touch-pan-y overscroll-contain' : 'max-h-[430px]')}>
             {categoryOrder.map((category) => {
