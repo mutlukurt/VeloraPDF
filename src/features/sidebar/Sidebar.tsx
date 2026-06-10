@@ -182,9 +182,16 @@ export function Sidebar({
     if (activeFile && pdf) {
       setActiveView('pdf')
       setPdfSidebarMode('thumbnails')
+      onMobileClose?.()
       return
     }
     onOpenRecentPdf(lastPdf)
+    onMobileClose?.()
+  }
+
+  const openCommandPalette = () => {
+    onMobileClose?.()
+    setCommandPaletteOpen(true)
   }
 
   const isDescendant = (node: PageNode, candidateId: string): boolean =>
@@ -261,7 +268,7 @@ export function Sidebar({
         <div className="mt-4 flex flex-col gap-2">
           <Button size="icon" onClick={() => createPage()} icon={<FilePlus2 size={17} />} />
           <Button size="icon" onClick={openLastPdf} disabled={!lastPdf} title={lastPdf ? `Open last PDF: ${lastPdf.name}` : 'No recent PDF'} icon={<FileText size={17} />} />
-          <Button size="icon" onClick={() => setCommandPaletteOpen(true)} icon={<Command size={17} />} />
+          <Button size="icon" onClick={openCommandPalette} icon={<Command size={17} />} />
           <Button size="icon" onClick={() => setSettingsOpen(true)} icon={<Settings size={17} />} />
         </div>
       </aside>
@@ -303,10 +310,10 @@ export function Sidebar({
           {lastPdf?.pageCount ? <span className="text-[11px] font-medium text-[var(--text-faint)]">{lastPdf.pageCount}p</span> : null}
         </Button>
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="soft" onClick={() => setCommandPaletteOpen(true)} icon={<Search size={15} />}>
+          <Button variant="soft" onClick={openCommandPalette} icon={<Search size={15} />}>
             Search
           </Button>
-          <Button variant="soft" onClick={() => setCommandPaletteOpen(true)} icon={<Command size={15} />}>
+          <Button variant="soft" onClick={openCommandPalette} icon={<Command size={15} />}>
             Quick
           </Button>
         </div>

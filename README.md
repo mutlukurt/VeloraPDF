@@ -471,7 +471,7 @@ The current copied desktop installer is:
 ## Current Version
 
 ```text
-1.0.33
+1.0.34
 ```
 
 Bundle identifier:
@@ -505,6 +505,14 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.34
+
+Released to fix the mobile web Notes sidebar action layering.
+
+Changes:
+
+- Opens Search and Quick directly above the mobile drawer by closing the drawer first and keeping command modals above mobile overlays.
 
 ### 1.0.33
 
