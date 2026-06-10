@@ -41,8 +41,8 @@ export function registerShortcuts(handlers: ShortcutHandlers) {
       event.preventDefault();
       event.shiftKey ? handlers.redo() : handlers.undo();
     }
-    if (event.key === "ArrowRight") handlers.nextPage();
-    if (event.key === "ArrowLeft") handlers.previousPage();
+    if (event.key === "ArrowRight" || event.key === "PageDown") handlers.nextPage();
+    if (event.key === "ArrowLeft" || event.key === "PageUp") handlers.previousPage();
     if (event.key === " ") handlers.setTool("hand");
     if (event.key === "Escape") handlers.closePanel();
   };

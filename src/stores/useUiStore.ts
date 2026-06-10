@@ -24,6 +24,7 @@ export type ViewSettings = {
   eyeProtection: boolean;
   showGaps: boolean;
   singlePage: boolean;
+  pageBackground: string;
 };
 
 type UiState = {
@@ -53,13 +54,21 @@ function initialTheme(): ThemeMode {
 }
 
 function initialSettings(): ViewSettings {
+  const defaults = {
+    continuous: true,
+    eyeProtection: false,
+    showGaps: true,
+    singlePage: true,
+    pageBackground: "#ECECF1",
+  };
+
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if (raw) return { continuous: true, eyeProtection: false, showGaps: true, singlePage: true, ...JSON.parse(raw) };
+    if (raw) return { ...defaults, ...JSON.parse(raw) };
   } catch {
-    return { continuous: true, eyeProtection: false, showGaps: true, singlePage: true };
+    return defaults;
   }
-  return { continuous: true, eyeProtection: false, showGaps: true, singlePage: true };
+  return defaults;
 }
 
 export const useUiStore = create<UiState>((set, get) => ({

@@ -5,6 +5,8 @@ import { IconButton } from "../ui/IconButton";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
 
+const pageBackgrounds = ["#ECECF1", "#F0EDFF", "#FFF7DA", "#24242B"];
+
 export function RightInspector() {
   const open = useUiStore((state) => state.rightPanelOpen);
   const setRightPanelOpen = useUiStore((state) => state.setRightPanelOpen);
@@ -47,8 +49,15 @@ export function RightInspector() {
             <section>
               <div className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-secondary">Page background</div>
               <div className="grid grid-cols-4 gap-2">
-                {["#ECECF1", "#F0EDFF", "#FFF7DA", "#24242B"].map((color) => (
-                  <div key={color} className="h-12 rounded-xl border border-border shadow-inner" style={{ background: color }} />
+                {pageBackgrounds.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    aria-label={`Set page background to ${color}`}
+                    className={`h-12 rounded-xl border shadow-inner transition ${viewSettings.pageBackground === color ? "border-accent ring-2 ring-[var(--accent)]/20" : "border-border hover:border-accent"}`}
+                    style={{ background: color }}
+                    onClick={() => updateViewSettings({ pageBackground: color })}
+                  />
                 ))}
               </div>
             </section>

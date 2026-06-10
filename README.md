@@ -4,7 +4,7 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.25-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.26-aarch64.dmg)
 
 [Download Velora PDF Mobile for Android arm64-v8a](downloads/Velora-PDF-Mobile-1.0.0-arm64-v8a.apk)
 
@@ -14,18 +14,18 @@ It is designed for people who want a calm, premium PDF reading experience withou
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.25-aarch64.dmg](downloads/Velora-PDF-1.0.25-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.26-aarch64.dmg](downloads/Velora-PDF-1.0.26-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.25.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.26.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.25_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.26_aarch64.dmg
 ```
 
 ## Download Android APK
@@ -444,13 +444,13 @@ src-tauri/target/release/bundle/dmg/
 The current copied desktop installer is:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.25.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.26.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.25
+1.0.26
 ```
 
 Bundle identifier:
@@ -485,15 +485,17 @@ aarch64
 
 ## Version History
 
-### 1.0.25
+### 1.0.26
 
-Released to fix opening notes from the home screen.
+Released to make the View Settings panel fully functional in the desktop reader.
 
 Changes:
 
-- Prevented Notes workspace initialization from replacing an already selected note with the default first/favorite page.
-- Fixes `Your Notes & Documents` cards so clicking a note opens that exact page.
-- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.25`.
+- Connected Single Page, Continuous Scrolling, Eye Protection Mode, Show Gaps Between Pages, and Page Background controls to the PDF reading workspace.
+- Added paged wheel navigation for non-continuous reading mode and PageUp/PageDown keyboard navigation.
+- Added selectable page background swatches with persisted local settings.
+- Built and copied the macOS aarch64 DMG to the desktop and `downloads/Velora-PDF-1.0.26-aarch64.dmg`.
+- Synchronized package, Tauri, Cargo, README, and DMG release metadata to `1.0.26`.
 
 ### 1.0.24
 

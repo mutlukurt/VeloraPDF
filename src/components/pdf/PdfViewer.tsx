@@ -15,6 +15,7 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const zoom = usePdfStore((state) => state.zoom);
   const setCurrentPage = usePdfStore((state) => state.setCurrentPage);
   const setZoom = usePdfStore((state) => state.setZoom);
+  const currentPage = usePdfStore((state) => state.currentPage);
   const sidebarMode = useUiStore((state) => state.sidebarMode);
   const viewSettings = useUiStore((state) => state.viewSettings);
   const [previewZoom, setPreviewZoom] = useState<number | null>(null);
@@ -26,7 +27,20 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
   const wheelCommitTimer = useRef<number | null>(null);
   const previewFrame = useRef<number | null>(null);
   const pendingScrollAnchor = useRef<{ ratio: number; left: number; top: number; width: number; height: number } | null>(null);
+  const pagedWheelLock = useRef<number | null>(null);
   const effectiveZoom = previewZoom ?? zoom;
+  const pagedMode = !viewSettings.continuous;
+  const spreadMode = !viewSettings.singlePage;
+  const firstSpreadPage = currentPage % 2 === 0 ? Math.max(1, currentPage - 1) : currentPage;
+  const renderedPages = pagedMode
+    ? pages.filter((page) => (spreadMode ? page === firstSpreadPage || page === firstSpreadPage + 1 : page === currentPage))
+    : pages;
+  const workspaceBackground = viewSettings.eyeProtection ? "#F4EFD9" : viewSettings.pageBackground;
+  const pageTone = viewSettings.eyeProtection ? "eye-protection" : "default";
+  const pageGapClass = viewSettings.showGaps ? "gap-16" : "gap-0";
+  const pageLayoutClass = spreadMode
+    ? `grid w-fit max-w-full grid-cols-1 justify-items-center lg:grid-cols-2 ${pageGapClass}`
+    : `flex w-fit flex-col items-center ${pageGapClass}`;
 
   const schedulePreviewZoom = useCallback((nextZoom: number) => {
     const clamped = Math.min(Math.max(nextZoom, 0.45), 2.6);
@@ -84,6 +98,23 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
     [commitPreviewZoom, schedulePreviewZoom, zoom],
   );
 
+  const handlePagedWheel = useCallback(
+    (event: React.WheelEvent<HTMLDivElement>) => {
+      if (!pagedMode || event.ctrlKey || Math.abs(event.deltaY) < 18) return;
+      event.preventDefault();
+
+      if (pagedWheelLock.current !== null) return;
+
+      const step = spreadMode ? 2 : 1;
+      const nextPage = event.deltaY > 0 ? currentPage + step : currentPage - step;
+      setCurrentPage(nextPage);
+      pagedWheelLock.current = window.setTimeout(() => {
+        pagedWheelLock.current = null;
+      }, 180);
+    },
+    [currentPage, pagedMode, setCurrentPage, spreadMode],
+  );
+
   useEffect(() => {
     const handleGestureStart = (event: Event) => {
       event.preventDefault();
@@ -112,8 +143,17 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       document.removeEventListener("gestureend", handleGestureEnd);
       if (previewFrame.current !== null) window.cancelAnimationFrame(previewFrame.current);
       if (wheelCommitTimer.current !== null) window.clearTimeout(wheelCommitTimer.current);
+      if (pagedWheelLock.current !== null) window.clearTimeout(pagedWheelLock.current);
     };
   }, [commitPreviewZoom, schedulePreviewZoom]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || pagedMode) return;
+    const pageElement = document.getElementById(`page-${currentPage}`);
+    if (!pageElement) return;
+    pageElement.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [currentPage, pagedMode]);
 
   return (
     <div className="relative flex min-w-0 flex-1 overflow-hidden">
@@ -124,14 +164,26 @@ export function PdfViewer({ pdf }: { pdf: PDFDocumentProxy }) {
       {sidebarMode === "attachments" ? <PdfAttachmentsPanel /> : null}
       <div
         ref={scrollerRef}
-        className={`relative flex-1 overflow-auto overscroll-contain ${viewSettings.eyeProtection ? "bg-[#F4EFD9] dark:bg-[#1f1d16]" : "bg-pdf-canvas"}`}
-        onWheel={handleWheel}
+        className="relative flex-1 overflow-auto overscroll-contain transition-colors"
+        style={{ background: workspaceBackground }}
+        onWheel={(event) => {
+          handleWheel(event);
+          handlePagedWheel(event);
+        }}
       >
         <div
-          className={`mx-auto flex min-h-full w-fit flex-col items-center px-12 py-12 ${viewSettings.showGaps ? "gap-16" : "gap-4"}`}
+          className={`mx-auto min-h-full px-12 py-12 ${pageLayoutClass}`}
         >
-          {pages.map((page) => (
-            <PdfPage key={page} pdf={pdf} pageNumber={page} zoom={zoom} displayZoom={effectiveZoom} onVisible={onVisible} />
+          {renderedPages.map((page) => (
+            <PdfPage
+              key={page}
+              pdf={pdf}
+              pageNumber={page}
+              zoom={zoom}
+              displayZoom={effectiveZoom}
+              onVisible={onVisible}
+              pageTone={pageTone}
+            />
           ))}
         </div>
       </div>

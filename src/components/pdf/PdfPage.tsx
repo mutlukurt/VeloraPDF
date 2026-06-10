@@ -2,6 +2,7 @@ import { memo, useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from "pdfjs-dist";
 import { AnnotationLayer } from "./AnnotationLayer";
 import { usePdfStore } from "../../stores/usePdfStore";
+import { cn } from "../../lib/utils/cn";
 
 type PdfPageProps = {
   pdf: PDFDocumentProxy;
@@ -9,9 +10,10 @@ type PdfPageProps = {
   zoom: number;
   displayZoom: number;
   onVisible: (page: number) => void;
+  pageTone?: "default" | "eye-protection";
 };
 
-export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoom, onVisible }: PdfPageProps) {
+export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoom, onVisible, pageTone = "default" }: PdfPageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);
@@ -146,11 +148,14 @@ export const PdfPage = memo(function PdfPage({ pdf, pageNumber, zoom, displayZoo
     <div
       ref={containerRef}
       id={`page-${pageNumber}`}
-      className="relative mx-auto overflow-hidden bg-white shadow-[0_26px_80px_rgba(0,0,0,.28)]"
+      className={cn(
+        "relative mx-auto overflow-hidden bg-white shadow-[0_26px_80px_rgba(0,0,0,.28)]",
+        pageTone === "eye-protection" && "bg-[#FFF8DC]",
+      )}
       style={{ width: cropWidth, height: cropHeight }}
     >
       <div
-        className="relative"
+        className={cn("relative", pageTone === "eye-protection" && "brightness-[0.96] sepia-[0.18]")}
         style={{
           transform: cropPercent ? `translate(${-cropX}px, ${-cropY}px)` : undefined,
           width: size.width,
