@@ -4,6 +4,7 @@ import { TopToolbar } from "./TopToolbar";
 import { HomeScreen } from "../home/HomeScreen";
 import { PdfViewer } from "../pdf/PdfViewer";
 import { NotesWorkspace } from "../notes/NotesWorkspace";
+import { NotebookWorkspace } from "../notebook/NotebookWorkspace";
 import { SettingsDialog } from "../../features/settings/SettingsDialog";
 import { usePdfStore } from "../../stores/usePdfStore";
 import type { RecentFile } from "../../stores/usePdfStore";
@@ -27,6 +28,18 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
         <div className="flex h-dvh w-screen overflow-hidden bg-app pb-14 text-primary md:pb-0">
           <LeftRail />
           <NotesWorkspace onOpenRecentPdf={onOpenRecentPdf} />
+        </div>
+        <SettingsDialog />
+      </>
+    );
+  }
+
+  if (activeView === "notebook") {
+    return (
+      <>
+        <div className="flex h-dvh w-screen overflow-hidden bg-app pb-14 text-primary md:pb-0">
+          <LeftRail />
+          <NotebookWorkspace />
         </div>
         <SettingsDialog />
       </>

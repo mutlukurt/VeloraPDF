@@ -1,8 +1,8 @@
-# VeloraPDF Android APK v2
+# VeloraPDF Android WebView APK v2.1
 
 Native Android WebView wrapper for the root VeloraPDF Vite web app.
 
-This is the Android APK v2 build requested for the mobile web experience. It is a real APK, not a PWA, and it does not use the legacy Expo/React Native mobile UI from `VeloraPDF Mobile/`.
+This is the Android WebView APK build for the Velora PDF web experience. It is a real APK, not a PWA, and it replaces the removed legacy Expo/React Native mobile app.
 
 The release APK embeds the built web assets under `app/src/main/assets/web` and loads them with Android `WebViewAssetLoader` from:
 
@@ -28,19 +28,19 @@ Because every app asset is packaged inside the APK, the release does not request
 
 ## Release APKs
 
-The current v2 APKs are stored in the root `downloads/` folder:
+The current v2.1 APKs are stored in the root `downloads/` folder:
 
 | Device / CPU | APK |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2-x86.apk`](../downloads/Velora-PDF-Android-v2-x86.apk) |
-| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2-x86_64.apk`](../downloads/Velora-PDF-Android-v2-x86_64.apk) |
+| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2.1-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2.1-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2.1-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2.1-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2.1-x86.apk`](../downloads/Velora-PDF-Android-v2.1-x86.apk) |
+| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2.1-x86_64.apk`](../downloads/Velora-PDF-Android-v2.1-x86_64.apk) |
 
 They are also copied locally to:
 
 ```text
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2/
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1/
 ```
 
 ## Screenshots
@@ -74,16 +74,16 @@ npm run build
 rm -rf "VeloraPDF Android APK v2/app/src/main/assets/web"
 mkdir -p "VeloraPDF Android APK v2/app/src/main/assets/web"
 cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
-"VeloraPDF Mobile/android/gradlew" -p "VeloraPDF Android APK v2" assembleRelease
+"./VeloraPDF Android APK v2/gradlew" -p "VeloraPDF Android APK v2" assembleRelease
 ```
 
 Copy release outputs:
 
 ```bash
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-armeabi-v7a-release.apk" downloads/Velora-PDF-Android-v2-armeabi-v7a.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-arm64-v8a-release.apk" downloads/Velora-PDF-Android-v2-arm64-v8a.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86-release.apk" downloads/Velora-PDF-Android-v2-x86.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.apk" downloads/Velora-PDF-Android-v2-x86_64.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-armeabi-v7a-release.apk" downloads/Velora-PDF-Android-v2.1-armeabi-v7a.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-arm64-v8a-release.apk" downloads/Velora-PDF-Android-v2.1-arm64-v8a.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86-release.apk" downloads/Velora-PDF-Android-v2.1-x86.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.apk" downloads/Velora-PDF-Android-v2.1-x86_64.apk
 ```
 
 ## Verification
@@ -91,8 +91,8 @@ cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.ap
 The current release was verified with Android SDK build-tools:
 
 - package name: `com.mutlukurt.velorapdfmobile`
-- version code: `2`
-- version name: `2.0.0`
+- version code: `21`
+- version name: `2.1.0`
 - APK Signature Scheme v2: enabled
 - native-code splits: `armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`
 - permission present: `android.permission.RECORD_AUDIO`

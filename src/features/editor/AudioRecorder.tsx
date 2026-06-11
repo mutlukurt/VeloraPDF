@@ -2,7 +2,7 @@ import { AudioLines, Mic, Pause, Play, RotateCcw, Save, SkipBack, SkipForward, S
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { appendVoiceRecordingChunk, canStreamVoiceRecording, createVoiceRecordingFile, deleteVoiceRecordingFile } from '../../lib/tauri/voiceRecording'
 
-type AudioRecording = {
+export type AudioRecording = {
   src: string
   name: string
   mime: string
@@ -13,6 +13,7 @@ type AudioRecording = {
 type AudioRecorderProps = {
   pageTitle: string
   onInsertRecording: (recording: AudioRecording) => void
+  className?: string
 }
 
 type RecorderStatus = 'idle' | 'requesting' | 'recording' | 'paused' | 'ready'
@@ -156,7 +157,7 @@ function blobToDataUrl(blob: Blob) {
   })
 }
 
-export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderProps) {
+export function AudioRecorder({ pageTitle, onInsertRecording, className }: AudioRecorderProps) {
   const [status, setStatus] = useState<RecorderStatus>('idle')
   const [error, setError] = useState('')
   const [recordingUrl, setRecordingUrl] = useState('')
@@ -536,7 +537,7 @@ export function AudioRecorder({ pageTitle, onInsertRecording }: AudioRecorderPro
   }, [])
 
   return (
-    <section className="mt-5 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_44px_rgba(31,31,28,0.06)]">
+    <section className={className ?? "mt-5 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_44px_rgba(31,31,28,0.06)]"}>
       <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
         <div className="flex min-w-[190px] items-center gap-2">
           <span className={`grid h-9 w-9 place-items-center rounded-lg ${status === 'recording' ? 'bg-red-500/10 text-red-500' : 'bg-[var(--accent-soft)] text-[var(--accent)]'}`}>

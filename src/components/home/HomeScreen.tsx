@@ -1,4 +1,4 @@
-import { Clock, FolderOpen, Notebook, Plus } from "lucide-react";
+import { Clock, FolderOpen, Notebook, NotebookPen, Plus } from "lucide-react";
 import { VeloraLogo } from "../brand/VeloraLogo";
 import { Button } from "../ui/Button";
 import { RecentFilesGrid } from "./RecentFilesGrid";
@@ -50,6 +50,10 @@ export function HomeScreen({ onOpenPdf, onOpenRecentPdf }: { onOpenPdf: () => vo
             <Button className="w-full sm:w-auto" variant="secondary" onClick={() => setActiveView("notes")}>
               <Notebook size={17} />
               Open Workspace
+            </Button>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={() => setActiveView("notebook")}>
+              <NotebookPen size={17} />
+              Open Notebook
             </Button>
           </div>
         </div>

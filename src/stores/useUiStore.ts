@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type ThemeMode = "light" | "dark";
 export type SidebarMode = "home" | "thumbnails" | "search" | "bookmarks" | "comments" | "attachments" | "settings" | null;
-export type ActiveView = "pdf" | "notes";
+export type ActiveView = "pdf" | "notes" | "notebook";
 export type ActiveTool =
   | "select"
   | "hand"

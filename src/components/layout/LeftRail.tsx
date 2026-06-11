@@ -1,4 +1,4 @@
-import { FileText, Home, MessageSquareText, Paperclip, Search, Settings, Sidebar, Star, Notebook } from "lucide-react";
+import { FileText, Home, MessageSquareText, Notebook, NotebookPen, Paperclip, Search, Settings, Sidebar, Star } from "lucide-react";
 import { IconButton } from "../ui/IconButton";
 import { usePdfStore } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
@@ -20,7 +20,7 @@ export function LeftRail() {
     <aside
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 flex h-14 w-full shrink-0 items-center gap-1 overflow-x-auto border-t border-border bg-rail px-2 pb-[env(safe-area-inset-bottom)] md:static md:h-auto md:w-14 md:flex-col md:gap-2 md:overflow-visible md:border-r md:border-t-0 md:px-0 md:pb-4",
-        activeView === "notes" ? "md:pt-12" : "md:pt-4"
+        activeView === "notes" || activeView === "notebook" ? "md:pt-12" : "md:pt-4"
       )}
     >
       <FileText className="mb-3 hidden h-5 w-5 text-accent md:block" />
@@ -48,6 +48,17 @@ export function LeftRail() {
         }}
       >
         <Notebook size={18} />
+      </IconButton>
+
+      <IconButton
+        label="Notebook"
+        active={activeView === "notebook"}
+        onClick={() => {
+          setActiveView("notebook");
+          setSidebarMode(null);
+        }}
+      >
+        <NotebookPen size={18} />
       </IconButton>
 
       <div className="mx-1 h-8 w-[1px] shrink-0 bg-border md:my-2 md:h-[1px] md:w-8" />
