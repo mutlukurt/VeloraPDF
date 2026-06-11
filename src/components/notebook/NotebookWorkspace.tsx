@@ -182,16 +182,16 @@ export function NotebookWorkspace() {
   if (activeNotebook) {
     return (
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[var(--workspace)] text-[var(--text)]">
-        <header className="kairnly-editor-header flex min-h-14 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--background-translucent)] px-4 py-2 pl-16 backdrop-blur-xl md:h-14 md:px-6">
-          <Button size="icon" variant="secondary" onClick={() => setActiveNotebookId(null)} icon={<ArrowLeft size={17} />} aria-label="Back to notebooks" />
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]">
+        <header className="kairnly-editor-header notebook-active-header flex min-h-14 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--background-translucent)] px-4 py-2 pl-16 backdrop-blur-xl md:h-14 md:px-6">
+          <Button className="notebook-active-back" size="icon" variant="secondary" onClick={() => setActiveNotebookId(null)} icon={<ArrowLeft size={17} />} aria-label="Back to notebooks" />
+          <div className="notebook-active-icon grid h-9 w-9 place-items-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]">
             <NotebookTabs size={18} />
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="notebook-active-title min-w-0 flex-1">
             <div className="truncate text-sm font-black text-[var(--text)]">{activeNotebook.title}</div>
             <div className="truncate text-xs font-semibold text-[var(--text-faint)]">{activeFolder?.name ?? 'All notebooks'}</div>
           </div>
-          <Button size="sm" variant="secondary" onClick={() => handleExport(activeNotebook)} icon={<Download size={15} />} disabled={busyExportId === activeNotebook.id}>
+          <Button className="notebook-active-export" size="sm" variant="secondary" onClick={() => handleExport(activeNotebook)} icon={<Download size={15} />} disabled={busyExportId === activeNotebook.id}>
             PDF
           </Button>
         </header>
@@ -242,18 +242,18 @@ export function NotebookWorkspace() {
         ))}
       </aside>
       <section className="min-w-0 flex-1 overflow-auto px-4 pb-24 pt-6 md:px-8">
-        <header className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+        <header className="notebook-library-header mb-6 flex flex-wrap items-center gap-3">
+          <div className="notebook-library-icon grid h-12 w-12 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
             <NotebookTabs size={22} />
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="notebook-library-copy min-w-0 flex-1">
             <h1 className="truncate text-2xl font-black text-[var(--text)]">{activeFolder?.name ?? 'Notebook Library'}</h1>
             <p className="text-sm font-semibold text-[var(--text-faint)]">Create, organize, export, and open handwritten notebooks.</p>
           </div>
-          <Button variant="secondary" onClick={createFolder} icon={<FolderPlus size={16} />}>
+          <Button className="notebook-library-action" variant="secondary" onClick={createFolder} icon={<FolderPlus size={16} />}>
             Folder
           </Button>
-          <Button variant="primary" onClick={createNotebook} icon={<Plus size={16} />}>
+          <Button className="notebook-library-action" variant="primary" onClick={createNotebook} icon={<Plus size={16} />}>
             Notebook
           </Button>
         </header>

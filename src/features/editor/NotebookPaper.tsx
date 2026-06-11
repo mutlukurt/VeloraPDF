@@ -78,6 +78,11 @@ function mobileFitZoom() {
   return clampZoom((window.innerWidth - 32) / PAPER_WIDTH)
 }
 
+function mobilePaperHeightScale() {
+  if (typeof window === 'undefined' || window.innerWidth >= 768) return 1
+  return 1.28
+}
+
 function dataUrlToBlobUrl(dataUrl: string) {
   const [header = '', data = ''] = dataUrl.split(',')
   const mime = header.match(/data:([^;]+)/)?.[1] || 'audio/mp4'
@@ -131,6 +136,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
   const pinchingRef = useRef(false)
   const pagePanRef = useRef<{ pointerId: number; x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null)
   const pageCount = Math.max(MIN_PAGE_COUNT, state.pageCount)
+  const displayPaperHeight = Math.round(PAPER_HEIGHT * zoom * mobilePaperHeightScale())
   const pages = useMemo(() => Array.from({ length: pageCount }, (_, index) => index + 1), [pageCount])
   const currentStrokes = useMemo(() => state.strokes.filter((stroke) => stroke.page === currentPage), [currentPage, state.strokes])
   const sortedRecordings = useMemo(() => [...state.recordings].sort((left, right) => right.createdAt - left.createdAt), [state.recordings])
@@ -532,7 +538,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
               <div
                 key={page}
                 className="paper-page relative overflow-hidden rounded-lg border border-[var(--border)] bg-[#fffef9]"
-                style={{ width: `${Math.round(PAPER_WIDTH * zoom)}px`, height: `${Math.round(PAPER_HEIGHT * zoom)}px`, touchAction: 'none', cursor: palmRejection ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
+                style={{ width: `${Math.round(PAPER_WIDTH * zoom)}px`, height: `${displayPaperHeight}px`, touchAction: 'none', cursor: palmRejection ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
                 onPointerDown={(event) => {
                   setActivePage(page)
                   if (beginPagePan(event)) return
