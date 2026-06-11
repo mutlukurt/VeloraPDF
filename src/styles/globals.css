@@ -774,4 +774,101 @@ input {
     scroll-padding-bottom: 7rem;
     scroll-padding-top: 0.75rem;
   }
+
+  .notebook-paper {
+    border-radius: 1rem;
+  }
+
+  .notebook-paper-toolbar {
+    gap: 0.45rem;
+    padding: 0.65rem;
+  }
+
+  .notebook-paper-toolbar > .mx-1 {
+    margin-inline: 0.1rem;
+    height: 1.65rem;
+  }
+
+  .paper-tool {
+    width: 2rem;
+    min-height: 2rem;
+    border-radius: 0.5rem;
+  }
+
+  .paper-swatch {
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: 0.45rem;
+  }
+
+  .paper-zoom-value,
+  .paper-page-count {
+    padding-inline: 0.45rem;
+    font-size: 0.68rem;
+  }
+
+  .paper-player-list {
+    order: 20;
+    min-width: 0;
+    width: 100%;
+    border-radius: 0.75rem;
+  }
+
+  .paper-player-icon,
+  .paper-player-button {
+    width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 0.48rem;
+  }
+
+  .paper-player-items {
+    max-height: 6.5rem;
+  }
+
+  .paper-player-row {
+    gap: 0.3rem;
+  }
+
+  .paper-player-label {
+    min-width: 4.5rem;
+    font-size: 0.7rem;
+  }
+
+  .paper-player-time {
+    min-width: auto;
+    flex: 1 0 auto;
+    text-align: left;
+  }
+
+  .paper-player-empty {
+    min-height: 1.85rem;
+    font-size: 0.72rem;
+  }
+
+  .notebook-recorder-wrap {
+    padding: 0.65rem;
+  }
+
+  .notebook-recorder-wrap > section > div {
+    gap: 0.6rem;
+  }
+
+  .notebook-recorder-wrap > section > div > div {
+    min-width: 0;
+  }
+
+  .notebook-recorder-wrap > section > div > div:first-child,
+  .notebook-recorder-wrap > section > div > div:nth-child(3) {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .notebook-recorder-wrap > section > div > div:first-child {
+    align-items: flex-start;
+  }
+
+  .notebook-scroll {
+    padding: 0.75rem 0.35rem 1rem;
+    scroll-padding-bottom: 6rem;
+  }
 }

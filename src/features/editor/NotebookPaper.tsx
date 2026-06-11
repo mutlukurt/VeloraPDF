@@ -32,6 +32,8 @@ export type PaperState = {
   recordings: PaperRecording[]
 }
 export const MIN_PAGE_COUNT = 10
+const PAPER_WIDTH = 794
+const PAPER_HEIGHT = 1123
 const colors = ['#15151a', '#5b4dff', '#b45a4d', '#2f6f8f', '#d8aa22', '#5f8f62', '#a85d86']
 
 export function notebookPaperStorageKey(pageId: string) {
@@ -68,7 +70,12 @@ function formatDuration(seconds: number) {
 }
 
 function clampZoom(value: number) {
-  return Math.max(0.7, Math.min(2.4, value))
+  return Math.max(0.42, Math.min(2.4, value))
+}
+
+function mobileFitZoom() {
+  if (typeof window === 'undefined' || window.innerWidth >= 768) return 1
+  return clampZoom((window.innerWidth - 32) / PAPER_WIDTH)
 }
 
 function dataUrlToBlobUrl(dataUrl: string) {
@@ -106,7 +113,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
   const [palmRejection, setPalmRejection] = useState(true)
   const [draft, setDraft] = useState<{ page: number; points: PaperPoint[] } | null>(null)
   const [undone, setUndone] = useState<PaperStroke[]>([])
-  const [zoom, setZoom] = useState(1)
+  const [zoom, setZoom] = useState(() => mobileFitZoom())
   const [playingId, setPlayingId] = useState('')
   const [playerTimes, setPlayerTimes] = useState<Record<string, number>>({})
   const [playerDurations, setPlayerDurations] = useState<Record<string, number>>({})
@@ -133,9 +140,22 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
     setState(next)
     setCurrentPage(1)
     activePageRef.current = 1
+    setZoom(mobileFitZoom())
     setDraft(null)
     setUndone([])
   }, [pageId])
+
+  useEffect(() => {
+    const fitNotebookToPhone = () => {
+      if (window.innerWidth >= 768) return
+      const fit = mobileFitZoom()
+      setZoom((value) => Math.min(value, fit))
+    }
+
+    fitNotebookToPhone()
+    window.addEventListener('resize', fitNotebookToPhone)
+    return () => window.removeEventListener('resize', fitNotebookToPhone)
+  }, [])
 
   useEffect(() => {
     writeNotebookPaper(pageId, state)
@@ -402,7 +422,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
       onPointerUpCapture={releaseTouch}
       onPointerCancelCapture={releaseTouch}
     >
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--border)] p-3">
+      <div className="notebook-paper-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--border)] p-3">
         <button className={`paper-tool ${palmRejection ? 'active' : ''}`} type="button" onClick={() => setPalmRejection((value) => !value)} aria-label="Palm rejection">
           <Hand size={17} />
         </button>
@@ -440,7 +460,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
         <button className="paper-tool" type="button" onClick={() => setZoom((value) => clampZoom(value - 0.1))} aria-label="Zoom out">
           <Minus size={17} />
         </button>
-        <div className="rounded-lg bg-[var(--surface-muted)] px-2 py-1 text-xs font-bold text-[var(--text-muted)]">{Math.round(zoom * 100)}%</div>
+        <div className="paper-zoom-value rounded-lg bg-[var(--surface-muted)] px-2 py-1 text-xs font-bold text-[var(--text-muted)]">{Math.round(zoom * 100)}%</div>
         <button className="paper-tool" type="button" onClick={() => setZoom((value) => clampZoom(value + 0.1))} aria-label="Zoom in">
           <Plus size={17} />
         </button>
@@ -492,10 +512,10 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
           </div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <div className="rounded-lg bg-[var(--surface-muted)] px-2 py-1 text-xs font-bold text-[var(--text-muted)]">Page {currentPage} / {pageCount}</div>
+          <div className="paper-page-count rounded-lg bg-[var(--surface-muted)] px-2 py-1 text-xs font-bold text-[var(--text-muted)]">Page {currentPage} / {pageCount}</div>
         </div>
       </div>
-      <div className="border-b border-[var(--border)] bg-[var(--workspace)] px-3 py-3">
+      <div className="notebook-recorder-wrap border-b border-[var(--border)] bg-[var(--workspace)] px-3 py-3">
         <AudioRecorder
           pageTitle={pageTitle}
           onInsertRecording={addRecording}
@@ -504,7 +524,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
       </div>
 
       <div ref={scrollRef} className="notebook-scroll min-h-0 flex-1 overflow-auto px-2 py-4 md:px-5" onWheel={handleNotebookWheel}>
-        <div className="mx-auto flex flex-col items-center gap-5 pb-8" style={{ width: `${Math.round(794 * zoom)}px`, maxWidth: 'none' }}>
+        <div className="mx-auto flex flex-col items-center gap-5 pb-8" style={{ width: `${Math.round(PAPER_WIDTH * zoom)}px`, maxWidth: 'none' }}>
           {pages.map((page) => {
             const pageStrokes = state.strokes.filter((stroke) => stroke.page === page)
             const pageDraft = draft?.page === page ? draft.points : []
@@ -512,7 +532,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
               <div
                 key={page}
                 className="paper-page relative overflow-hidden rounded-lg border border-[var(--border)] bg-[#fffef9]"
-                style={{ width: `${Math.round(794 * zoom)}px`, height: `${Math.round(1123 * zoom)}px`, touchAction: 'none', cursor: palmRejection ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
+                style={{ width: `${Math.round(PAPER_WIDTH * zoom)}px`, height: `${Math.round(PAPER_HEIGHT * zoom)}px`, touchAction: 'none', cursor: palmRejection ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
                 onPointerDown={(event) => {
                   setActivePage(page)
                   if (beginPagePan(event)) return
