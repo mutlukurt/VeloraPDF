@@ -55,6 +55,7 @@ function renderHtmlText(node: TiptapNode) {
 
 function renderHtmlNode(node: TiptapNode): string {
   if (node.type === 'text') return renderHtmlText(node)
+  if (node.type === 'hardBreak') return '<br />'
   if (node.type === 'paragraph') return `<p>${renderHtmlChildren(node) || '<br />'}</p>`
   if (node.type === 'heading') {
     const level = Math.min(3, Math.max(1, Number(node.attrs?.level ?? 1)))
@@ -166,6 +167,7 @@ function renderTableMarkdown(node: TiptapNode) {
 
 function renderMarkdownNode(node: TiptapNode, depth = 0): string {
   if (node.type === 'text') return renderMarkdownText(node)
+  if (node.type === 'hardBreak') return '\n'
   if (node.type === 'paragraph') return renderMarkdownInline(node)
   if (node.type === 'heading') return `${'#'.repeat(Math.min(6, Math.max(1, Number(node.attrs?.level ?? 1))))} ${renderMarkdownInline(node)}`
   if (node.type === 'bulletList') {

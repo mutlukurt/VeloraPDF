@@ -27,6 +27,39 @@ const pageStyle = `
   .velora-pdf-page p { margin: 9px 0; }
   .velora-pdf-page ul, .velora-pdf-page ol { margin: 10px 0; padding-left: 26px; }
   .velora-pdf-page li { margin: 4px 0; }
+  .velora-pdf-list {
+    display: block;
+    margin: 10px 0;
+  }
+  .velora-pdf-list-item {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    column-gap: 8px;
+    align-items: start;
+    margin: 8px 0;
+    break-inside: avoid;
+  }
+  .velora-pdf-list-marker {
+    color: #5b4dff;
+    font-weight: 800;
+    text-align: right;
+    line-height: 1.7;
+  }
+  .velora-pdf-list-body {
+    min-width: 0;
+  }
+  .velora-pdf-list-body > p:first-child,
+  .velora-pdf-list-body > .velora-pdf-list:first-child {
+    margin-top: 0;
+  }
+  .velora-pdf-list-body > p:last-child,
+  .velora-pdf-list-body > .velora-pdf-list:last-child {
+    margin-bottom: 0;
+  }
+  .velora-pdf-task-marker {
+    color: #111827;
+    font-weight: 800;
+  }
   .velora-pdf-page blockquote {
     margin: 16px 0;
     padding: 12px 16px;
@@ -105,21 +138,43 @@ function renderText(node: TiptapNode) {
   return html
 }
 
+function renderList(node: TiptapNode, ordered: boolean) {
+  const start = Number(node.attrs?.start ?? 1)
+  const items = (node.content ?? [])
+    .map((child, index) => {
+      if (child.type !== 'listItem') return renderNode(child)
+      return renderListItem(child, ordered ? `${start + index}.` : '•')
+    })
+    .join('')
+
+  return `<div class="velora-pdf-list ${ordered ? 'velora-pdf-ordered-list' : 'velora-pdf-bullet-list'}">${items}</div>`
+}
+
+function renderListItem(node: TiptapNode, marker: string) {
+  return `
+    <div class="velora-pdf-list-item">
+      <div class="velora-pdf-list-marker">${escapeHtml(marker)}</div>
+      <div class="velora-pdf-list-body">${renderChildren(node)}</div>
+    </div>
+  `
+}
+
 function renderNode(node: TiptapNode): string {
   if (node.type === 'text') return renderText(node)
+  if (node.type === 'hardBreak') return '<br />'
   if (node.type === 'paragraph') return `<p>${renderChildren(node) || '&nbsp;'}</p>`
   if (node.type === 'heading') {
     const level = Number(node.attrs?.level ?? 1)
     const tag = level === 2 ? 'h2' : level === 3 ? 'h3' : 'h1'
     return `<${tag}>${renderChildren(node)}</${tag}>`
   }
-  if (node.type === 'bulletList') return `<ul>${renderChildren(node)}</ul>`
-  if (node.type === 'orderedList') return `<ol>${renderChildren(node)}</ol>`
-  if (node.type === 'listItem') return `<li>${renderChildren(node)}</li>`
-  if (node.type === 'taskList') return `<ul>${renderChildren(node)}</ul>`
+  if (node.type === 'bulletList') return renderList(node, false)
+  if (node.type === 'orderedList') return renderList(node, true)
+  if (node.type === 'listItem') return renderListItem(node, '•')
+  if (node.type === 'taskList') return `<div class="velora-pdf-list velora-pdf-task-list">${renderChildren(node)}</div>`
   if (node.type === 'taskItem') {
     const checked = node.attrs?.checked ? '☑' : '☐'
-    return `<li>${checked} ${renderChildren(node)}</li>`
+    return renderListItem(node, checked)
   }
   if (node.type === 'blockquote') return `<blockquote>${renderChildren(node)}</blockquote>`
   if (node.type === 'codeBlock') return `<pre><code>${escapeHtml(node.content?.map((child) => child.text ?? '').join('') ?? '')}</code></pre>`
