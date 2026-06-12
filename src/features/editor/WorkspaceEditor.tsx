@@ -591,6 +591,35 @@ export function WorkspaceEditor() {
     [blockControls.deleteFrom, blockControls.visible, editor, moveDraggedBlock],
   )
 
+  const moveSelectedImage = useCallback(
+    (direction: 'up' | 'down') => {
+      if (!editor || !selectedImageRange) return
+      const currentSelection = editor.state.selection as typeof editor.state.selection & { node?: { type: { name: string }; toJSON: () => JSONContent } }
+      const selectedNode = currentSelection.node?.type.name === 'image'
+        ? currentSelection.node
+        : editor.state.doc.nodeAt(selectedImageRange.from)
+      if (!selectedNode || selectedNode.type.name !== 'image') return
+      const ranges: BlockDragRange[] = []
+      editor.state.doc.forEach((node, offset) => {
+        ranges.push({ from: offset, to: offset + node.nodeSize, json: node.toJSON() })
+      })
+      const index = ranges.findIndex((range) => selectedImageRange.from >= range.from && selectedImageRange.from < range.to)
+      const targetIndex = direction === 'up' ? index - 1 : index + 1
+      const target = ranges[targetIndex]
+      if (!target) return
+
+      let insertAt = direction === 'up' ? target.from : target.to
+      const imageSize = selectedImageRange.to - selectedImageRange.from
+      if (insertAt > selectedImageRange.from) insertAt -= imageSize
+
+      editor.chain().focus().deleteRange(selectedImageRange).insertContentAt(insertAt, selectedNode.toJSON()).run()
+      editor.commands.setNodeSelection(insertAt)
+      saveActiveDoc(editor.getJSON() as TiptapDoc)
+      setSelectedImageRange({ from: insertAt, to: insertAt + imageSize })
+    },
+    [editor, saveActiveDoc, selectedImageRange],
+  )
+
   const deleteSelectedImage = useCallback(() => {
     if (!editor || !selectedImageRange) return
     editor.chain().focus().deleteRange(selectedImageRange).run()
@@ -857,6 +886,26 @@ export function WorkspaceEditor() {
           </div>
         </div>
       </DndContext>
+      {editor && selectedImageRange ? (
+        <aside className="kairnly-image-actions" aria-label="Image actions">
+          <div>
+            <p>Image</p>
+            <span>Move or remove selected photo</span>
+          </div>
+          <button type="button" onClick={() => moveSelectedImage('up')} aria-label="Move image up">
+            <ArrowUp size={16} />
+            <span>Move up</span>
+          </button>
+          <button type="button" onClick={() => moveSelectedImage('down')} aria-label="Move image down">
+            <ArrowDown size={16} />
+            <span>Move down</span>
+          </button>
+          <button type="button" className="danger" onClick={deleteSelectedImage} aria-label="Delete image">
+            <Trash2 size={16} />
+            <span>Delete</span>
+          </button>
+        </aside>
+      ) : null}
       {editor ? (
         <div className="kairnly-bottom-actions">
           <button
@@ -875,10 +924,22 @@ export function WorkspaceEditor() {
           >
             <Type size={22} />
           </button>
-          <button type="button" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35" onClick={() => moveSelectedBlock('up')} disabled={!blockControls.visible} aria-label="Move block up">
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35"
+            onClick={() => (selectedImageRange ? moveSelectedImage('up') : moveSelectedBlock('up'))}
+            disabled={!hasSelectedBlockOrImage}
+            aria-label={selectedImageRange ? 'Move image up' : 'Move block up'}
+          >
             <ArrowUp size={21} />
           </button>
-          <button type="button" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35" onClick={() => moveSelectedBlock('down')} disabled={!blockControls.visible} aria-label="Move block down">
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35"
+            onClick={() => (selectedImageRange ? moveSelectedImage('down') : moveSelectedBlock('down'))}
+            disabled={!hasSelectedBlockOrImage}
+            aria-label={selectedImageRange ? 'Move image down' : 'Move block down'}
+          >
             <ArrowDown size={21} />
           </button>
           <button

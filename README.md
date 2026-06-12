@@ -8,10 +8,10 @@
   <a href="https://veloraproject.app/">
     <img alt="Website" src="https://img.shields.io/badge/Website-veloraproject.app-111827?style=for-the-badge&logo=safari&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.38-aarch64.dmg">
+  <a href="downloads/Velora-PDF-1.0.39-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-Android-v2.1.7-arm64-v8a.apk">
+  <a href="downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk">
     <img alt="Download for Android" src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white">
   </a>
 </p>
@@ -25,9 +25,9 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.38-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.39-aarch64.dmg)
 
-[Download Velora PDF Android WebView APK v2.1.7 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.7-arm64-v8a.apk)
+[Download Velora PDF Android WebView APK v2.1.8 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk)
 
 Velora PDF is a private, local-first PDF reader, annotation workspace, and handwritten notebook app for macOS plus an offline Android WebView APK.
 
@@ -35,42 +35,42 @@ It is designed for people who want a calm, premium reading and note-taking exper
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.38-aarch64.dmg](downloads/Velora-PDF-1.0.38-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.39-aarch64.dmg](downloads/Velora-PDF-1.0.39-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.38.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.39.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.38_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.39_aarch64.dmg
 ```
 
-## Download Android WebView APK v2.1.7
+## Download Android WebView APK v2.1.8
 
-Velora PDF Android WebView APK v2.1.7 is a real native Android APK wrapper around the same web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
+Velora PDF Android WebView APK v2.1.8 is a real native Android APK wrapper around the same web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
 
-Current Android WebView APK v2.1.7 downloads:
+Current Android WebView APK v2.1.8 downloads:
 
 | Device / CPU | APK |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.7-arm64-v8a.apk](downloads/Velora-PDF-Android-v2.1.7-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.7-armeabi-v7a.apk](downloads/Velora-PDF-Android-v2.1.7-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.7-x86.apk](downloads/Velora-PDF-Android-v2.1.7-x86.apk) |
-| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.7-x86_64.apk](downloads/Velora-PDF-Android-v2.1.7-x86_64.apk) |
+| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.8-arm64-v8a.apk](downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.8-armeabi-v7a.apk](downloads/Velora-PDF-Android-v2.1.8-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.8-x86.apk](downloads/Velora-PDF-Android-v2.1.8-x86.apk) |
+| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.8-x86_64.apk](downloads/Velora-PDF-Android-v2.1.8-x86_64.apk) |
 
 For a normal Android phone, use `arm64-v8a`.
 
-Current Android WebView APK v2.1.7 release build outputs:
+Current Android WebView APK v2.1.8 release build outputs:
 
 ```text
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.7/Velora-PDF-Android-v2.1.7-armeabi-v7a.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.7/Velora-PDF-Android-v2.1.7-arm64-v8a.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.7/Velora-PDF-Android-v2.1.7-x86.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.7/Velora-PDF-Android-v2.1.7-x86_64.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.8/Velora-PDF-Android-v2.1.8-armeabi-v7a.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.8/Velora-PDF-Android-v2.1.8-arm64-v8a.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.8/Velora-PDF-Android-v2.1.8-x86.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.8/Velora-PDF-Android-v2.1.8-x86_64.apk
 ```
 
 Android WebView APK project source:
@@ -79,7 +79,7 @@ Android WebView APK project source:
 VeloraPDF Android APK v2/
 ```
 
-Android WebView APK v2.1.7 includes:
+Android WebView APK v2.1.8 includes:
 
 - The root VeloraPDF mobile web UI embedded directly inside the APK.
 - Offline startup and app usage without the Android `INTERNET` permission.
@@ -93,6 +93,7 @@ Android WebView APK v2.1.7 includes:
 - Drag-and-drop photo import works inside Notes pages and handwritten Notebook pages, with mouse and touch corner resizing.
 - Window-level image drops land directly in the active Notes editor on browser and desktop builds.
 - Selected images can be deleted from the bottom action bar or by right-clicking the image.
+- Clicking a Notes image opens a right-side action panel with move up, move down, and delete controls.
 - Android-specific top spacing for the Notes workspace and PDF editor so status bar/camera areas do not cover controls.
 - Phone-specific notebook responsive tuning so headers, controls, and handwritten pages fit narrow Android screens without horizontal document overflow.
 - Taller phone writing pages for more comfortable stylus handwriting.
@@ -519,25 +520,25 @@ cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
 "./VeloraPDF Android APK v2/gradlew" -p "VeloraPDF Android APK v2" assembleRelease
 ```
 
-The Android WebView APK v2.1.7 release outputs are copied to:
+The Android WebView APK v2.1.8 release outputs are copied to:
 
 ```text
-downloads/Velora-PDF-Android-v2.1.7-armeabi-v7a.apk
-downloads/Velora-PDF-Android-v2.1.7-arm64-v8a.apk
-downloads/Velora-PDF-Android-v2.1.7-x86.apk
-downloads/Velora-PDF-Android-v2.1.7-x86_64.apk
+downloads/Velora-PDF-Android-v2.1.8-armeabi-v7a.apk
+downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk
+downloads/Velora-PDF-Android-v2.1.8-x86.apk
+downloads/Velora-PDF-Android-v2.1.8-x86_64.apk
 ```
 
 The current copied desktop installer is:
 
 ```text
-downloads/Velora-PDF-1.0.38-aarch64.dmg
+downloads/Velora-PDF-1.0.39-aarch64.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.38
+1.0.39
 ```
 
 Bundle identifier:
@@ -571,6 +572,30 @@ aarch64
 ```
 
 ## Version History
+
+### Android WebView APK v2.1.8
+
+Released with a right-side selected-image action panel and image block movement controls from the root VeloraPDF web build.
+
+Changes:
+
+- Added a right-side action panel that opens when a Notes image is selected.
+- Added selected-image move up and move down controls for sending an image one block higher or lower.
+- Kept selected-image delete available from the right-side panel.
+- Connected the bottom action bar arrows to selected-image movement when an image is active.
+- Rebuilt Android WebView APK release outputs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+
+### 1.0.39
+
+Released to add a selected-image action panel and image block movement.
+
+Changes:
+
+- Added a right-side panel with Move up, Move down, and Delete for selected Notes images.
+- Added selected-image block movement so an image can move one block above or below neighboring content.
+- Reused the bottom action bar arrows for image movement when an image is selected.
+- Built and published the macOS `1.0.39` Apple Silicon DMG.
+- Updated Android WebView APK release builds to v2.1.8 for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
 
 ### Android WebView APK v2.1.7
 
