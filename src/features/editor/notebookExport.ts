@@ -1,4 +1,4 @@
-import { MIN_PAGE_COUNT, type PaperState, type PaperStroke, readNotebookPaper } from './NotebookPaper'
+import { MIN_PAGE_COUNT, type PaperImage, type PaperState, type PaperStroke, readNotebookPaper } from './NotebookPaper'
 import { downloadBlob } from '../../lib/utils/files'
 
 type NotebookExportTarget = {
@@ -15,7 +15,12 @@ function strokeSvg(stroke: PaperStroke) {
   return `<polyline points="${points}" fill="none" stroke="${escapeXml(stroke.color)}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${stroke.width}" opacity="${stroke.opacity}" />`
 }
 
+function imageSvg(image: PaperImage) {
+  return `<image href="${escapeXml(image.src)}" x="${image.x * 794}" y="${image.y * 1123}" width="${image.width * 794}" height="${image.height * 1123}" preserveAspectRatio="xMidYMid meet" />`
+}
+
 function pageSvg(state: PaperState, page: number) {
+  const images = (state.images ?? []).filter((image) => image.page === page).map(imageSvg).join('')
   const strokes = state.strokes.filter((stroke) => stroke.page === page).map(strokeSvg).join('')
   const recordings = state.recordings
     .filter((recording) => recording.page === page)
@@ -25,7 +30,7 @@ function pageSvg(state: PaperState, page: number) {
     const y = 82 + index * 34
     return `<line x1="54" x2="740" y1="${y}" y2="${y}" stroke="#dfe3ee" stroke-width="1" />`
   }).join('')
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="794" height="1123" viewBox="0 0 794 1123"><rect width="794" height="1123" fill="#fffef9"/>${lines}${strokes}${recordings}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="794" height="1123" viewBox="0 0 794 1123"><rect width="794" height="1123" fill="#fffef9"/>${lines}${images}${strokes}${recordings}</svg>`
 }
 
 function svgToImage(svg: string) {

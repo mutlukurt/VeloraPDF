@@ -25,11 +25,23 @@ export type PaperRecording = {
   y: number
   createdAt: number
 }
+export type PaperImage = {
+  id: string
+  page: number
+  src: string
+  name: string
+  x: number
+  y: number
+  width: number
+  height: number
+  createdAt: number
+}
 export type PaperState = {
   version: 1
   pageCount: number
   strokes: PaperStroke[]
   recordings: PaperRecording[]
+  images: PaperImage[]
 }
 export const MIN_PAGE_COUNT = 10
 const PAPER_WIDTH = 794
@@ -41,7 +53,7 @@ export function notebookPaperStorageKey(pageId: string) {
 }
 
 export function emptyPaperState(): PaperState {
-  return { version: 1, pageCount: MIN_PAGE_COUNT, strokes: [], recordings: [] }
+  return { version: 1, pageCount: MIN_PAGE_COUNT, strokes: [], recordings: [], images: [] }
 }
 
 export function readNotebookPaper(pageId: string): PaperState {
@@ -54,6 +66,7 @@ export function readNotebookPaper(pageId: string): PaperState {
       pageCount: Math.max(MIN_PAGE_COUNT, parsed.pageCount || MIN_PAGE_COUNT),
       strokes: Array.isArray(parsed.strokes) ? parsed.strokes : [],
       recordings: Array.isArray(parsed.recordings) ? parsed.recordings : [],
+      images: Array.isArray((parsed as Partial<PaperState>).images) ? (parsed as Partial<PaperState>).images as PaperImage[] : [],
     }
   } catch {
     return emptyPaperState()
@@ -110,6 +123,24 @@ function nearestStroke(strokes: PaperStroke[], point: PaperPoint) {
   return nearest && nearest.distance < 0.045 ? nearest.stroke : null
 }
 
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(new Error('Image could not be read.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function imageSize(src: string) {
+  return new Promise<{ width: number; height: number }>((resolve) => {
+    const image = new Image()
+    image.onload = () => resolve({ width: image.naturalWidth || 1, height: image.naturalHeight || 1 })
+    image.onerror = () => resolve({ width: 4, height: 3 })
+    image.src = src
+  })
+}
+
 export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange }: { pageId: string; pageTitle: string; standalone?: boolean; onChange?: () => void }) {
   const [state, setState] = useState<PaperState>(() => readNotebookPaper(pageId))
   const [currentPage, setCurrentPage] = useState(1)
@@ -124,6 +155,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
   const [playerDurations, setPlayerDurations] = useState<Record<string, number>>({})
   const [playbackErrors, setPlaybackErrors] = useState<Record<string, string>>({})
   const [isPanning, setIsPanning] = useState(false)
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
   const activePointerRef = useRef<number | null>(null)
   const activePageRef = useRef(1)
   const pointerAllowedRef = useRef(false)
@@ -135,6 +167,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
   const pinchRef = useRef<{ distance: number; zoom: number; centerX: number; centerY: number; scrollLeft: number; scrollTop: number } | null>(null)
   const pinchingRef = useRef(false)
   const pagePanRef = useRef<{ pointerId: number; x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null)
+  const imageDragRef = useRef<{ pointerId: number; id: string; mode: 'move' | 'resize-nw' | 'resize-ne' | 'resize-sw' | 'resize-se'; startX: number; startY: number; image: PaperImage } | null>(null)
   const pageCount = Math.max(MIN_PAGE_COUNT, state.pageCount)
   const displayPaperHeight = Math.round(PAPER_HEIGHT * zoom * mobilePaperHeightScale())
   const pages = useMemo(() => Array.from({ length: pageCount }, (_, index) => index + 1), [pageCount])
@@ -149,6 +182,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
     setZoom(mobileFitZoom())
     setDraft(null)
     setUndone([])
+    setSelectedImageId(null)
   }, [pageId])
 
   useEffect(() => {
@@ -420,6 +454,77 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
     return true
   }, [])
 
+  const addImageFile = useCallback(async (file: File, page: number, point: PaperPoint) => {
+    if (!file.type.startsWith('image/')) return
+    const src = await fileToDataUrl(file)
+    const size = await imageSize(src)
+    const width = 0.36
+    const height = Math.max(0.08, Math.min(0.45, width * (size.height / Math.max(1, size.width)) * (PAPER_WIDTH / PAPER_HEIGHT)))
+    const next: PaperImage = {
+      id: crypto.randomUUID(),
+      page,
+      src,
+      name: file.name,
+      x: Math.max(0.02, Math.min(0.98 - width, point.x - width / 2)),
+      y: Math.max(0.02, Math.min(0.98 - height, point.y - height / 2)),
+      width,
+      height,
+      createdAt: Date.now(),
+    }
+    commitState((current) => ({ ...current, images: [...(current.images ?? []), next] }))
+    setSelectedImageId(next.id)
+  }, [commitState])
+
+  const pagePointFromClient = useCallback((element: HTMLElement, clientX: number, clientY: number) => {
+    const rect = element.getBoundingClientRect()
+    return {
+      x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+      y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height)),
+    }
+  }, [])
+
+  const moveImage = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    const drag = imageDragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return false
+    event.preventDefault()
+    const pageElement = (event.currentTarget.closest('.paper-page') ?? event.currentTarget.parentElement) as HTMLElement | null
+    if (!pageElement) return true
+    const rect = pageElement.getBoundingClientRect()
+    const dx = (event.clientX - drag.startX) / rect.width
+    const dy = (event.clientY - drag.startY) / rect.height
+    const minWidth = 0.08
+    const minHeight = 0.06
+    let nextImage: PaperImage = {
+      ...drag.image,
+      x: Math.max(0, Math.min(1 - drag.image.width, drag.image.x + dx)),
+      y: Math.max(0, Math.min(1 - drag.image.height, drag.image.y + dy)),
+    }
+    if (drag.mode !== 'move') {
+      const fromLeft = drag.mode === 'resize-nw' || drag.mode === 'resize-sw'
+      const fromTop = drag.mode === 'resize-nw' || drag.mode === 'resize-ne'
+      const rawX = fromLeft ? drag.image.x + dx : drag.image.x
+      const rawY = fromTop ? drag.image.y + dy : drag.image.y
+      const rawWidth = fromLeft ? drag.image.width - dx : drag.image.width + dx
+      const rawHeight = fromTop ? drag.image.height - dy : drag.image.height + dy
+      const width = Math.max(minWidth, Math.min(0.96, rawWidth))
+      const height = Math.max(minHeight, Math.min(0.96, rawHeight))
+      nextImage = {
+        ...drag.image,
+        x: Math.max(0, Math.min(1 - width, fromLeft ? rawX : drag.image.x)),
+        y: Math.max(0, Math.min(1 - height, fromTop ? rawY : drag.image.y)),
+        width,
+        height,
+      }
+    }
+    commitState((current) => ({ ...current, images: (current.images ?? []).map((image) => (image.id === drag.id ? nextImage : image)) }))
+    return true
+  }, [commitState])
+
+  const deleteSelectedImage = useCallback((id: string) => {
+    commitState((current) => ({ ...current, images: (current.images ?? []).filter((image) => image.id !== id) }))
+    setSelectedImageId((selected) => (selected === id ? null : selected))
+  }, [commitState])
+
   return (
     <section
       className={`notebook-paper ${standalone ? 'notebook-paper-standalone' : 'mt-6'} flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_44px_rgba(31,31,28,0.06)]`}
@@ -533,6 +638,7 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
         <div className="mx-auto flex flex-col items-center gap-5 pb-8" style={{ width: `${Math.round(PAPER_WIDTH * zoom)}px`, maxWidth: 'none' }}>
           {pages.map((page) => {
             const pageStrokes = state.strokes.filter((stroke) => stroke.page === page)
+            const pageImages = (state.images ?? []).filter((image) => image.page === page)
             const pageDraft = draft?.page === page ? draft.points : []
             return (
               <div
@@ -582,6 +688,16 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
                   pointerAllowedRef.current = false
                   setDraft(null)
                 }}
+                onDragOver={(event) => {
+                  if (Array.from(event.dataTransfer.items).some((item) => item.kind === 'file' && item.type.startsWith('image/'))) event.preventDefault()
+                }}
+                onDrop={(event) => {
+                  const file = Array.from(event.dataTransfer.files).find((item) => item.type.startsWith('image/'))
+                  if (!file) return
+                  event.preventDefault()
+                  setActivePage(page)
+                  addImageFile(file, page, pagePointFromClient(event.currentTarget, event.clientX, event.clientY)).catch((error) => alert(error instanceof Error ? error.message : 'Image import failed.'))
+                }}
               >
                 <svg className="absolute inset-0 h-full w-full" viewBox="0 0 794 1123" preserveAspectRatio="none">
                   <rect width="794" height="1123" fill="#fffef9" />
@@ -592,6 +708,63 @@ export function NotebookPaper({ pageId, pageTitle, standalone = false, onChange 
                     <polyline key={stroke.id} points={pathForStroke(stroke)} fill="none" stroke={stroke.color} strokeLinecap="round" strokeLinejoin="round" strokeWidth={stroke.width} opacity={stroke.opacity} />
                   ))}
                 </svg>
+                {pageImages.map((image) => (
+                  <div
+                    key={image.id}
+                    className={`paper-image ${selectedImageId === image.id ? 'selected' : ''}`}
+                    style={{ left: `${image.x * 100}%`, top: `${image.y * 100}%`, width: `${image.width * 100}%`, height: `${image.height * 100}%` }}
+                    onPointerDown={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      setActivePage(page)
+                      setSelectedImageId(image.id)
+                      setDraft(null)
+                      imageDragRef.current = { pointerId: event.pointerId, id: image.id, mode: 'move', startX: event.clientX, startY: event.clientY, image }
+                      event.currentTarget.setPointerCapture(event.pointerId)
+                    }}
+                    onPointerMove={moveImage}
+                    onPointerUp={(event) => {
+                      if (imageDragRef.current?.pointerId === event.pointerId) imageDragRef.current = null
+                    }}
+                    onPointerCancel={(event) => {
+                      if (imageDragRef.current?.pointerId === event.pointerId) imageDragRef.current = null
+                    }}
+                  >
+                    <img src={image.src} alt={image.name} draggable={false} />
+                    {selectedImageId === image.id ? (
+                      <>
+                        {(['nw', 'ne', 'sw', 'se'] as const).map((corner) => (
+                          <button
+                            key={corner}
+                            type="button"
+                            className={`paper-image-handle ${corner}`}
+                            aria-label={`Resize image ${corner}`}
+                            onPointerDown={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              imageDragRef.current = { pointerId: event.pointerId, id: image.id, mode: `resize-${corner}`, startX: event.clientX, startY: event.clientY, image }
+                              event.currentTarget.setPointerCapture(event.pointerId)
+                            }}
+                            onPointerMove={moveImage}
+                            onPointerUp={(event) => {
+                              if (imageDragRef.current?.pointerId === event.pointerId) imageDragRef.current = null
+                            }}
+                            onPointerCancel={(event) => {
+                              if (imageDragRef.current?.pointerId === event.pointerId) imageDragRef.current = null
+                            }}
+                          />
+                        ))}
+                        <button type="button" className="paper-image-delete" onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          deleteSelectedImage(image.id)
+                        }} aria-label="Delete image">
+                          <Trash2 size={13} />
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                ))}
                 <div className="pointer-events-none absolute right-4 top-3 rounded-md bg-white/80 px-2 py-1 text-[11px] font-black text-[#8a887f]">{page}</div>
               </div>
             )

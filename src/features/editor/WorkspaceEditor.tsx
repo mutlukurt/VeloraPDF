@@ -15,9 +15,10 @@ import TaskList from '@tiptap/extension-task-list'
 import Underline from '@tiptap/extension-underline'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
+import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { motion } from 'framer-motion'
-import { Bold, Check, Code2, Download, GripVertical, Highlighter, Italic, Link2, Plus, Redo2, Search, Strikethrough, Trash2, Type, Underline as UnderlineIcon, Undo2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Bold, Check, Code2, Download, Highlighter, Image as ImageIcon, Italic, Link2, Plus, Redo2, Search, Strikethrough, Trash2, Type, Underline as UnderlineIcon, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { db } from '../../lib/db/client'
@@ -62,6 +63,80 @@ const backgroundColors = [
 const blockControlsOffset = 126
 
 type BlockDragRange = { from: number; to: number; json: JSONContent }
+
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(new Error('File could not be read.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps) {
+  const width = Number(node.attrs.width ?? 520)
+  const src = String(node.attrs.src ?? '')
+  const alt = String(node.attrs.alt ?? '')
+  const startRef = useRef<{ x: number; width: number } | null>(null)
+
+  useEffect(() => {
+    const handleMove = (event: PointerEvent) => {
+      const start = startRef.current
+      if (!start) return
+      event.preventDefault()
+      updateAttributes({ width: Math.max(120, Math.min(980, start.width + event.clientX - start.x)) })
+    }
+    const handleUp = () => {
+      startRef.current = null
+    }
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+    window.addEventListener('pointercancel', handleUp)
+    return () => {
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
+      window.removeEventListener('pointercancel', handleUp)
+    }
+  }, [updateAttributes])
+
+  return (
+    <NodeViewWrapper as="figure" className={`kairnly-resizable-image ${selected ? 'selected' : ''}`} style={{ width: `${width}px`, maxWidth: '100%' }}>
+      <img src={src} alt={alt} draggable={false} />
+      <figcaption>{alt}</figcaption>
+      <button
+        type="button"
+        className="kairnly-image-resize-handle"
+        aria-label="Resize image"
+        onPointerDown={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          startRef.current = { x: event.clientX, width }
+          event.currentTarget.setPointerCapture(event.pointerId)
+        }}
+      />
+    </NodeViewWrapper>
+  )
+}
+
+const ResizableImage = ImageExtension.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: 520,
+        parseHTML: (element) => Number(element.getAttribute('data-width') || element.getAttribute('width') || 520),
+        renderHTML: (attributes) => ({
+          'data-width': attributes.width,
+          style: `width:${attributes.width}px;max-width:100%;`,
+        }),
+      },
+    }
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageView)
+  },
+})
 
 function isInsideNode(editor: { state: { selection: { $from: { depth: number; node: (depth: number) => { type: { name: string }; textContent: string } } } } }, nodeName: string) {
   const { $from } = editor.state.selection
@@ -147,7 +222,7 @@ export function WorkspaceEditor() {
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
-      ImageExtension.configure({ inline: false, allowBase64: true }),
+      ResizableImage.configure({ inline: false, allowBase64: true }),
       MediaBlock,
       Link.configure({ openOnClick: false, autolink: true }),
       Table.configure({ resizable: true }),
@@ -326,7 +401,7 @@ export function WorkspaceEditor() {
         return
       }
       if (pending.kind === 'image') {
-        pending.resolve({ type: 'image', attrs: { src, alt: file.name, title: file.name } })
+        pending.resolve({ type: 'image', attrs: { src, alt: file.name, title: file.name, width: 520 } })
         return
       }
       pending.resolve({
@@ -343,6 +418,17 @@ export function WorkspaceEditor() {
     reader.onerror = () => pending.resolve(null)
     reader.readAsDataURL(file)
   }, [])
+
+  const insertImageFile = useCallback(async (file: File, coords?: { left: number; top: number }) => {
+    if (!editor || !file.type.startsWith('image/')) return false
+    const src = await fileToDataUrl(file)
+    const position = coords ? editor.view.posAtCoords(coords)?.pos : null
+    const imageNode = { type: 'image', attrs: { src, alt: file.name, title: file.name, width: 520 } }
+    if (typeof position === 'number') editor.chain().focus().insertContentAt(position, imageNode).run()
+    else editor.chain().focus().insertContent(imageNode).run()
+    saveActiveDoc(editor.getJSON() as TiptapDoc)
+    return true
+  }, [editor, saveActiveDoc])
 
   const updateHoveredBlock = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -420,6 +506,26 @@ export function WorkspaceEditor() {
       saveActiveDoc(editor.getJSON() as TiptapDoc)
     },
     [editor, saveActiveDoc],
+  )
+
+  const moveSelectedBlock = useCallback(
+    (direction: 'up' | 'down') => {
+      if (!editor || !blockControls.visible) return
+      const ranges: BlockDragRange[] = []
+      editor.state.doc.forEach((node, offset) => {
+        ranges.push({ from: offset, to: offset + node.nodeSize, json: node.toJSON() })
+      })
+      const index = ranges.findIndex((range) => range.from === blockControls.deleteFrom)
+      const targetIndex = direction === 'up' ? index - 1 : index + 1
+      const source = ranges[index]
+      const target = ranges[targetIndex]
+      if (!source || !target) return
+      draggedBlockRef.current = source
+      moveDraggedBlock(target, direction === 'up' ? 'before' : 'after')
+      draggedBlockRef.current = null
+      setBlockControls((controls) => ({ ...controls, visible: false }))
+    },
+    [blockControls.deleteFrom, blockControls.visible, editor, moveDraggedBlock],
   )
 
   useEffect(() => {
@@ -604,6 +710,15 @@ export function WorkspaceEditor() {
             className="relative"
             onMouseMove={updateHoveredBlock}
             onMouseLeave={scheduleBlockControlsHide}
+            onDragOver={(event) => {
+              if (Array.from(event.dataTransfer.items).some((item) => item.kind === 'file' && item.type.startsWith('image/'))) event.preventDefault()
+            }}
+            onDrop={(event) => {
+              const file = Array.from(event.dataTransfer.files).find((item) => item.type.startsWith('image/'))
+              if (!file) return
+              event.preventDefault()
+              insertImageFile(file, { left: event.clientX, top: event.clientY }).catch((error) => alert(error instanceof Error ? error.message : 'Image import failed.'))
+            }}
           >
             {blockDropTarget ? (
               <div
@@ -614,85 +729,6 @@ export function WorkspaceEditor() {
                   top: blockControls.position.top + (blockDropTarget.placement === 'after' ? 34 : 0),
                 }}
               />
-            ) : null}
-            {blockControls.visible ? (
-              <div
-                data-block-controls
-                className="fixed z-30 hidden items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5 opacity-95 shadow-lift md:flex"
-                style={{ left: blockControls.position.left, top: blockControls.position.top }}
-                onMouseEnter={() => {
-                  if (blockControlsHideTimer.current) {
-                    window.clearTimeout(blockControlsHideTimer.current)
-                    blockControlsHideTimer.current = null
-                  }
-                }}
-                onMouseLeave={scheduleBlockControlsHide}
-              >
-                <button
-                  data-block-plus
-                  aria-label="Add block"
-                  className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-faint)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--text)]"
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                  }}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
-                    editor?.commands.blur()
-                    const rect = event.currentTarget.getBoundingClientRect()
-                    setInsertMenu({
-                      open: true,
-                      query: '',
-                      position: {
-                        left: Math.max(8, Math.min(rect.right + 8, window.innerWidth - Math.min(360, window.innerWidth - 16) - 8)),
-                        top: Math.max(8, Math.min(rect.top, window.innerHeight - 480)),
-                      },
-                      context: {
-                        source: 'plus',
-                        insertAt: blockControls.insertAt,
-                        targetBlockId: blockControls.targetBlockId,
-                        pageId: activePage.id,
-                        parentBlockId: null,
-                      },
-                    })
-                  }}
-                >
-                  <Plus size={16} />
-                </button>
-                <span
-                  className="grid h-7 w-7 cursor-grab place-items-center rounded-md text-[var(--text-faint)] active:cursor-grabbing"
-                  onPointerDown={(event) => {
-                    if (!editor) return
-                    const node = editor.state.doc.nodeAt(blockControls.deleteFrom)
-                    if (!node) return
-                    event.preventDefault()
-                    event.stopPropagation()
-                    draggedBlockRef.current = { from: blockControls.deleteFrom, to: blockControls.deleteTo, json: node.toJSON() }
-                    blockPointerDragRef.current = { startX: event.clientX, startY: event.clientY, dragging: false }
-                  }}
-                >
-                  <GripVertical size={17} />
-                </span>
-                <button
-                  data-block-plus
-                  aria-label="Delete block"
-                  className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-faint)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                    if (!editor) return
-                    const { deleteFrom, deleteTo } = blockControls
-                    const fallbackParagraph = editor.state.doc.childCount <= 1
-                    editor.chain().focus().deleteRange({ from: deleteFrom, to: deleteTo }).run()
-                    if (fallbackParagraph && editor.state.doc.childCount === 0) {
-                      editor.chain().focus().insertContent({ type: 'paragraph' }).run()
-                    }
-                    setBlockControls((controls) => ({ ...controls, visible: false }))
-                  }}
-                >
-                  <Trash2 size={15} />
-                </button>
-              </div>
             ) : null}
             {editor ? (
               <BubbleMenu editor={editor}>
@@ -751,7 +787,7 @@ export function WorkspaceEditor() {
         </div>
       </DndContext>
       {editor ? (
-        <div className="fixed inset-x-0 bottom-14 z-40 flex h-14 items-center gap-2 border-t border-[var(--border)] bg-[var(--surface)] px-3 shadow-[0_-10px_30px_rgba(15,15,20,.12)] md:hidden">
+        <div className="fixed inset-x-0 bottom-14 z-40 flex h-14 items-center gap-2 border-t border-[var(--border)] bg-[var(--surface)] px-3 shadow-[0_-10px_30px_rgba(15,15,20,.12)] md:bottom-0 md:left-14">
           <button
             type="button"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface-muted)] text-[var(--text)]"
@@ -767,6 +803,28 @@ export function WorkspaceEditor() {
             aria-label="Open text blocks"
           >
             <Type size={22} />
+          </button>
+          <button type="button" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35" onClick={() => moveSelectedBlock('up')} disabled={!blockControls.visible} aria-label="Move block up">
+            <ArrowUp size={21} />
+          </button>
+          <button type="button" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)] disabled:opacity-35" onClick={() => moveSelectedBlock('down')} disabled={!blockControls.visible} aria-label="Move block down">
+            <ArrowDown size={21} />
+          </button>
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--danger)] disabled:opacity-35"
+            onClick={() => {
+              if (!editor || !blockControls.visible) return
+              const fallbackParagraph = editor.state.doc.childCount <= 1
+              editor.chain().focus().deleteRange({ from: blockControls.deleteFrom, to: blockControls.deleteTo }).run()
+              if (fallbackParagraph && editor.state.doc.childCount === 0) editor.chain().focus().insertContent({ type: 'paragraph' }).run()
+              saveActiveDoc(editor.getJSON() as TiptapDoc)
+              setBlockControls((controls) => ({ ...controls, visible: false }))
+            }}
+            disabled={!blockControls.visible}
+            aria-label="Delete block"
+          >
+            <Trash2 size={21} />
           </button>
           <button
             type="button"
@@ -786,7 +844,19 @@ export function WorkspaceEditor() {
           >
             <Redo2 size={21} />
           </button>
-          <div className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--text-faint)]">Blocks</div>
+          <button
+            type="button"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--text-muted)]"
+            onClick={() => pickLocalFile('image').then((node) => {
+              if (!node || !editor) return
+              editor.chain().focus().insertContent(node).run()
+              saveActiveDoc(editor.getJSON() as TiptapDoc)
+            })}
+            aria-label="Insert photo"
+          >
+            <ImageIcon size={21} />
+          </button>
+          <div className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--text-faint)]">{blockControls.visible ? 'Selected block' : 'Blocks'}</div>
         </div>
       ) : null}
       <BlockInsertMenu
