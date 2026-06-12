@@ -73,7 +73,7 @@ function fileToDataUrl(file: File) {
   })
 }
 
-function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps) {
+function ResizableImageView({ node, updateAttributes, selected, deleteNode }: NodeViewProps) {
   const width = Number(node.attrs.width ?? 520)
   const src = String(node.attrs.src ?? '')
   const alt = String(node.attrs.alt ?? '')
@@ -100,7 +100,15 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
   }, [updateAttributes])
 
   return (
-    <NodeViewWrapper as="figure" className={`kairnly-resizable-image ${selected ? 'selected' : ''}`} style={{ width: `${width}px`, maxWidth: '100%' }}>
+    <NodeViewWrapper
+      as="figure"
+      className={`kairnly-resizable-image ${selected ? 'selected' : ''}`}
+      style={{ width: `${width}px`, maxWidth: '100%' }}
+      onContextMenu={(event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault()
+        if (window.confirm('Delete this image?')) deleteNode()
+      }}
+    >
       <img src={src} alt={alt} draggable={false} />
       <figcaption>{alt}</figcaption>
       <button
@@ -189,6 +197,7 @@ export function WorkspaceEditor() {
     targetBlockId?: string
   }>({ visible: false, position: { left: 0, top: 0 }, insertAt: 0, deleteFrom: 0, deleteTo: 0 })
   const [blockDropTarget, setBlockDropTarget] = useState<{ from: number; placement: 'before' | 'after' } | null>(null)
+  const [selectedImageRange, setSelectedImageRange] = useState<{ from: number; to: number } | null>(null)
   const [iconPickerOpen, setIconPickerOpen] = useState(false)
   const [iconQuery, setIconQuery] = useState('')
   const pendingFilePicker = useRef<{
@@ -233,6 +242,12 @@ export function WorkspaceEditor() {
     [],
   )
 
+  const syncImageSelection = useCallback((currentEditor: { state: { selection: { from: number; to: number; node?: { type: { name: string }; nodeSize: number } } } }) => {
+    const { selection } = currentEditor.state
+    const selectedNode = selection.node
+    setSelectedImageRange(selectedNode?.type.name === 'image' ? { from: selection.from, to: selection.from + selectedNode.nodeSize } : null)
+  }, [])
+
   const editor = useEditor({
     extensions,
     content: activeDoc,
@@ -242,6 +257,7 @@ export function WorkspaceEditor() {
       },
     },
     onUpdate: ({ editor }) => {
+      syncImageSelection(editor)
       const doc = editor.getJSON() as TiptapDoc
       if (saveTimer.current) window.clearTimeout(saveTimer.current)
       saveTimer.current = window.setTimeout(() => saveActiveDoc(doc), 650)
@@ -264,6 +280,9 @@ export function WorkspaceEditor() {
       } else {
         setInsertMenu((menu) => (menu.context?.source === 'slash' ? { ...menu, open: false } : menu))
       }
+    },
+    onSelectionUpdate: ({ editor }) => {
+      syncImageSelection(editor)
     },
   })
 
@@ -430,6 +449,50 @@ export function WorkspaceEditor() {
     return true
   }, [editor, saveActiveDoc])
 
+  useEffect(() => {
+    if (!editor || !activePage) return
+
+    const hasImage = (transfer: DataTransfer | null) => {
+      if (!transfer) return false
+      return Array.from(transfer.items).some((item) => item.kind === 'file' && item.type.startsWith('image/')) || Array.from(transfer.files).some((file) => file.type.startsWith('image/'))
+    }
+
+    const imageFile = (transfer: DataTransfer | null) => {
+      if (!transfer) return null
+      return Array.from(transfer.files).find((file) => file.type.startsWith('image/')) ?? null
+    }
+
+    const editorCoords = (event: DragEvent) => {
+      const rect = editor.view.dom.getBoundingClientRect()
+      return {
+        left: Math.max(rect.left + 8, Math.min(rect.right - 8, event.clientX || rect.left + 48)),
+        top: Math.max(rect.top + 8, Math.min(rect.bottom - 8, event.clientY || rect.top + 48)),
+      }
+    }
+
+    const handleDragOver = (event: DragEvent) => {
+      if (!hasImage(event.dataTransfer)) return
+      event.preventDefault()
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
+    }
+
+    const handleDrop = (event: DragEvent) => {
+      if (!hasImage(event.dataTransfer)) return
+      const file = imageFile(event.dataTransfer)
+      if (!file) return
+      event.preventDefault()
+      event.stopPropagation()
+      insertImageFile(file, editorCoords(event)).catch((error) => alert(error instanceof Error ? error.message : 'Image import failed.'))
+    }
+
+    document.addEventListener('dragover', handleDragOver, true)
+    document.addEventListener('drop', handleDrop, true)
+    return () => {
+      document.removeEventListener('dragover', handleDragOver, true)
+      document.removeEventListener('drop', handleDrop, true)
+    }
+  }, [activePage, editor, insertImageFile])
+
   const updateHoveredBlock = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!editor || insertMenu.open) return
@@ -528,6 +591,13 @@ export function WorkspaceEditor() {
     [blockControls.deleteFrom, blockControls.visible, editor, moveDraggedBlock],
   )
 
+  const deleteSelectedImage = useCallback(() => {
+    if (!editor || !selectedImageRange) return
+    editor.chain().focus().deleteRange(selectedImageRange).run()
+    saveActiveDoc(editor.getJSON() as TiptapDoc)
+    setSelectedImageRange(null)
+  }, [editor, saveActiveDoc, selectedImageRange])
+
   useEffect(() => {
     const handleMove = (event: PointerEvent) => {
       const pointer = blockPointerDragRef.current
@@ -595,6 +665,7 @@ export function WorkspaceEditor() {
   }
 
   const title = titleDrafts[activePage.id] ?? activePage.title ?? ''
+  const hasSelectedBlockOrImage = blockControls.visible || Boolean(selectedImageRange)
 
   return (
     <motion.main key={activePage.id} className="h-full overflow-y-auto" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
@@ -787,7 +858,7 @@ export function WorkspaceEditor() {
         </div>
       </DndContext>
       {editor ? (
-        <div className="fixed inset-x-0 bottom-14 z-40 flex h-14 items-center gap-2 border-t border-[var(--border)] bg-[var(--surface)] px-3 shadow-[0_-10px_30px_rgba(15,15,20,.12)] md:bottom-0 md:left-14">
+        <div className="kairnly-bottom-actions">
           <button
             type="button"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface-muted)] text-[var(--text)]"
@@ -814,6 +885,10 @@ export function WorkspaceEditor() {
             type="button"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[var(--danger)] disabled:opacity-35"
             onClick={() => {
+              if (selectedImageRange) {
+                deleteSelectedImage()
+                return
+              }
               if (!editor || !blockControls.visible) return
               const fallbackParagraph = editor.state.doc.childCount <= 1
               editor.chain().focus().deleteRange({ from: blockControls.deleteFrom, to: blockControls.deleteTo }).run()
@@ -821,8 +896,8 @@ export function WorkspaceEditor() {
               saveActiveDoc(editor.getJSON() as TiptapDoc)
               setBlockControls((controls) => ({ ...controls, visible: false }))
             }}
-            disabled={!blockControls.visible}
-            aria-label="Delete block"
+            disabled={!hasSelectedBlockOrImage}
+            aria-label={selectedImageRange ? 'Delete image' : 'Delete block'}
           >
             <Trash2 size={21} />
           </button>
@@ -856,7 +931,7 @@ export function WorkspaceEditor() {
           >
             <ImageIcon size={21} />
           </button>
-          <div className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--text-faint)]">{blockControls.visible ? 'Selected block' : 'Blocks'}</div>
+          <div className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--text-faint)]">{selectedImageRange ? 'Selected image' : blockControls.visible ? 'Selected block' : 'Blocks'}</div>
         </div>
       ) : null}
       <BlockInsertMenu

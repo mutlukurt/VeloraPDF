@@ -432,6 +432,24 @@ input {
   touch-action: none;
 }
 
+.kairnly-bottom-actions {
+  position: fixed;
+  right: 0.75rem;
+  bottom: calc(3.5rem + 0.75rem);
+  left: 0.75rem;
+  z-index: 40;
+  display: flex;
+  height: 3.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  padding: 0.35rem 0.55rem;
+  box-shadow: 0 18px 44px rgba(15, 15, 20, 0.16);
+  backdrop-filter: blur(18px);
+}
+
 .notebook-paper {
   touch-action: manipulation;
 }
@@ -1057,5 +1075,15 @@ input {
   .notebook-scroll {
     padding: 0.75rem 0.35rem 1rem;
     scroll-padding-bottom: 6rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .kairnly-bottom-actions {
+    right: auto;
+    bottom: 1.15rem;
+    left: calc(50% + 175px);
+    width: min(760px, calc(100vw - 380px));
+    transform: translateX(-50%);
   }
 }
