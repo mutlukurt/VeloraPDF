@@ -243,7 +243,7 @@ export function SettingsDialog() {
                   <img src={veloraIconUrl} alt="Velora Notes" className="h-12 w-12 rounded-xl object-cover shadow-lift" />
                   <div>
                     <h3 className="text-base font-semibold text-[var(--text)]">Velora Notes</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Version 1.0.39 · Local-first desktop workspace</p>
+                    <p className="text-xs text-[var(--text-muted)]">Version 1.0.40 · Local-first desktop workspace</p>
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-[var(--text-muted)]">

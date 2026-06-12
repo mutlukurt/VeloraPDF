@@ -340,7 +340,7 @@ export function WorkspaceEditor() {
     setInsertMenu({
       open: true,
       query: '',
-      position: { left: 8, top: window.innerHeight - 360 },
+      position: { left: window.innerWidth / 2, top: window.innerHeight },
       context: {
         source: 'plus',
         insertAt,
@@ -887,7 +887,7 @@ export function WorkspaceEditor() {
         </div>
       </DndContext>
       {editor && selectedImageRange ? (
-        <aside className="kairnly-image-actions" aria-label="Image actions">
+        <aside className="kairnly-pill-popover kairnly-image-actions" aria-label="Image actions">
           <div>
             <p>Image</p>
             <span>Move or remove selected photo</span>

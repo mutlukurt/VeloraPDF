@@ -81,11 +81,12 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
 
   if (!editor || !context) return null
 
+  const isPillMenu = context.source === 'plus'
   let runningIndex = -1
   const menuWidth = Math.min(360, window.innerWidth - 16)
   const menuLeft = Math.max(8, Math.min(position.left, window.innerWidth - menuWidth - 8))
   const menuTop = Math.max(8, Math.min(position.top, window.innerHeight - 120))
-  const menuStyle = isTouchDevice ? undefined : { left: menuLeft, top: menuTop, width: menuWidth }
+  const menuStyle = isPillMenu || isTouchDevice ? undefined : { left: menuLeft, top: menuTop, width: menuWidth }
 
   const runCommand = async (command: (typeof visibleCommands)[number]) => {
     if (executingRef.current) return
@@ -118,14 +119,16 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
             data-block-insert-menu
             className={cn(
               'fixed z-50 overflow-hidden border border-[var(--border)] bg-[var(--surface)] shadow-calm',
-              isTouchDevice
+              isPillMenu
+                ? 'kairnly-pill-popover kairnly-block-pill-menu rounded-2xl'
+                : isTouchDevice
                 ? 'inset-x-2 bottom-2 max-h-[72dvh] rounded-2xl'
                 : 'max-h-[min(520px,calc(100dvh-1rem))] rounded-2xl',
             )}
             style={menuStyle}
-            initial={isTouchDevice ? { opacity: 0, y: 24 } : { opacity: 0, y: 8, scale: 0.98 }}
-            animate={isTouchDevice ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isTouchDevice ? { opacity: 0, y: 18 } : { opacity: 0, y: 6, scale: 0.98 }}
+            initial={isPillMenu || isTouchDevice ? { opacity: 0, y: 24 } : { opacity: 0, y: 8, scale: 0.98 }}
+            animate={isPillMenu || isTouchDevice ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isPillMenu || isTouchDevice ? { opacity: 0, y: 18 } : { opacity: 0, y: 6, scale: 0.98 }}
             transition={{ duration: 0.13 }}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
@@ -158,7 +161,7 @@ export function BlockInsertMenu({ editor, open, query, position, context, helper
               <kbd className="rounded-md border border-[var(--border)] px-1.5 py-1 text-[10px] text-[var(--text-faint)]">Esc</kbd>
             )}
           </div>
-          <div className={cn('overflow-y-auto p-1.5', isTouchDevice ? 'max-h-[calc(72dvh-57px)] touch-pan-y overscroll-contain' : 'max-h-[430px]')}>
+          <div className={cn('overflow-y-auto p-1.5', isPillMenu ? 'max-h-[calc(min(520px,100dvh-10rem)-57px)] touch-pan-y overscroll-contain' : isTouchDevice ? 'max-h-[calc(72dvh-57px)] touch-pan-y overscroll-contain' : 'max-h-[430px]')}>
             {categoryOrder.map((category) => {
               const group = visibleCommands.filter((command) => command.category === category)
               if (group.length === 0) return null

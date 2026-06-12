@@ -1,4 +1,4 @@
-# VeloraPDF Android WebView APK v2.1.8
+# VeloraPDF Android WebView APK v2.1.9
 
 Native Android WebView wrapper for the root VeloraPDF Vite web app.
 
@@ -27,7 +27,8 @@ Because every app asset is packaged inside the APK, the release does not request
 - Drag-and-drop photo import works inside Notes pages and handwritten Notebook pages, with mouse and touch corner resizing.
 - Window-level image drops land directly in the active Notes editor on browser and desktop builds.
 - Selected Notes images can be deleted from the bottom action bar or by right-clicking the image.
-- Clicking a Notes image opens a right-side action panel with move up, move down, and delete controls.
+- Block insert and selected-image action panels open above the bottom pill on browser, DMG, tablet, phone, and Android WebView builds.
+- Clicking a Notes image exposes move up, move down, and delete controls in the same bottom-pill panel system.
 - Android-specific spacing for the Notes workspace and PDF editor toolbar.
 - Phone-specific notebook responsive tuning so headers, controls, and handwritten pages fit narrow Android screens without horizontal document overflow.
 - Taller phone writing pages for more comfortable stylus handwriting.
@@ -38,19 +39,19 @@ Because every app asset is packaged inside the APK, the release does not request
 
 ## Release APKs
 
-The current v2.1.8 APKs are stored in the root `downloads/` folder:
+The current v2.1.9 APKs are stored in the root `downloads/` folder:
 
 | Device / CPU | APK |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2.1.8-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2.1.8-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2.1.8-x86.apk`](../downloads/Velora-PDF-Android-v2.1.8-x86.apk) |
-| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2.1.8-x86_64.apk`](../downloads/Velora-PDF-Android-v2.1.8-x86_64.apk) |
+| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2.1.9-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2.1.9-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2.1.9-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2.1.9-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2.1.9-x86.apk`](../downloads/Velora-PDF-Android-v2.1.9-x86.apk) |
+| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2.1.9-x86_64.apk`](../downloads/Velora-PDF-Android-v2.1.9-x86_64.apk) |
 
 They are also copied locally to:
 
 ```text
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.8/
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.9/
 ```
 
 ## Screenshots
@@ -90,10 +91,10 @@ cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
 Copy release outputs:
 
 ```bash
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-armeabi-v7a-release.apk" downloads/Velora-PDF-Android-v2.1.8-armeabi-v7a.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-arm64-v8a-release.apk" downloads/Velora-PDF-Android-v2.1.8-arm64-v8a.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86-release.apk" downloads/Velora-PDF-Android-v2.1.8-x86.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.apk" downloads/Velora-PDF-Android-v2.1.8-x86_64.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-armeabi-v7a-release.apk" downloads/Velora-PDF-Android-v2.1.9-armeabi-v7a.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-arm64-v8a-release.apk" downloads/Velora-PDF-Android-v2.1.9-arm64-v8a.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86-release.apk" downloads/Velora-PDF-Android-v2.1.9-x86.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.apk" downloads/Velora-PDF-Android-v2.1.9-x86_64.apk
 ```
 
 ## Verification
@@ -101,8 +102,8 @@ cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.ap
 The current release was verified with Android SDK build-tools:
 
 - package name: `com.mutlukurt.velorapdfmobile`
-- version code: `29`
-- version name: `2.1.8`
+- version code: `30`
+- version name: `2.1.9`
 - APK Signature Scheme v2: enabled
 - native-code splits: `armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`
 - permission present: `android.permission.RECORD_AUDIO`
