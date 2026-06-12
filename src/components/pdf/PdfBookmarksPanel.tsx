@@ -62,11 +62,11 @@ export function PdfBookmarksPanel() {
                 onClick={() => handleJump(page)}
               >
                 <div className="text-xs font-bold text-accent">Page {page}</div>
-                <div className="text-[10px] text-secondary mt-0.5">Custom reference marker</div>
+                <div className="text-[10px] text-secondary mt-0.5">Tap to jump to this page</div>
               </button>
               <button
                 aria-label="Remove bookmark"
-                className="opacity-0 group-hover:opacity-100 p-1 text-secondary hover:text-red-400 rounded-lg transition"
+                className="p-1 text-secondary opacity-100 transition hover:text-red-400 rounded-lg md:opacity-0 md:group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleBookmark(fileId, page);

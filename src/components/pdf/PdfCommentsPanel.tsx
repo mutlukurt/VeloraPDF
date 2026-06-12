@@ -206,7 +206,7 @@ export function PdfCommentsPanel() {
                       {new Date(annotation.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                  <div className="flex items-center gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
                     {hasText && (
                       <button
                         aria-label="Edit comment text"

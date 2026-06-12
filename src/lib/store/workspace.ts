@@ -29,11 +29,19 @@ type WorkspaceStore = {
   setSettingsOpen: (open: boolean) => void
 }
 
-const savedTheme = () => (localStorage.getItem('kairnly.theme') === 'dark' ? 'dark' : 'light') as ThemeMode
+const WORKSPACE_THEME_KEY = 'kairnly.theme'
+const APP_THEME_KEY = 'velora:theme'
+
+const savedTheme = () => {
+  const saved = localStorage.getItem(APP_THEME_KEY) ?? localStorage.getItem(WORKSPACE_THEME_KEY)
+  return (saved === 'dark' ? 'dark' : 'light') as ThemeMode
+}
 
 function applyTheme(theme: ThemeMode) {
   document.documentElement.dataset.theme = theme
-  localStorage.setItem('kairnly.theme', theme)
+  document.documentElement.classList.toggle('dark', theme === 'dark')
+  localStorage.setItem(WORKSPACE_THEME_KEY, theme)
+  localStorage.setItem(APP_THEME_KEY, theme)
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({

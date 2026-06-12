@@ -7,6 +7,7 @@ import { exportPagesAsPdfZip } from '../../lib/export/pdf'
 import { useWorkspaceStore } from '../../lib/store/workspace'
 import { cn } from '../../lib/utils/cn'
 import { downloadBlob } from '../../lib/utils/files'
+import { useUiStore } from '../../stores/useUiStore'
 import veloraIconUrl from '../../assets/velora-icon.png'
 
 type SettingsTab = 'appearance' | 'data' | 'editor' | 'about'
@@ -60,15 +61,24 @@ function SettingRow({ title, description, children }: { title: string; descripti
 }
 
 export function SettingsDialog() {
-  const { settingsOpen, setSettingsOpen, theme, setTheme, dataLocation, refreshPages, pages, activePageId, openPage } = useWorkspaceStore()
+  const { settingsOpen, setSettingsOpen, theme: workspaceTheme, setTheme: setWorkspaceTheme, dataLocation, refreshPages, pages, activePageId, openPage } = useWorkspaceStore()
+  const appTheme = useUiStore((state) => state.theme)
+  const setAppTheme = useUiStore((state) => state.setTheme)
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance')
   const [preferences, setPreferences] = useState(readPreferences)
   const [status, setStatus] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const theme = appTheme ?? workspaceTheme
 
   useEffect(() => {
     applyPreferences(preferences)
   }, [preferences])
+
+  const updateTheme = (nextTheme: 'light' | 'dark') => {
+    setAppTheme(nextTheme)
+    setWorkspaceTheme(nextTheme)
+    setStatus(`${nextTheme === 'dark' ? 'Dark' : 'Light'} theme applied.`)
+  }
 
   const exportBackup = async () => {
     const backup = await db.exportWorkspaceBackup()
@@ -128,12 +138,12 @@ export function SettingsDialog() {
               <section>
                 <h3 className="text-sm font-semibold text-[var(--text)]">Theme</h3>
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <button className={`rounded-xl border p-4 text-left transition ${theme === 'light' ? 'border-[var(--accent)] bg-[var(--accent-soft)]' : 'border-[var(--border)] hover:bg-[var(--surface-muted)]'}`} onClick={() => setTheme('light')}>
+                  <button className={`rounded-xl border p-4 text-left transition ${theme === 'light' ? 'border-[var(--accent)] bg-[var(--accent-soft)]' : 'border-[var(--border)] hover:bg-[var(--surface-muted)]'}`} onClick={() => updateTheme('light')}>
                     <Sun size={18} />
                     <span className="mt-3 block text-sm font-medium">Light</span>
                     <span className="mt-1 block text-xs text-[var(--text-muted)]">Warm paper and stone</span>
                   </button>
-                  <button className={`rounded-xl border p-4 text-left transition ${theme === 'dark' ? 'border-[var(--accent)] bg-[var(--accent-soft)]' : 'border-[var(--border)] hover:bg-[var(--surface-muted)]'}`} onClick={() => setTheme('dark')}>
+                  <button className={`rounded-xl border p-4 text-left transition ${theme === 'dark' ? 'border-[var(--accent)] bg-[var(--accent-soft)]' : 'border-[var(--border)] hover:bg-[var(--surface-muted)]'}`} onClick={() => updateTheme('dark')}>
                     <Moon size={18} />
                     <span className="mt-3 block text-sm font-medium">Dark</span>
                     <span className="mt-1 block text-xs text-[var(--text-muted)]">Deep graphite for focus</span>
@@ -192,19 +202,19 @@ export function SettingsDialog() {
             <div className="space-y-4">
               <SettingRow title="Editor font size" description="Adjust the writing canvas type size.">
                 <div className="flex items-center gap-3">
-                  <input type="range" min={15} max={21} value={preferences.fontSize} onChange={(event) => setPreferences((value) => ({ ...value, fontSize: Number(event.target.value) }))} />
+                  <input aria-label="Editor font size" type="range" min={15} max={21} value={preferences.fontSize} onChange={(event) => setPreferences((value) => ({ ...value, fontSize: Number(event.target.value) }))} />
                   <span className="w-10 text-right text-xs text-[var(--text-muted)]">{preferences.fontSize}px</span>
                 </div>
               </SettingRow>
               <SettingRow title="Line height" description="Tune reading density for long notes and drafts.">
                 <div className="flex items-center gap-3">
-                  <input type="range" min={1.5} max={2} step={0.02} value={preferences.lineHeight} onChange={(event) => setPreferences((value) => ({ ...value, lineHeight: Number(event.target.value) }))} />
+                  <input aria-label="Editor line height" type="range" min={1.5} max={2} step={0.02} value={preferences.lineHeight} onChange={(event) => setPreferences((value) => ({ ...value, lineHeight: Number(event.target.value) }))} />
                   <span className="w-10 text-right text-xs text-[var(--text-muted)]">{preferences.lineHeight.toFixed(2)}</span>
                 </div>
               </SettingRow>
               <SettingRow title="Page width" description="Choose a narrow journal feel or a wider document workspace.">
                 <div className="flex items-center gap-3">
-                  <input type="range" min={720} max={980} step={20} value={preferences.editorWidth} onChange={(event) => setPreferences((value) => ({ ...value, editorWidth: Number(event.target.value) }))} />
+                  <input aria-label="Editor page width" type="range" min={720} max={980} step={20} value={preferences.editorWidth} onChange={(event) => setPreferences((value) => ({ ...value, editorWidth: Number(event.target.value) }))} />
                   <span className="w-12 text-right text-xs text-[var(--text-muted)]">{preferences.editorWidth}px</span>
                 </div>
               </SettingRow>
@@ -220,7 +230,7 @@ export function SettingsDialog() {
                   {preferences.focusMode ? 'On' : 'Off'}
                 </button>
               </SettingRow>
-              <Button variant="soft" onClick={() => setPreferences(defaultPreferences)} icon={<RotateCcw size={15} />}>
+              <Button variant="soft" onClick={() => { setPreferences(defaultPreferences); setStatus('Editor preferences reset.') }} icon={<RotateCcw size={15} />}>
                 Reset editor preferences
               </Button>
             </div>
@@ -233,7 +243,7 @@ export function SettingsDialog() {
                   <img src={veloraIconUrl} alt="Velora Notes" className="h-12 w-12 rounded-xl object-cover shadow-lift" />
                   <div>
                     <h3 className="text-base font-semibold text-[var(--text)]">Velora Notes</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Version 1.0.2 · Local-first desktop workspace</p>
+                    <p className="text-xs text-[var(--text-muted)]">Version 1.0.36 · Local-first desktop workspace</p>
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-[var(--text-muted)]">

@@ -15,6 +15,7 @@ export function IconButton({ active, label, children, className, ...props }: Ico
       className={cn(
         "grid h-10 w-10 place-items-center rounded-xl border border-transparent text-secondary transition hover:border-border hover:bg-elevated hover:text-primary",
         active && "border-accent/30 bg-soft-purple text-accent shadow-[0_10px_24px_rgba(91,77,255,.22)]",
+        props.disabled && "cursor-not-allowed opacity-40 hover:border-transparent hover:bg-transparent hover:text-secondary",
         className,
       )}
       {...props}

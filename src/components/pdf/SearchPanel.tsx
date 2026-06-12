@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { searchPdf, type SearchResult } from "../../lib/pdf/searchPdf";
 import { usePdfStore } from "../../stores/usePdfStore";
@@ -33,8 +33,14 @@ export function SearchPanel({ pdf }: { pdf: PDFDocumentProxy }) {
       <div className="mb-3 flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-secondary">
         <Search size={15} />
         <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search document" className="w-full bg-transparent text-sm text-primary outline-none placeholder:text-secondary" />
+        {query ? (
+          <button type="button" aria-label="Clear search" className="rounded-lg p-1 text-secondary hover:bg-elevated hover:text-primary" onClick={() => setQuery("")}>
+            <X size={14} />
+          </button>
+        ) : null}
       </div>
       <div className="space-y-2">
+        {!query.trim() ? <div className="rounded-xl bg-surface p-3 text-sm text-secondary">Type a word or phrase to search every page.</div> : null}
         {loading ? <div className="rounded-xl bg-surface p-3 text-sm text-secondary">Searching...</div> : null}
         {!loading && query && results.length === 0 ? <div className="rounded-xl bg-surface p-3 text-sm text-secondary">No matches found.</div> : null}
         {results.map((result, index) => (
