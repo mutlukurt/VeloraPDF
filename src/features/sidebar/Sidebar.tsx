@@ -67,9 +67,9 @@ function PageRow({
         if (!suppressClick) openPage(page.id)
       }}
       className={cn(
-        'group relative flex min-h-9 cursor-grab touch-none select-none items-center gap-1 rounded-lg py-1 pr-1.5 text-sm transition active:cursor-grabbing',
+        'group relative flex min-h-9 cursor-grab select-none items-center gap-1 rounded-lg py-1 pr-1.5 text-sm transition active:cursor-grabbing',
         isActive ? 'bg-[var(--accent-soft)] text-[var(--text)]' : 'text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]',
-        isDragging && 'opacity-40',
+        isDragging ? 'touch-none opacity-40' : 'touch-pan-y',
         placement === 'inside' && 'bg-[var(--accent-soft)]/70 ring-2 ring-[var(--accent)]/30',
       )}
       style={{ paddingLeft: `${depth * 14 + 6}px` }}
@@ -222,6 +222,7 @@ export function Sidebar({
   const visibleNodes = useMemo(() => getVisibleNodes(tree, expandedIds), [tree, expandedIds])
 
   const pageDragRef = useRef<{ sourceId: string; startX: number; startY: number; dragging: boolean } | null>(null)
+  const longPressTimerRef = useRef<number | null>(null)
   const suppressPageClickRef = useRef(false)
   const favorites = pages.filter((page) => page.isFavorite)
   const recent = pages
@@ -262,8 +263,19 @@ export function Sidebar({
 
   const handlePagePointerDown = (event: React.PointerEvent<HTMLDivElement>, node: PageNode) => {
     if (event.button !== 0) return
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current)
+    }
     pageDragRef.current = { sourceId: node.id, startX: event.clientX, startY: event.clientY, dragging: false }
     suppressPageClickRef.current = false
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      if (pageDragRef.current && pageDragRef.current.sourceId === node.id) {
+        pageDragRef.current.dragging = true
+        suppressPageClickRef.current = true
+        setDraggedPageId(node.id)
+      }
+    }, 2000)
   }
 
   useEffect(() => {
@@ -271,10 +283,20 @@ export function Sidebar({
       const drag = pageDragRef.current
       if (!drag) return
       const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY)
-      if (!drag.dragging && distance < 6) return
-      drag.dragging = true
+      
+      if (!drag.dragging) {
+        // If they move too far (> 10px) before the 2 seconds, cancel long press
+        if (distance > 10) {
+          if (longPressTimerRef.current) {
+            window.clearTimeout(longPressTimerRef.current)
+            longPressTimerRef.current = null
+          }
+          pageDragRef.current = null
+        }
+        return
+      }
+
       suppressPageClickRef.current = true
-      setDraggedPageId(drag.sourceId)
       
       const element = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
       
@@ -312,6 +334,10 @@ export function Sidebar({
     }
 
     const handleUp = async () => {
+      if (longPressTimerRef.current) {
+        window.clearTimeout(longPressTimerRef.current)
+        longPressTimerRef.current = null
+      }
       const drag = pageDragRef.current
       pageDragRef.current = null
       const target = useWorkspaceStore.getState().dropTarget
@@ -326,9 +352,11 @@ export function Sidebar({
 
     window.addEventListener('pointermove', handleMove)
     window.addEventListener('pointerup', handleUp)
+    window.addEventListener('pointercancel', handleUp)
     return () => {
       window.removeEventListener('pointermove', handleMove)
       window.removeEventListener('pointerup', handleUp)
+      window.removeEventListener('pointercancel', handleUp)
     }
   }, [nodeById])
 

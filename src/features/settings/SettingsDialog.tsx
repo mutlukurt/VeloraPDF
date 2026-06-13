@@ -17,7 +17,7 @@ const isAndroid = typeof window !== 'undefined' && (
   !!(window as any).VeloraAndroidFiles || 
   navigator.userAgent.toLowerCase().includes('android')
 );
-const appVersion = isAndroid ? '2.1.12' : packageJson.version;
+const appVersion = isAndroid ? '2.1.13' : packageJson.version;
 const workspaceType = isAndroid ? 'Local-first mobile workspace' : 'Local-first desktop workspace';
 
 type SettingsTab = 'appearance' | 'data' | 'editor' | 'about'
