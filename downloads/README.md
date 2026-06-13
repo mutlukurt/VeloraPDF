@@ -3,31 +3,31 @@
 This folder contains only the current release builds:
 
 - macOS DMG for the desktop app.
-- Android WebView APK v2.1.14 builds for phones, tablets, and emulators.
+- Android WebView APK v2.1.16 builds for phones, tablets, and emulators.
 
 ## macOS
 
 | Device | Download |
 | --- | --- |
-| Apple Silicon Mac | [Velora-PDF-1.0.45-aarch64.dmg](Velora-PDF-1.0.45-aarch64.dmg) |
+| Apple Silicon Mac | [Velora-PDF-1.0.47-aarch64.dmg](Velora-PDF-1.0.47-aarch64.dmg) |
 
-## Android WebView APK v2.1.14
+## Android WebView APK v2.1.16
 
 | Device / CPU | APK |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.14-arm64-v8a.apk](Velora-PDF-Android-v2.1.14-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.14-armeabi-v7a.apk](Velora-PDF-Android-v2.1.14-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.14-x86.apk](Velora-PDF-Android-v2.1.14-x86.apk) |
-| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.14-x86_64.apk](Velora-PDF-Android-v2.1.14-x86_64.apk) |
+| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.16-arm64-v8a.apk](Velora-PDF-Android-v2.1.16-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.16-armeabi-v7a.apk](Velora-PDF-Android-v2.1.16-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.16-x86.apk](Velora-PDF-Android-v2.1.16-x86.apk) |
+| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.16-x86_64.apk](Velora-PDF-Android-v2.1.16-x86_64.apk) |
 
-For a normal Android phone or tablet, use `Velora-PDF-Android-v2.1.14-arm64-v8a.apk`.
+For a normal Android phone or tablet, use `Velora-PDF-Android-v2.1.16-arm64-v8a.apk`.
 
 ## SHA256
 
 ```text
-d9fe672b56c6430fea0e455e9b06535d03871c4e75b95436a2cf75c76057d313  Velora-PDF-1.0.45-aarch64.dmg
-d5b835ddd5f98851e473352febfce2b9e2cee2face3fa857271d89bf785cd410  Velora-PDF-Android-v2.1.14-arm64-v8a.apk
-1e3735cb8161dbb86293c6ef4bfb8a260c4369705cd2ac79bb2b50ee9d82b386  Velora-PDF-Android-v2.1.14-armeabi-v7a.apk
-a6e49c4d6d1cabcb1892c9ba040cccbe50535101eff8bd6e48194eeeaea449d5  downloads/Velora-PDF-Android-v2.1.14-x86.apk
-33d2b83e38d1f28d14bbc550e16dec18a8a8fda0c9a1b2bc750d8f980314892c  downloads/Velora-PDF-Android-v2.1.14-x86_64.apk
+b84436df0e99d8549e5c36dd7006667afcd0c6ce3d1b40bebe4e3e00acad865f  Velora-PDF-1.0.47-aarch64.dmg
+26abe306c50b0358ac489df8db9b6a55212a291f8c98f877b8570f0776a96a1a  Velora-PDF-Android-v2.1.16-arm64-v8a.apk
+47c7f8e66f4c8f7d168cebf99de08f86b3c94ce62f3086e46b361e13d05b1a70  Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
+f9f01c17f1e8610b0f293e4e2c90fabfee3d7b751101250862ee04012b2e311b  Velora-PDF-Android-v2.1.16-x86.apk
+b1ff141dd5db4902bf5acb1338002fa54a7740dab12be9cf246ab3f5b0182e2e  downloads/Velora-PDF-Android-v2.1.16-x86_64.apk
 ```

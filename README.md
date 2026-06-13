@@ -8,10 +8,10 @@
   <a href="https://veloraproject.app/">
     <img alt="Website" src="https://img.shields.io/badge/Website-veloraproject.app-111827?style=for-the-badge&logo=safari&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.45-aarch64.dmg">
+  <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk">
+  <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
     <img alt="Download for Android" src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white">
   </a>
 </p>
@@ -25,9 +25,9 @@
 
 ![Velora PDF brand preview](assets/brand.webp)
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.45-aarch64.dmg)
+[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF Android WebView APK v2.1.14 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk)
+[Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
 Velora PDF is a private, local-first PDF reader, annotation workspace, and handwritten notebook app for macOS plus an offline Android WebView APK.
 
@@ -35,42 +35,42 @@ It is designed for people who want a calm, premium reading and note-taking exper
 
 ## Download macOS DMG
 
-Download for macOS: [Velora-PDF-1.0.45-aarch64.dmg](downloads/Velora-PDF-1.0.45-aarch64.dmg)
+Download for macOS: [Velora-PDF-1.0.47-aarch64.dmg](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
 Current local build output:
 
 ```text
-/Users/mutlu/Desktop/Velora PDF_1.0.45_aarch64.dmg
+/Users/mutlu/Desktop/Velora PDF_1.0.47_aarch64.dmg
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.45_aarch64.dmg
+src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 ```
 
-## Download Android WebView APK v2.1.14
+## Download Android WebView APK v2.1.16
 
-Velora PDF Android WebView APK v2.1.14 is a real native Android APK wrapper around the same web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
+Velora PDF Android WebView APK v2.1.16 is a real native Android APK wrapper around the same web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
 
-Current Android WebView APK v2.1.14 downloads:
+Current Android WebView APK v2.1.16 downloads:
 
 | Device / CPU | APK |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.14-arm64-v8a.apk](downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.14-armeabi-v7a.apk](downloads/Velora-PDF-Android-v2.1.14-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.14-x86.apk](downloads/Velora-PDF-Android-v2.1.14-x86.apk) |
-| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.14-x86_64.apk](downloads/Velora-PDF-Android-v2.1.14-x86_64.apk) |
+| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.16-arm64-v8a.apk](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.16-armeabi-v7a.apk](downloads/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.16-x86.apk](downloads/Velora-PDF-Android-v2.1.16-x86.apk) |
+| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.16-x86_64.apk](downloads/Velora-PDF-Android-v2.1.16-x86_64.apk) |
 
 For a normal Android phone, use `arm64-v8a`.
 
-Current Android WebView APK v2.1.14 release build outputs:
+Current Android WebView APK v2.1.16 release build outputs:
 
 ```text
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.14/Velora-PDF-Android-v2.1.14-armeabi-v7a.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.14/Velora-PDF-Android-v2.1.14-arm64-v8a.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.14/Velora-PDF-Android-v2.1.14-x86.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.14/Velora-PDF-Android-v2.1.14-x86_64.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-arm64-v8a.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-x86.apk
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-x86_64.apk
 ```
 
 Android WebView APK project source:
@@ -79,7 +79,7 @@ Android WebView APK project source:
 VeloraPDF Android APK v2/
 ```
 
-Android WebView APK v2.1.14 includes:
+Android WebView APK v2.1.16 includes:
 
 - The root VeloraPDF mobile web UI embedded directly inside the APK.
 - Offline startup and app usage without the Android `INTERNET` permission.
@@ -522,25 +522,25 @@ cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
 "./VeloraPDF Android APK v2/gradlew" -p "VeloraPDF Android APK v2" assembleRelease
 ```
 
-The Android WebView APK v2.1.14 release outputs are copied to:
+The Android WebView APK v2.1.16 release outputs are copied to:
 
 ```text
-downloads/Velora-PDF-Android-v2.1.14-armeabi-v7a.apk
-downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk
-downloads/Velora-PDF-Android-v2.1.14-x86.apk
-downloads/Velora-PDF-Android-v2.1.14-x86_64.apk
+downloads/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
+downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk
+downloads/Velora-PDF-Android-v2.1.16-x86.apk
+downloads/Velora-PDF-Android-v2.1.16-x86_64.apk
 ```
 
 The current copied desktop installer is:
 
 ```text
-downloads/Velora-PDF-1.0.45-aarch64.dmg
+downloads/Velora-PDF-1.0.47-aarch64.dmg
 ```
 
 ## Current Version
 
 ```text
-1.0.45
+1.0.47
 ```
 
 Bundle identifier:
@@ -574,6 +574,47 @@ aarch64
 ```
 
 ## Version History
+
+### Android WebView APK v2.1.16
+
+Released with a robust touch drag-and-drop fix for mobile/tablet devices in the sidebar, implementing pointer capture and callout-prevention styles to ensure smooth drag-and-drop without browser-level gesture cancellation.
+
+Changes:
+
+- Added pointer capture handling on long press to prevent native gesture hijacking.
+- Added explicit user-select and touch-callout CSS styles to page rows to block context menus and selection magnifiers.
+- Bounded touch wiggle cancellation to 25px (from 10px) to prevent micro-movements from cancelling dragging.
+- Rebuilt Android WebView APK release outputs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+
+### 1.0.47
+
+Released with robust touch drag-and-drop improvements for touchscreens in the sidebar.
+
+Changes:
+
+- Implemented touchscreen-specific wiggling thresholds (25px) and pointer capture APIs.
+- Embedded selection and callout prevention styling directly on draggable page rows.
+- Built and published the macOS `1.0.47` Apple Silicon DMG.
+- Updated Android WebView APK release builds to v2.1.16 for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+
+### Android WebView APK v2.1.15
+
+Released with history back/forward navigation buttons and clickable breadcrumbs in the editor header.
+
+Changes:
+
+- Added header navigation support.
+- Rebuilt Android WebView APK release outputs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+
+### 1.0.46
+
+Released with history back/forward navigation buttons and clickable breadcrumbs in the editor header.
+
+Changes:
+
+- Added clickable parent breadcrumbs and history tracking to navigation stores.
+- Built and published the macOS `1.0.46` Apple Silicon DMG.
+- Updated Android WebView APK release builds to v2.1.15 for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
 
 ### Android WebView APK v2.1.14
 
