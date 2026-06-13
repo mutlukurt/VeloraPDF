@@ -18,7 +18,7 @@ import { BubbleMenu } from '@tiptap/react/menus'
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { motion } from 'framer-motion'
-import { ArrowDown, ArrowUp, Bold, Check, Code2, Download, Highlighter, Image as ImageIcon, Italic, Link2, Plus, Redo2, Search, Strikethrough, Trash2, Type, Underline as UnderlineIcon, Undo2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Bold, Check, Code2, Download, Highlighter, Image as ImageIcon, Italic, Link2, Plus, Redo2, Search, Strikethrough, Trash2, Type, Underline as UnderlineIcon, Undo2, FolderOpen, FolderMinus, FolderPlus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { db } from '../../lib/db/client'
@@ -27,6 +27,7 @@ import { collectPageFamily, exportPagePdf, exportPagesAsPdfZip } from '../../lib
 import { PageIcon } from '../../lib/icons/pageIcons'
 import { pageIconOptions } from '../../lib/icons/pageIconRegistry'
 import { useWorkspaceStore } from '../../lib/store/workspace'
+import { cn } from '../../lib/utils/cn'
 import { downloadText } from '../../lib/utils/files'
 import { plainTextFromNode } from '../../lib/utils/text'
 import type { TiptapDoc } from '../../types'
@@ -180,7 +181,25 @@ const KairnlyListKeys = Extension.create({
 })
 
 export function WorkspaceEditor() {
-  const { activePage, activeDoc, pages, updatePage, saveActiveDoc, createPage, refreshPages } = useWorkspaceStore()
+  const {
+    activePage,
+    activeDoc,
+    pages,
+    updatePage,
+    saveActiveDoc,
+    createPage,
+    refreshPages,
+    draggedPageId,
+    dropTarget,
+    openPage,
+  } = useWorkspaceStore()
+
+  const subpages = useMemo(() => {
+    if (!activePage) return []
+    return pages
+      .filter((page) => page.parentId === activePage.id && !page.isArchived)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
+  }, [pages, activePage?.id])
   const [titleDrafts, setTitleDrafts] = useState<Record<string, string>>({})
   const [insertMenu, setInsertMenu] = useState<{
     open: boolean
@@ -700,7 +719,10 @@ export function WorkspaceEditor() {
     <motion.main key={activePage.id} className="h-full overflow-y-auto" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
       {activePage.cover ? <div className="h-40 border-b border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-muted),var(--accent-soft))]" /> : null}
       <DndContext sensors={sensors}>
-        <div className="mx-auto max-w-[var(--editor-max-width)] px-4 pb-28 pt-5 sm:px-6 md:px-8 md:pt-12">
+        <div
+          data-editor-drop-zone
+          className="mx-auto max-w-[var(--editor-max-width)] px-4 pb-28 pt-5 sm:px-6 md:px-8 md:pt-12 relative"
+        >
           <div className="mb-6 flex items-start gap-3 md:gap-4">
             <div ref={iconPickerRef} className="relative shrink-0">
               <button
@@ -805,6 +827,66 @@ export function WorkspaceEditor() {
               <AudioRecorder pageTitle={activePage.title} onInsertRecording={insertAudioRecording} />
             </div>
           </div>
+
+          {/* Subpages Section */}
+          {subpages.length > 0 && (
+            <div className="mb-6 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-muted)]/30 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-faint)] flex items-center gap-1.5">
+                  <FolderOpen size={14} className="text-[var(--accent)]" /> Subpages ({subpages.length})
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => createPage(activePage.id)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:underline"
+                >
+                  <Plus size={13} /> Add subpage
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {subpages.map((subpage) => (
+                  <div
+                    key={subpage.id}
+                    onClick={() => openPage(subpage.id)}
+                    className="group relative flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2.5 shadow-sm transition hover:border-[var(--accent)]/50 hover:bg-[var(--surface-muted)] cursor-pointer"
+                  >
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <PageIcon value={subpage.icon} size={15} className="shrink-0" />
+                      <span className="truncate text-xs font-medium text-[var(--text)]">{subpage.title || 'Untitled'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          updatePage({ ...subpage, parentId: null })
+                        }}
+                        title="Move to top level"
+                        className="p-1 rounded hover:bg-[var(--accent-soft)] text-[var(--text-muted)] hover:text-[var(--accent)]"
+                      >
+                        <FolderMinus size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Drag and Drop Active Overlay */}
+          {draggedPageId && (
+            <div
+              className={cn(
+                "mb-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-8 px-4 text-center transition",
+                dropTarget?.id === activePage.id
+                  ? "border-[var(--accent)] bg-[var(--accent-soft)]/20 text-[var(--accent)]"
+                  : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)]/50 hover:bg-[var(--surface-muted)]/50"
+              )}
+            >
+              <FolderPlus size={24} className="mb-2 opacity-60 animate-bounce" />
+              <p className="text-xs font-semibold">Drop here to move inside this page as a subpage</p>
+            </div>
+          )}
 
           <div
             className="relative"

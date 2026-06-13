@@ -1,10 +1,22 @@
-import { Archive, FilePlus2, PanelTop, Star } from 'lucide-react'
+import { Archive, FilePlus2, PanelTop, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useWorkspaceStore } from '../../lib/store/workspace'
 import { formatRelativeTime } from '../../lib/utils/text'
 
 export function EditorHeader() {
-  const { activePage, pages, updatePage, archiveActivePage, createPage, saveState } = useWorkspaceStore()
+  const {
+    activePage,
+    pages,
+    updatePage,
+    archiveActivePage,
+    createPage,
+    saveState,
+    openPage,
+    pageHistory,
+    pageHistoryIndex,
+    historyNavigate,
+  } = useWorkspaceStore()
+
   if (!activePage) return null
 
   const breadcrumbs = []
@@ -16,12 +28,41 @@ export function EditorHeader() {
     current = parent
   }
 
+  const canGoBack = pageHistoryIndex > 0
+  const canGoForward = pageHistoryIndex < pageHistory.length - 1
+
   return (
     <header className="kairnly-editor-header sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--background-translucent)] py-2 pl-16 pr-3 backdrop-blur-xl md:h-14 md:gap-3 md:px-6">
       <div className="flex min-w-0 flex-1 items-center gap-2 text-xs text-[var(--text-muted)] md:text-sm">
+        {/* Navigation History Buttons */}
+        <div className="flex items-center gap-0.5 mr-1 shrink-0">
+          <Button
+            size="icon"
+            className="h-7 w-7 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-muted)] disabled:opacity-35"
+            disabled={!canGoBack}
+            onClick={() => historyNavigate('back')}
+            icon={<ChevronLeft size={16} />}
+            title="Go back"
+          />
+          <Button
+            size="icon"
+            className="h-7 w-7 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-muted)] disabled:opacity-35"
+            disabled={!canGoForward}
+            onClick={() => historyNavigate('forward')}
+            icon={<ChevronRight size={16} />}
+            title="Go forward"
+          />
+        </div>
+
+        {/* Breadcrumbs */}
         {breadcrumbs.map((page) => (
           <span key={page.id} className="flex items-center gap-2">
-            <span className="max-w-[120px] truncate">{page.title}</span>
+            <button
+              onClick={() => openPage(page.id)}
+              className="max-w-[120px] truncate hover:text-[var(--text)] transition cursor-pointer font-medium"
+            >
+              {page.title}
+            </button>
             <span>/</span>
           </span>
         ))}

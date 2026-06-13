@@ -4,6 +4,8 @@ import { db } from '../db/client'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
+type PageDropPlacement = 'before' | 'after' | 'inside' | 'root'
+
 type WorkspaceStore = {
   pages: Page[]
   activePageId?: string
@@ -15,11 +17,15 @@ type WorkspaceStore = {
   commandPaletteOpen: boolean
   settingsOpen: boolean
   dataLocation?: string
+  draggedPageId: string | null
+  dropTarget: { id: string; placement: PageDropPlacement } | null
+  pageHistory: string[]
+  pageHistoryIndex: number
   initialize: () => Promise<void>
-  openPage: (pageId: string) => Promise<void>
+  openPage: (pageId: string, pushToHistory?: boolean) => Promise<void>
   createPage: (parentId?: string | null) => Promise<Page>
   updatePage: (page: Page) => Promise<void>
-  movePage: (pageId: string, targetId: string, placement: 'before' | 'after' | 'inside') => Promise<void>
+  movePage: (pageId: string, targetId: string | null, placement: PageDropPlacement) => Promise<void>
   archiveActivePage: () => Promise<void>
   saveActiveDoc: (doc: TiptapDoc) => Promise<void>
   refreshPages: () => Promise<void>
@@ -27,6 +33,9 @@ type WorkspaceStore = {
   toggleSidebar: () => void
   setCommandPaletteOpen: (open: boolean) => void
   setSettingsOpen: (open: boolean) => void
+  setDraggedPageId: (id: string | null) => void
+  setDropTarget: (target: { id: string; placement: PageDropPlacement } | null) => void
+  historyNavigate: (direction: 'back' | 'forward') => Promise<void>
 }
 
 const WORKSPACE_THEME_KEY = 'kairnly.theme'
@@ -51,6 +60,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   sidebarCollapsed: false,
   commandPaletteOpen: false,
   settingsOpen: false,
+  draggedPageId: null,
+  dropTarget: null,
+  pageHistory: [],
+  pageHistoryIndex: -1,
+  setDraggedPageId: (draggedPageId) => set({ draggedPageId }),
+  setDropTarget: (dropTarget) => set({ dropTarget }),
 
   initialize: async () => {
     applyTheme(get().theme)
@@ -66,16 +81,47 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     set({ pages: await db.listPages() })
   },
 
-  openPage: async (pageId: string) => {
+  openPage: async (pageId: string, pushToHistory = true) => {
     const [page, doc] = await Promise.all([db.getPage(pageId), db.loadPageContent(pageId)])
     if (!page) return
-    set((state) => ({
-      activePageId: pageId,
-      activePage: page,
-      activeDoc: doc,
-      pages: state.pages.map((item) => (item.id === page.id ? page : item)),
-      saveState: 'saved',
-    }))
+    
+    set((state) => {
+      let nextHistory = [...state.pageHistory]
+      let nextIndex = state.pageHistoryIndex
+      
+      if (pushToHistory) {
+        nextHistory = nextHistory.slice(0, nextIndex + 1)
+        if (nextHistory[nextIndex] !== pageId) {
+          nextHistory.push(pageId)
+          nextIndex = nextHistory.length - 1
+        }
+      }
+      
+      return {
+        activePageId: pageId,
+        activePage: page,
+        activeDoc: doc,
+        pages: state.pages.map((item) => (item.id === page.id ? page : item)),
+        saveState: 'saved',
+        pageHistory: nextHistory,
+        pageHistoryIndex: nextIndex,
+      }
+    })
+  },
+
+  historyNavigate: async (direction: 'back' | 'forward') => {
+    const { pageHistory, pageHistoryIndex, openPage } = get()
+    if (direction === 'back' && pageHistoryIndex > 0) {
+      const nextIndex = pageHistoryIndex - 1
+      const pageId = pageHistory[nextIndex]
+      await openPage(pageId, false)
+      set({ pageHistoryIndex: nextIndex })
+    } else if (direction === 'forward' && pageHistoryIndex < pageHistory.length - 1) {
+      const nextIndex = pageHistoryIndex + 1
+      const pageId = pageHistory[nextIndex]
+      await openPage(pageId, false)
+      set({ pageHistoryIndex: nextIndex })
+    }
   },
 
   createPage: async (parentId?: string | null) => {
@@ -97,22 +143,26 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   movePage: async (pageId, targetId, placement) => {
     const pages = get().pages
     const moving = pages.find((page) => page.id === pageId)
-    const target = pages.find((page) => page.id === targetId)
-    if (!moving || !target || moving.id === target.id) return
+    const target = targetId ? pages.find((page) => page.id === targetId) : undefined
+    if (!moving) return
 
-    let cursor: Page | undefined = target
-    while (cursor?.parentId) {
-      if (cursor.parentId === moving.id) return
-      cursor = pages.find((page) => page.id === cursor?.parentId)
+    if (placement !== 'root' && (!target || moving.id === target.id)) return
+
+    if (target) {
+      let cursor: Page | undefined = target
+      while (cursor?.parentId) {
+        if (cursor.parentId === moving.id) return
+        cursor = pages.find((page) => page.id === cursor?.parentId)
+      }
     }
 
-    const nextParentId = placement === 'inside' ? target.id : target.parentId ?? null
+    const nextParentId = placement === 'root' ? null : placement === 'inside' && target ? target.id : target?.parentId ?? null
     const siblings = pages
       .filter((page) => page.id !== moving.id && (page.parentId ?? null) === nextParentId)
       .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
 
     let insertIndex = siblings.length
-    if (placement !== 'inside') {
+    if (placement !== 'inside' && placement !== 'root' && target) {
       const targetIndex = siblings.findIndex((page) => page.id === target.id)
       if (targetIndex >= 0) insertIndex = placement === 'before' ? targetIndex : targetIndex + 1
     }

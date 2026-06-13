@@ -1,8 +1,6 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Archive,
-  ChevronsLeft,
-  ChevronsRight,
   Command,
   FileText,
   FilePlus2,
@@ -12,6 +10,8 @@ import {
   Search,
   Settings,
   Star,
+  ChevronRight,
+  ChevronDown,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
@@ -27,105 +27,104 @@ import type { Page } from '../../types'
 import veloraIconUrl from '../../assets/velora-icon.png'
 import { buildPageTree, type PageNode } from './pageTree'
 
-type PageDropPlacement = 'before' | 'after' | 'inside'
+type PageDropPlacement = 'before' | 'after' | 'inside' | 'root'
+const ROOT_DROP_ID = '__root__'
+
+const flattenNodes = (nodes: PageNode[]): PageNode[] => nodes.flatMap((node) => [node, ...flattenNodes(node.children)])
 
 function PageRow({
-  node,
-  depth = 0,
+  page,
+  childCount,
+  depth,
+  isExpanded,
+  onToggleExpand,
   draggedPageId,
   dropTarget,
   onPointerDownPage,
   suppressClick,
 }: {
-  node: PageNode
-  depth?: number
+  page: PageNode
+  childCount: number
+  depth: number
+  isExpanded: boolean
+  onToggleExpand: (id: string) => void
   draggedPageId: string | null
   dropTarget: { id: string; placement: PageDropPlacement } | null
-  onPointerDownPage: (event: React.PointerEvent<HTMLDivElement>, node: PageNode) => void
+  onPointerDownPage: (event: React.PointerEvent<HTMLDivElement>, page: PageNode) => void
   suppressClick: boolean
 }) {
-  const [open, setOpen] = useState(true)
   const { activePageId, openPage, createPage, updatePage } = useWorkspaceStore()
-  const isActive = activePageId === node.id
-  const hasChildren = node.children.length > 0
-  const isDragging = draggedPageId === node.id
-  const placement = dropTarget?.id === node.id ? dropTarget.placement : null
+  const isActive = activePageId === page.id
+  const isDragging = draggedPageId === page.id
+  const placement = dropTarget?.id === page.id ? dropTarget.placement : null
 
   return (
-    <div>
-      <div
-        data-page-id={node.id}
-        onPointerDown={(event) => onPointerDownPage(event, node)}
-        onClick={() => {
-          if (!suppressClick) openPage(node.id)
-        }}
-        className={cn(
-          'group relative flex h-8 cursor-grab select-none items-center gap-1 rounded-lg px-1.5 text-sm transition active:cursor-grabbing',
-          isActive ? 'bg-[var(--accent-soft)] text-[var(--text)]' : 'text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]',
-          isDragging && 'opacity-40',
-          placement === 'inside' && 'ring-2 ring-[var(--accent)]/30',
-        )}
-        style={{ paddingLeft: 6 + depth * 14 }}
-      >
-        {placement === 'before' ? <span className="absolute left-2 right-2 top-0 h-0.5 rounded-full bg-[var(--accent)]" /> : null}
-        {placement === 'after' ? <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[var(--accent)]" /> : null}
+    <div
+      data-page-id={page.id}
+      data-page-parent-id={page.parentId ?? ''}
+      onPointerDown={(event) => onPointerDownPage(event, page)}
+      onClick={() => {
+        if (!suppressClick) openPage(page.id)
+      }}
+      className={cn(
+        'group relative flex min-h-9 cursor-grab touch-none select-none items-center gap-1 rounded-lg py-1 pr-1.5 text-sm transition active:cursor-grabbing',
+        isActive ? 'bg-[var(--accent-soft)] text-[var(--text)]' : 'text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]',
+        isDragging && 'opacity-40',
+        placement === 'inside' && 'bg-[var(--accent-soft)]/70 ring-2 ring-[var(--accent)]/30',
+      )}
+      style={{ paddingLeft: `${depth * 14 + 6}px` }}
+    >
+      {placement === 'before' ? <span className="absolute right-2 top-0 h-0.5 rounded-full bg-[var(--accent)]" style={{ left: `${depth * 14 + 6}px` }} /> : null}
+      {placement === 'after' ? <span className="absolute bottom-0 right-2 h-0.5 rounded-full bg-[var(--accent)]" style={{ left: `${depth * 14 + 6}px` }} /> : null}
+      
+      {childCount > 0 ? (
         <button
-          className="grid h-5 w-5 place-items-center rounded hover:bg-black/5"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation()
-            setOpen((value) => !value)
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleExpand(page.id)
           }}
-          aria-label="Toggle page"
+          className="grid h-5 w-5 shrink-0 place-items-center rounded hover:bg-[var(--accent-soft)] text-[var(--text-muted)] transition"
         >
-          {hasChildren ? open ? <ChevronsLeft size={12} className="-rotate-90" /> : <ChevronsRight size={12} /> : <span className="h-1 w-1 rounded-full bg-current opacity-40" />}
+          {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
         </button>
-        <div className="flex min-w-0 flex-1 items-center gap-2 text-left">
-          <PageIcon value={node.icon} size={16} className="shrink-0" />
-          <span className="truncate">{node.title || 'Untitled'}</span>
-        </div>
-        <div className="flex opacity-0 transition group-hover:opacity-100">
-          <Tooltip label="Add child page">
-            <Button
-              size="icon"
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
-                createPage(node.id)
-              }}
-              icon={<FilePlus2 size={14} />}
-            />
-          </Tooltip>
-          <Tooltip label={node.isFavorite ? 'Unfavorite' : 'Favorite'}>
-            <Button
-              size="icon"
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
-                updatePage({ ...node, isFavorite: !node.isFavorite })
-              }}
-              icon={<Star size={14} fill={node.isFavorite ? 'currentColor' : 'none'} />}
-            />
-          </Tooltip>
+      ) : (
+        <span className="grid h-5 w-5 shrink-0 place-items-center rounded">
+          <span className="h-1 w-1 rounded-full bg-current opacity-40" />
+        </span>
+      )}
+      
+      <div className="flex min-w-0 flex-1 items-center gap-2 text-left">
+        <PageIcon value={page.icon} size={16} className="shrink-0" />
+        <div className="min-w-0 flex-1">
+          <span className="block truncate">{page.title || 'Untitled'}</span>
         </div>
       </div>
-      <AnimatePresence initial={false}>
-        {open && hasChildren ? (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            {node.children.map((child) => (
-              <PageRow
-                key={child.id}
-                node={child}
-                depth={depth + 1}
-                draggedPageId={draggedPageId}
-                dropTarget={dropTarget}
-                onPointerDownPage={onPointerDownPage}
-                suppressClick={suppressClick}
-              />
-            ))}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      <div className="flex shrink-0 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+        <Tooltip label="Add child page">
+          <Button
+            size="icon"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              createPage(page.id)
+            }}
+            icon={<FilePlus2 size={14} />}
+          />
+        </Tooltip>
+        <Tooltip label={page.isFavorite ? 'Unfavorite' : 'Favorite'}>
+          <Button
+            size="icon"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              updatePage({ ...page, isFavorite: !page.isFavorite })
+            }}
+            icon={<Star size={14} fill={page.isFavorite ? 'currentColor' : 'none'} />}
+          />
+        </Tooltip>
+      </div>
     </div>
   )
 }
@@ -152,12 +151,17 @@ export function Sidebar({
 }) {
   const {
     pages,
+    activePageId,
     activePage,
     sidebarCollapsed,
     toggleSidebar,
     createPage,
     setCommandPaletteOpen,
     setSettingsOpen,
+    draggedPageId,
+    dropTarget,
+    setDraggedPageId,
+    setDropTarget,
   } = useWorkspaceStore()
   const activeFile = usePdfStore((state) => state.activeFile)
   const pdf = usePdfStore((state) => state.pdf)
@@ -165,8 +169,58 @@ export function Sidebar({
   const setActiveView = useUiStore((state) => state.setActiveView)
   const setPdfSidebarMode = useUiStore((state) => state.setSidebarMode)
   const tree = useMemo(() => buildPageTree(pages), [pages])
-  const [draggedPageId, setDraggedPageId] = useState<string | null>(null)
-  const [dropTarget, setDropTarget] = useState<{ id: string; placement: PageDropPlacement } | null>(null)
+  const flatNodes = useMemo(() => flattenNodes(tree), [tree])
+  const nodeById = useMemo(() => new Map(flatNodes.map((node) => [node.id, node])), [flatNodes])
+
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
+
+  // Auto-expand ancestors when active page changes
+  useEffect(() => {
+    if (activePageId) {
+      const ancestors: string[] = []
+      let currentId = activePageId
+      while (currentId) {
+        const page = pages.find((p) => p.id === currentId)
+        if (page && page.parentId) {
+          ancestors.push(page.parentId)
+          currentId = page.parentId
+        } else {
+          break
+        }
+      }
+      if (ancestors.length > 0) {
+        setExpandedIds((prev) => {
+          const next = { ...prev }
+          let changed = false
+          for (const id of ancestors) {
+            if (!next[id]) {
+              next[id] = true
+              changed = true
+            }
+          }
+          return changed ? next : prev
+        })
+      }
+    }
+  }, [activePageId, pages])
+
+  const handleToggleExpand = (id: string) => {
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  const getVisibleNodes = (nodes: PageNode[], expanded: Record<string, boolean>, depth = 0): (PageNode & { depth: number })[] => {
+    return nodes.flatMap((node) => {
+      const isExpanded = !!expanded[node.id]
+      const nodeWithDepth = { ...node, depth }
+      if (isExpanded && node.children && node.children.length > 0) {
+        return [nodeWithDepth, ...getVisibleNodes(node.children, expanded, depth + 1)]
+      }
+      return [nodeWithDepth]
+    })
+  }
+
+  const visibleNodes = useMemo(() => getVisibleNodes(tree, expandedIds), [tree, expandedIds])
+
   const pageDragRef = useRef<{ sourceId: string; startX: number; startY: number; dragging: boolean } | null>(null)
   const suppressPageClickRef = useRef(false)
   const favorites = pages.filter((page) => page.isFavorite)
@@ -221,13 +275,35 @@ export function Sidebar({
       drag.dragging = true
       suppressPageClickRef.current = true
       setDraggedPageId(drag.sourceId)
-      const row = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest<HTMLElement>('[data-page-id]')
+      
+      const element = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
+      
+      // Check for dropping on the active page's editor area
+      const editorDrop = element?.closest<HTMLElement>('[data-editor-drop-zone]')
+      if (editorDrop) {
+        const activeId = useWorkspaceStore.getState().activePageId
+        if (activeId && activeId !== drag.sourceId) {
+          const sourceNode = nodeById.get(drag.sourceId)
+          const isActiveDescendant = sourceNode ? isDescendant(sourceNode, activeId) : false
+          if (!isActiveDescendant) {
+            setDropTarget({ id: activeId, placement: 'inside' })
+            return
+          }
+        }
+      }
+
+      const rootDrop = element?.closest<HTMLElement>('[data-page-root-drop]')
+      if (rootDrop) {
+        setDropTarget({ id: ROOT_DROP_ID, placement: 'root' })
+        return
+      }
+      const row = element?.closest<HTMLElement>('[data-page-id]')
       if (!row) {
         setDropTarget(null)
         return
       }
       const targetId = row.dataset.pageId
-      const targetNode = targetId ? tree.flatMap(function flatten(node): PageNode[] { return [node, ...node.children.flatMap(flatten)] }).find((node) => node.id === targetId) : undefined
+      const targetNode = targetId ? nodeById.get(targetId) : undefined
       if (!targetNode || targetNode.id === drag.sourceId || isDescendant(targetNode, drag.sourceId)) {
         setDropTarget(null)
         return
@@ -238,7 +314,7 @@ export function Sidebar({
     const handleUp = async () => {
       const drag = pageDragRef.current
       pageDragRef.current = null
-      const target = dropTarget
+      const target = useWorkspaceStore.getState().dropTarget
       setDraggedPageId(null)
       setDropTarget(null)
       window.setTimeout(() => {
@@ -254,13 +330,7 @@ export function Sidebar({
       window.removeEventListener('pointermove', handleMove)
       window.removeEventListener('pointerup', handleUp)
     }
-  }, [dropTarget, tree])
-
-  const handlePageDrop = async (sourceId: string, targetId: string, placement: PageDropPlacement) => {
-    setDraggedPageId(null)
-    setDropTarget(null)
-    await useWorkspaceStore.getState().movePage(sourceId, targetId, placement)
-  }
+  }, [nodeById])
 
   if (sidebarCollapsed && !mobileOpen) {
     return (
@@ -343,10 +413,24 @@ export function Sidebar({
             <Button size="icon" onClick={() => createPage()} icon={<FilePlus2 size={14} />} />
           </div>
           <div className="space-y-0.5">
-            {tree.map((node) => (
+            <div
+              data-page-root-drop
+              className={cn(
+                'mb-1 hidden rounded-full border border-dashed border-[var(--accent)]/40 px-3 py-1.5 text-center text-[11px] font-semibold text-[var(--accent)] transition',
+                draggedPageId && 'block',
+                dropTarget?.id === ROOT_DROP_ID && 'border-[var(--accent)] bg-[var(--accent-soft)] shadow-sm',
+              )}
+            >
+              Drop here for top level
+            </div>
+            {visibleNodes.map((node) => (
               <PageRow
                 key={node.id}
-                node={node}
+                page={node}
+                childCount={node.children.length}
+                depth={node.depth}
+                isExpanded={!!expandedIds[node.id]}
+                onToggleExpand={handleToggleExpand}
                 draggedPageId={draggedPageId}
                 dropTarget={dropTarget}
                 onPointerDownPage={handlePagePointerDown}

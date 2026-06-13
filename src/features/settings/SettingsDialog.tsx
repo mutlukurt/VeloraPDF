@@ -9,6 +9,16 @@ import { cn } from '../../lib/utils/cn'
 import { downloadBlob } from '../../lib/utils/files'
 import { useUiStore } from '../../stores/useUiStore'
 import veloraIconUrl from '../../assets/velora-icon.png'
+import packageJson from '../../../package.json'
+
+const isAndroid = typeof window !== 'undefined' && (
+  // Check for Android native bridges or user agent
+  !!(window as any).VeloraAndroidRecorder || 
+  !!(window as any).VeloraAndroidFiles || 
+  navigator.userAgent.toLowerCase().includes('android')
+);
+const appVersion = isAndroid ? '2.1.12' : packageJson.version;
+const workspaceType = isAndroid ? 'Local-first mobile workspace' : 'Local-first desktop workspace';
 
 type SettingsTab = 'appearance' | 'data' | 'editor' | 'about'
 
@@ -243,7 +253,7 @@ export function SettingsDialog() {
                   <img src={veloraIconUrl} alt="Velora Notes" className="h-12 w-12 rounded-xl object-cover shadow-lift" />
                   <div>
                     <h3 className="text-base font-semibold text-[var(--text)]">Velora Notes</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Version 1.0.41 · Local-first desktop workspace</p>
+                    <p className="text-xs text-[var(--text-muted)]">Version {appVersion} · {workspaceType}</p>
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-[var(--text-muted)]">
