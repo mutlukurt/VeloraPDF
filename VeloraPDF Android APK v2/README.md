@@ -1,4 +1,4 @@
-# VeloraPDF Android WebView APK v2.1.13
+# VeloraPDF Android WebView APK v2.1.14
 
 Native Android WebView wrapper for the root VeloraPDF Vite web app.
 
@@ -40,19 +40,19 @@ Because every app asset is packaged inside the APK, the release does not request
 
 ## Release APKs
 
-The current v2.1.13 APKs are stored in the root `downloads/` folder:
+The current v2.1.14 APKs are stored in the root `downloads/` folder:
 
 | Device / CPU | APK |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2.1.13-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2.1.13-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2.1.13-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2.1.13-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2.1.13-x86.apk`](../downloads/Velora-PDF-Android-v2.1.13-x86.apk) |
-| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2.1.13-x86_64.apk`](../downloads/Velora-PDF-Android-v2.1.13-x86_64.apk) |
+| Most modern phones and tablets, 64-bit ARM | [`downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk`](../downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk) |
+| Older 32-bit ARM phones and tablets | [`downloads/Velora-PDF-Android-v2.1.14-armeabi-v7a.apk`](../downloads/Velora-PDF-Android-v2.1.14-armeabi-v7a.apk) |
+| Android emulator / 32-bit x86 | [`downloads/Velora-PDF-Android-v2.1.14-x86.apk`](../downloads/Velora-PDF-Android-v2.1.14-x86.apk) |
+| Android emulator / 64-bit x86 | [`downloads/Velora-PDF-Android-v2.1.14-x86_64.apk`](../downloads/Velora-PDF-Android-v2.1.14-x86_64.apk) |
 
 They are also copied locally to:
 
 ```text
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.13/
+/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.14/
 ```
 
 ## Screenshots
@@ -92,10 +92,10 @@ cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
 Copy release outputs:
 
 ```bash
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-armeabi-v7a-release.apk" downloads/Velora-PDF-Android-v2.1.13-armeabi-v7a.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-arm64-v8a-release.apk" downloads/Velora-PDF-Android-v2.1.13-arm64-v8a.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86-release.apk" downloads/Velora-PDF-Android-v2.1.13-x86.apk
-cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.apk" downloads/Velora-PDF-Android-v2.1.13-x86_64.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-armeabi-v7a-release.apk" downloads/Velora-PDF-Android-v2.1.14-armeabi-v7a.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-arm64-v8a-release.apk" downloads/Velora-PDF-Android-v2.1.14-arm64-v8a.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86-release.apk" downloads/Velora-PDF-Android-v2.1.14-x86.apk
+cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.apk" downloads/Velora-PDF-Android-v2.1.14-x86_64.apk
 ```
 
 ## Verification
@@ -103,8 +103,8 @@ cp "VeloraPDF Android APK v2/app/build/outputs/apk/release/app-x86_64-release.ap
 The current release was verified with Android SDK build-tools:
 
 - package name: `com.mutlukurt.velorapdfmobile`
-- version code: `34`
-- version name: `2.1.13`
+- version code: `35`
+- version name: `2.1.14`
 - APK Signature Scheme v2: enabled
 - native-code splits: `armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`
 - permission present: `android.permission.RECORD_AUDIO`
