@@ -1,7 +1,7 @@
 # Velora PDF
 
 <p align="center">
-  <strong>Private, local-first PDF reading and annotation for macOS, Android phones, and tablets.</strong>
+  <strong>Private, local-first PDF reading and annotation for macOS, Windows, Android phones, and tablets.</strong>
 </p>
 
 <p align="center">
@@ -10,6 +10,9 @@
   </a>
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
+  </a>
+  <a href="downloads/Velora-PDF-1.0.47-x64-setup.exe">
+    <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
     <img alt="Download for Android" src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white">
@@ -27,9 +30,11 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.47-x64-setup.exe)
+
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
-Velora PDF is a private, local-first PDF reader, annotation workspace, and handwritten notebook app for macOS plus an offline Android WebView APK.
+Velora PDF is a private, local-first PDF reader, annotation workspace, and handwritten notebook app for macOS, Windows plus an offline Android WebView APK.
 
 It is designed for people who want a calm, premium reading and note-taking experience without accounts, subscriptions, cloud sync, tracking, analytics, or external APIs. PDFs and notebooks stay on the user’s own device, render locally, annotate locally, record local voice memos, and export locally.
 
@@ -47,6 +52,22 @@ Tauri build output:
 
 ```text
 src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
+```
+
+## Download Windows EXE
+
+Download for Windows: [Velora-PDF-1.0.47-x64-setup.exe](downloads/Velora-PDF-1.0.47-x64-setup.exe)
+
+Current local build output:
+
+```text
+C:\Users\mutlu\Desktop\Velora PDF_1.0.47_x64-setup.exe
+```
+
+Tauri build output:
+
+```text
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.47_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -229,6 +250,7 @@ Desktop integration:
 - `@tauri-apps/plugin-fs`
 - Rust Tauri shell
 - macOS DMG bundle target
+- Windows NSIS bundle target
 
 Android APK v2 integration:
 
@@ -512,6 +534,18 @@ The generated DMG is located at:
 src-tauri/target/release/bundle/dmg/
 ```
 
+Build the Windows app and EXE installer:
+
+```bash
+npm run tauri build
+```
+
+The generated EXE is located at:
+
+```text
+src-tauri/target/release/bundle/nsis/
+```
+
 Build the Android WebView APK app:
 
 ```bash
@@ -531,10 +565,11 @@ downloads/Velora-PDF-Android-v2.1.16-x86.apk
 downloads/Velora-PDF-Android-v2.1.16-x86_64.apk
 ```
 
-The current copied desktop installer is:
+The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
+downloads/Velora-PDF-1.0.47-x64-setup.exe
 ```
 
 ## Current Version
@@ -588,13 +623,16 @@ Changes:
 
 ### 1.0.47
 
-Released with robust touch drag-and-drop improvements for touchscreens in the sidebar.
+Released with robust touch drag-and-drop improvements for touchscreens in the sidebar, and added Windows desktop target support.
 
 Changes:
 
 - Implemented touchscreen-specific wiggling thresholds (25px) and pointer capture APIs.
 - Embedded selection and callout prevention styling directly on draggable page rows.
 - Built and published the macOS `1.0.47` Apple Silicon DMG.
+- Added full Windows compile target support using Tauri 2 and Rust.
+- Built and published the Windows `1.0.47` x64 EXE setup installer.
+- Resolved Windows command prompt debug console leakage by enforcing the GUI subsystem window attribute in `main.rs`.
 - Updated Android WebView APK release builds to v2.1.16 for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
 
 ### Android WebView APK v2.1.15
