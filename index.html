@@ -83,6 +83,30 @@
         <p class="velora-boot-title">Velora PDF</p>
       </div>
     </div>
+    <script>
+      // Reveal the native window the moment the boot shell paints, without
+      // waiting for the React bundle to download and execute. The Rust layer
+      // listens for "velora-ready" and shows the hidden window.
+      (function () {
+        var revealed = false;
+        function reveal() {
+          if (revealed) return;
+          try {
+            if (window.__TAURI__ && window.__TAURI__.event) {
+              window.__TAURI__.event.emit("velora-ready");
+              revealed = true;
+              return;
+            }
+          } catch (error) {
+            /* Rust fallback timer still reveals the window. */
+          }
+          setTimeout(reveal, 40);
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(reveal);
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

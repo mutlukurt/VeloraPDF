@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.50-x64-setup.exe">
+  <a href="downloads/Velora-PDF-1.0.51-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
@@ -30,7 +30,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.50-x64-setup.exe)
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.51-x64-setup.exe)
 
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
@@ -56,20 +56,20 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 ## Download Windows EXE
 
-Download for Windows: [Velora-PDF-1.0.50-x64-setup.exe](downloads/Velora-PDF-1.0.50-x64-setup.exe)
+Download for Windows: [Velora-PDF-1.0.51-x64-setup.exe](downloads/Velora-PDF-1.0.51-x64-setup.exe)
 
-This Windows build focuses on near-instant startup and faster backup import. The frontend is code-split so the startup chunk dropped from ~2.7 MB to ~60 KB, with the PDF viewer, note editor and PDF export libraries loaded only when needed. Backup import now runs inside a single SQLite transaction with cached statements, cutting multi-second imports down to a fraction. The window still stays hidden until the themed UI paints and is then revealed with no white flash.
+This Windows build reveals the window the instant the boot shell paints, before the React bundle finishes downloading, so launch feels immediate instead of waiting on the full app to mount. An inline script emits a `velora-ready` signal as soon as the splash is painted and the Rust layer shows the window right away, with a guaranteed fallback. The React runtime chunk was also trimmed from ~965 KB to ~143 KB. It keeps the code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
 
 Current local build output:
 
 ```text
-C:\Users\mutlu\Desktop\Velora-PDF-1.0.50-x64-setup.exe
+C:\Users\mutlu\Desktop\Velora-PDF-1.0.51-x64-setup.exe
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.50_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.51_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -571,13 +571,13 @@ The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.50-x64-setup.exe
+downloads/Velora-PDF-1.0.51-x64-setup.exe
 ```
 
 ## Current Version
 
 ```text
-1.0.50
+1.0.51
 ```
 
 Bundle identifier:
@@ -611,6 +611,16 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.51
+
+Released to make the window appear as early as physically possible on launch.
+
+- Added an inline reveal script in `index.html` that emits `velora-ready` as soon as the boot shell paints, so the window is shown before the React bundle finishes loading instead of waiting for the app to mount.
+- Enabled `withGlobalTauri` so the inline script can emit the reveal event without importing the module bundle.
+- Narrowed the `vendor-react` chunk to React, React DOM and the scheduler, trimming it from ~965 KB to ~143 KB so the first interactive paint arrives sooner.
+- Note: the remaining startup time is dominated by the Windows WebView2 runtime initialization, which is outside the app's control.
+- Rebuilt and republished the Windows `1.0.51` x64 EXE setup installer.
 
 ### 1.0.50
 

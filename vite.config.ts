@@ -22,8 +22,15 @@ export default defineConfig({
           if (id.includes("html2canvas") || id.includes("dompurify") || id.includes("canvg")) return "vendor-canvas";
           if (id.includes("jszip")) return "vendor-jszip";
           if (id.includes("@tiptap") || id.includes("prosemirror")) return "vendor-editor";
-          if (id.includes("framer-motion") || id.includes("motion")) return "vendor-motion";
-          if (id.includes("react-dom") || id.includes("react") || id.includes("scheduler")) return "vendor-react";
+          if (id.includes("framer-motion") || id.includes("/motion")) return "vendor-motion";
+          if (
+            id.includes("/node_modules/react/") ||
+            id.includes("/node_modules/react-dom/") ||
+            id.includes("/node_modules/scheduler/") ||
+            id.includes("/node_modules/react/jsx-runtime")
+          ) {
+            return "vendor-react";
+          }
           return "vendor";
         },
       },
