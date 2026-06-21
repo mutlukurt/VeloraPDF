@@ -16,9 +16,9 @@ This folder contains only the current release builds:
 
 | Device | Download |
 | --- | --- |
-| Windows 10/11 x64 | [Velora-PDF-1.0.51-x64-setup.exe](Velora-PDF-1.0.51-x64-setup.exe) |
+| Windows 10/11 x64 | [Velora-PDF-1.0.52-x64-setup.exe](Velora-PDF-1.0.52-x64-setup.exe) |
 
-This Windows build reveals the window the instant the boot shell paints, before the React bundle finishes loading, so startup feels immediate. The React runtime chunk was also trimmed from ~965 KB to ~143 KB. It keeps the code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
+This Windows build also saves the current note when you close the window, not just when you switch pages, so an accidental click on the close button can no longer lose in-progress work. It keeps the instant window reveal, code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
 
 ## Android WebView APK v2.1.16
 
@@ -35,7 +35,7 @@ For a normal Android phone or tablet, use `Velora-PDF-Android-v2.1.16-arm64-v8a.
 
 ```text
 b84436df0e99d8549e5c36dd7006667afcd0c6ce3d1b40bebe4e3e00acad865f  Velora-PDF-1.0.47-aarch64.dmg
-528c47818876bba894de7403875249800f411aed4411da2532861eeb2e168891  Velora-PDF-1.0.51-x64-setup.exe
+fdfbdecb361070e77f8a8f00319e8a3892f59637b7d5f80bf8af2eb87d0867e7  Velora-PDF-1.0.52-x64-setup.exe
 26abe306c50b0358ac489df8db9b6a55212a291f8c98f877b8570f0776a96a1a  Velora-PDF-Android-v2.1.16-arm64-v8a.apk
 47c7f8e66f4c8f7d168cebf99de08f86b3c94ce62f3086e46b361e13d05b1a70  Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
 f9f01c17f1e8610b0f293e4e2c90fabfee3d7b751101250862ee04012b2e311b  Velora-PDF-Android-v2.1.16-x86.apk

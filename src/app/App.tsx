@@ -28,6 +28,37 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+    let closing = false;
+    void (async () => {
+      const { getCurrentWindow } = await import("@tauri-apps/api/window");
+      const appWindow = getCurrentWindow();
+      const handle = await appWindow.onCloseRequested(async (event) => {
+        // On the second pass (after we re-issue the close) let it through.
+        if (closing) return;
+        // Save any unsaved note before the window actually closes so a stray
+        // click on the close button can never lose in-progress work.
+        event.preventDefault();
+        closing = true;
+        try {
+          await useWorkspaceStore.getState().flushActiveDoc();
+        } catch (error) {
+          console.error(error);
+        }
+        await appWindow.close();
+      });
+      if (disposed) handle();
+      else unlisten = handle;
+    })();
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, []);
+
+  useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.dataset.theme = theme;
   }, [theme]);

@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.51-x64-setup.exe">
+  <a href="downloads/Velora-PDF-1.0.52-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
@@ -30,7 +30,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.51-x64-setup.exe)
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.52-x64-setup.exe)
 
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
@@ -56,20 +56,20 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 ## Download Windows EXE
 
-Download for Windows: [Velora-PDF-1.0.51-x64-setup.exe](downloads/Velora-PDF-1.0.51-x64-setup.exe)
+Download for Windows: [Velora-PDF-1.0.52-x64-setup.exe](downloads/Velora-PDF-1.0.52-x64-setup.exe)
 
-This Windows build reveals the window the instant the boot shell paints, before the React bundle finishes downloading, so launch feels immediate instead of waiting on the full app to mount. An inline script emits a `velora-ready` signal as soon as the splash is painted and the Rust layer shows the window right away, with a guaranteed fallback. The React runtime chunk was also trimmed from ~965 KB to ~143 KB. It keeps the code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
+This Windows build saves the current note when the window is closed, in addition to saving on page changes, so an accidental click on the close button can no longer discard unsaved work. The app intercepts the window close request, flushes the active note to SQLite, and then completes the close. It keeps the instant window reveal, code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
 
 Current local build output:
 
 ```text
-C:\Users\mutlu\Desktop\Velora-PDF-1.0.51-x64-setup.exe
+C:\Users\mutlu\Desktop\Velora-PDF-1.0.52-x64-setup.exe
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.51_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.52_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -571,13 +571,13 @@ The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.51-x64-setup.exe
+downloads/Velora-PDF-1.0.52-x64-setup.exe
 ```
 
 ## Current Version
 
 ```text
-1.0.51
+1.0.52
 ```
 
 Bundle identifier:
@@ -611,6 +611,15 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.52
+
+Released to protect unsaved notes from accidental window closes.
+
+- The app now intercepts the window close request, flushes the active note to SQLite, and then completes the close, so a stray click on the close button can no longer lose in-progress work.
+- Saving still happens on page changes too; the close handler only adds a final save on exit instead of saving on every keystroke.
+- Added the `core:window:allow-close` and `core:window:allow-destroy` capabilities required to finish the close after saving.
+- Rebuilt and republished the Windows `1.0.52` x64 EXE setup installer.
 
 ### 1.0.51
 
