@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.49-x64-setup.exe">
+  <a href="downloads/Velora-PDF-1.0.50-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
@@ -30,7 +30,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.49-x64-setup.exe)
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.50-x64-setup.exe)
 
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
@@ -56,20 +56,20 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 ## Download Windows EXE
 
-Download for Windows: [Velora-PDF-1.0.49-x64-setup.exe](downloads/Velora-PDF-1.0.49-x64-setup.exe)
+Download for Windows: [Velora-PDF-1.0.50-x64-setup.exe](downloads/Velora-PDF-1.0.50-x64-setup.exe)
 
-This Windows build removes the startup white flash entirely. The window now stays hidden until the themed UI has finished painting and is then revealed instantly, with a guaranteed fallback so it always appears. It keeps the page-change note saving and per-page search indexing from the previous release.
+This Windows build focuses on near-instant startup and faster backup import. The frontend is code-split so the startup chunk dropped from ~2.7 MB to ~60 KB, with the PDF viewer, note editor and PDF export libraries loaded only when needed. Backup import now runs inside a single SQLite transaction with cached statements, cutting multi-second imports down to a fraction. The window still stays hidden until the themed UI paints and is then revealed with no white flash.
 
 Current local build output:
 
 ```text
-C:\Users\mutlu\Desktop\Velora-PDF-1.0.49-x64-setup.exe
+C:\Users\mutlu\Desktop\Velora-PDF-1.0.50-x64-setup.exe
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.49_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.50_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -571,13 +571,13 @@ The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.49-x64-setup.exe
+downloads/Velora-PDF-1.0.50-x64-setup.exe
 ```
 
 ## Current Version
 
 ```text
-1.0.49
+1.0.50
 ```
 
 Bundle identifier:
@@ -611,6 +611,16 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.50
+
+Released for near-instant startup and much faster backup import.
+
+- Code-split the Vite bundle with `manualChunks`, shrinking the startup JS chunk from ~2.7 MB to ~60 KB.
+- Lazy-loaded the PDF viewer, notes workspace and notebook workspace with `Suspense`, so heavy views load only when opened.
+- Deferred `pdfjs-dist` and the PDF export libraries to dynamic imports so they no longer block the first paint.
+- Wrapped backup import in a single SQLite transaction with cached prepared statements, turning multi-second imports into sub-second ones.
+- Rebuilt and republished the Windows `1.0.50` x64 EXE setup installer.
 
 ### 1.0.49
 

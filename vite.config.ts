@@ -12,5 +12,21 @@ export default defineConfig({
   envPrefix: ["VITE_", "TAURI_"],
   build: {
     target: "es2020",
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("pdfjs-dist")) return "vendor-pdfjs";
+          if (id.includes("jspdf") || id.includes("pdf-lib")) return "vendor-pdf-export";
+          if (id.includes("html2canvas") || id.includes("dompurify") || id.includes("canvg")) return "vendor-canvas";
+          if (id.includes("jszip")) return "vendor-jszip";
+          if (id.includes("@tiptap") || id.includes("prosemirror")) return "vendor-editor";
+          if (id.includes("framer-motion") || id.includes("motion")) return "vendor-motion";
+          if (id.includes("react-dom") || id.includes("react") || id.includes("scheduler")) return "vendor-react";
+          return "vendor";
+        },
+      },
+    },
   },
 });

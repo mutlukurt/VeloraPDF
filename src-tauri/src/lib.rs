@@ -557,7 +557,11 @@ fn import_workspace_backup(backup: Value, state: State<'_, DbState>) -> Result<(
     let blocks = backup_blocks(&backup, pages)?;
     let timestamp = now();
 
-    conn.execute_batch(
+    // Run the whole import inside a single transaction. Without this, every
+    // INSERT auto-commits to disk, which makes large backups take seconds.
+    let tx = conn.unchecked_transaction().map_err(|error| error.to_string())?;
+
+    tx.execute_batch(
         "
         DELETE FROM page_tags;
         DELETE FROM page_links;
@@ -567,51 +571,67 @@ fn import_workspace_backup(backup: Value, state: State<'_, DbState>) -> Result<(
     )
     .map_err(|error| error.to_string())?;
 
-    for page_value in pages {
-        let page: Page = serde_json::from_value(page_value.clone()).map_err(|error| error.to_string())?;
-        conn.execute(
-            "INSERT INTO pages (id, title, icon, cover, parent_id, sort_order, is_favorite, is_archived, created_at, updated_at, last_opened_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
-            params![
-                page.id,
-                page.title,
-                page.icon,
-                page.cover,
-                page.parent_id,
-                page.sort_order,
-                if page.is_favorite { 1 } else { 0 },
-                if page.is_archived { 1 } else { 0 },
-                page.created_at,
-                page.updated_at,
-                page.last_opened_at
-            ],
-        )
-        .map_err(|error| error.to_string())?;
+    {
+        let mut page_stmt = tx
+            .prepare_cached(
+                "INSERT INTO pages (id, title, icon, cover, parent_id, sort_order, is_favorite, is_archived, created_at, updated_at, last_opened_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            )
+            .map_err(|error| error.to_string())?;
+        for page_value in pages {
+            let page: Page = serde_json::from_value(page_value.clone()).map_err(|error| error.to_string())?;
+            page_stmt
+                .execute(params![
+                    page.id,
+                    page.title,
+                    page.icon,
+                    page.cover,
+                    page.parent_id,
+                    page.sort_order,
+                    if page.is_favorite { 1 } else { 0 },
+                    if page.is_archived { 1 } else { 0 },
+                    page.created_at,
+                    page.updated_at,
+                    page.last_opened_at
+                ])
+                .map_err(|error| error.to_string())?;
+        }
+
+        let mut block_stmt = tx
+            .prepare_cached(
+                "INSERT INTO blocks (id, page_id, parent_block_id, type, content_json, properties_json, sort_order, created_at, updated_at)
+                 VALUES (?1, ?2, NULL, ?3, ?4, '{}', ?5, ?6, ?6)",
+            )
+            .map_err(|error| error.to_string())?;
+        for (index, block_value) in blocks.iter().enumerate() {
+            let page_id = block_value
+                .get("pageId")
+                .and_then(Value::as_str)
+                .ok_or_else(|| "Backup block is missing pageId".to_string())?;
+            let content = block_value
+                .get("content")
+                .cloned()
+                .unwrap_or_else(|| json!({"type":"paragraph"}));
+            let block_type = content.get("type").and_then(Value::as_str).unwrap_or("paragraph");
+            let sort_order = block_value
+                .get("sortOrder")
+                .and_then(Value::as_i64)
+                .unwrap_or(index as i64);
+            block_stmt
+                .execute(params![
+                    Uuid::new_v4().to_string(),
+                    page_id,
+                    block_type,
+                    content.to_string(),
+                    sort_order,
+                    timestamp
+                ])
+                .map_err(|error| error.to_string())?;
+        }
     }
 
-    for (index, block_value) in blocks.iter().enumerate() {
-        let page_id = block_value
-            .get("pageId")
-            .and_then(Value::as_str)
-            .ok_or_else(|| "Backup block is missing pageId".to_string())?;
-        let content = block_value
-            .get("content")
-            .cloned()
-            .unwrap_or_else(|| json!({"type":"paragraph"}));
-        let block_type = content.get("type").and_then(Value::as_str).unwrap_or("paragraph");
-        let sort_order = block_value
-            .get("sortOrder")
-            .and_then(Value::as_i64)
-            .unwrap_or(index as i64);
-        conn.execute(
-            "INSERT INTO blocks (id, page_id, parent_block_id, type, content_json, properties_json, sort_order, created_at, updated_at)
-             VALUES (?1, ?2, NULL, ?3, ?4, '{}', ?5, ?6, ?6)",
-            params![Uuid::new_v4().to_string(), page_id, block_type, content.to_string(), sort_order, timestamp],
-        )
-        .map_err(|error| error.to_string())?;
-    }
-
-    rebuild_search_index(&conn).map_err(|error| error.to_string())
+    rebuild_search_index(&tx).map_err(|error| error.to_string())?;
+    tx.commit().map_err(|error| error.to_string())
 }
 
 #[derive(Serialize)]

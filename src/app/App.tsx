@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 import { AppShell } from "../components/layout/AppShell";
 import { loadStoredAnnotations, persistStoredAnnotations } from "../lib/pdf/annotationStorage";
-import { exportAnnotatedPdf } from "../lib/pdf/exportPdf";
-import { loadPdfDocument } from "../lib/pdf/loadPdf";
 import { pickPdfFile, readPdfFile, saveJsonSidecar, savePdfBytes } from "../lib/tauri/fileDialog";
 import { registerShortcuts } from "../lib/utils/shortcuts";
 import { useAnnotationStore } from "../stores/useAnnotationStore";
@@ -50,6 +48,7 @@ export function App() {
     const file = { ...picked, openedAt: Date.now() };
     usePdfStore.getState().setActiveFile(file);
     useAnnotationStore.getState().setAnnotations(loadStoredAnnotations(file));
+    const { loadPdfDocument } = await import("../lib/pdf/loadPdf");
     const pdf = await loadPdfDocument(picked.data);
     usePdfStore.getState().setPdf(pdf);
     usePdfStore.getState().setPageCount(pdf.numPages);
@@ -82,6 +81,7 @@ export function App() {
   const exportPdf = async () => {
     if (!activeFile) return;
     try {
+      const { exportAnnotatedPdf } = await import("../lib/pdf/exportPdf");
       const bytes = await exportAnnotatedPdf(activeFile.data, annotations);
       await savePdfBytes(activeFile.name.replace(/\.pdf$/i, "") + "-velora.pdf", bytes);
     } catch (error) {

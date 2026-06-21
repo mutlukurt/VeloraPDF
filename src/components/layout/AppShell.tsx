@@ -1,14 +1,22 @@
+import { Suspense, lazy } from "react";
 import { LeftRail } from "./LeftRail";
 import { RightInspector } from "./RightInspector";
 import { TopToolbar } from "./TopToolbar";
 import { HomeScreen } from "../home/HomeScreen";
-import { PdfViewer } from "../pdf/PdfViewer";
-import { NotesWorkspace } from "../notes/NotesWorkspace";
-import { NotebookWorkspace } from "../notebook/NotebookWorkspace";
 import { SettingsDialog } from "../../features/settings/SettingsDialog";
 import { usePdfStore } from "../../stores/usePdfStore";
 import type { RecentFile } from "../../stores/usePdfStore";
 import { useUiStore } from "../../stores/useUiStore";
+
+const PdfViewer = lazy(() => import("../pdf/PdfViewer").then((m) => ({ default: m.PdfViewer })));
+const NotesWorkspace = lazy(() => import("../notes/NotesWorkspace").then((m) => ({ default: m.NotesWorkspace })));
+const NotebookWorkspace = lazy(() =>
+  import("../notebook/NotebookWorkspace").then((m) => ({ default: m.NotebookWorkspace })),
+);
+
+function ViewFallback() {
+  return <div className="flex min-h-0 flex-1 items-center justify-center bg-app" aria-busy="true" />;
+}
 
 type AppShellProps = {
   onOpenPdf: () => void;
@@ -27,7 +35,9 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
       <>
         <div className="flex h-dvh w-screen overflow-hidden bg-app pb-14 text-primary md:pb-0">
           <LeftRail />
-          <NotesWorkspace onOpenRecentPdf={onOpenRecentPdf} />
+          <Suspense fallback={<ViewFallback />}>
+            <NotesWorkspace onOpenRecentPdf={onOpenRecentPdf} />
+          </Suspense>
         </div>
         <SettingsDialog />
       </>
@@ -39,7 +49,9 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
       <>
         <div className="flex h-dvh w-screen overflow-hidden bg-app pb-14 text-primary md:pb-0">
           <LeftRail />
-          <NotebookWorkspace />
+          <Suspense fallback={<ViewFallback />}>
+            <NotebookWorkspace />
+          </Suspense>
         </div>
         <SettingsDialog />
       </>
@@ -54,7 +66,13 @@ export function AppShell({ onOpenPdf, onOpenRecentPdf, onSaveAnnotations, onExpo
         ) : null}
         <div className="flex min-h-0 flex-1 pb-14 md:pb-0">
           <LeftRail />
-          {pdf ? <PdfViewer pdf={pdf} /> : <HomeScreen onOpenPdf={onOpenPdf} onOpenRecentPdf={onOpenRecentPdf} />}
+          {pdf ? (
+            <Suspense fallback={<ViewFallback />}>
+              <PdfViewer pdf={pdf} />
+            </Suspense>
+          ) : (
+            <HomeScreen onOpenPdf={onOpenPdf} onOpenRecentPdf={onOpenRecentPdf} />
+          )}
           {hasPdf ? <RightInspector /> : null}
         </div>
       </div>
