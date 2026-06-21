@@ -186,7 +186,7 @@ export function WorkspaceEditor() {
     activeDoc,
     pages,
     updatePage,
-    saveActiveDoc,
+    setActiveDocDraft,
     createPage,
     refreshPages,
     draggedPageId,
@@ -225,7 +225,6 @@ export function WorkspaceEditor() {
   } | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const iconPickerRef = useRef<HTMLDivElement | null>(null)
-  const saveTimer = useRef<number | null>(null)
   const titleTimer = useRef<number | null>(null)
   const blockControlsHideTimer = useRef<number | null>(null)
   const draggedBlockRef = useRef<BlockDragRange | null>(null)
@@ -277,9 +276,7 @@ export function WorkspaceEditor() {
     },
     onUpdate: ({ editor }) => {
       syncImageSelection(editor)
-      const doc = editor.getJSON() as TiptapDoc
-      if (saveTimer.current) window.clearTimeout(saveTimer.current)
-      saveTimer.current = window.setTimeout(() => saveActiveDoc(doc), 650)
+      setActiveDocDraft(editor.getJSON() as TiptapDoc)
 
       const { state, view } = editor
       const { selection } = state
@@ -394,9 +391,9 @@ export function WorkspaceEditor() {
           },
         })
         .run()
-      saveActiveDoc(editor.getJSON() as TiptapDoc)
+      setActiveDocDraft(editor.getJSON() as TiptapDoc)
     },
-    [editor, saveActiveDoc],
+    [editor, setActiveDocDraft],
   )
 
   const pickLocalFile = useCallback((kind: 'image' | 'video' | 'file') => {
@@ -464,9 +461,9 @@ export function WorkspaceEditor() {
     const imageNode = { type: 'image', attrs: { src, alt: file.name, title: file.name, width: 520 } }
     if (typeof position === 'number') editor.chain().focus().insertContentAt(position, imageNode).run()
     else editor.chain().focus().insertContent(imageNode).run()
-    saveActiveDoc(editor.getJSON() as TiptapDoc)
+    setActiveDocDraft(editor.getJSON() as TiptapDoc)
     return true
-  }, [editor, saveActiveDoc])
+  }, [editor, setActiveDocDraft])
 
   useEffect(() => {
     if (!editor || !activePage) return
@@ -585,9 +582,9 @@ export function WorkspaceEditor() {
       if (insertAt > source.from) insertAt -= source.to - source.from
 
       editor.chain().focus().deleteRange({ from: source.from, to: source.to }).insertContentAt(insertAt, source.json).run()
-      saveActiveDoc(editor.getJSON() as TiptapDoc)
+      setActiveDocDraft(editor.getJSON() as TiptapDoc)
     },
-    [editor, saveActiveDoc],
+    [editor, setActiveDocDraft],
   )
 
   const moveSelectedBlock = useCallback(
@@ -633,18 +630,18 @@ export function WorkspaceEditor() {
 
       editor.chain().focus().deleteRange(selectedImageRange).insertContentAt(insertAt, selectedNode.toJSON()).run()
       editor.commands.setNodeSelection(insertAt)
-      saveActiveDoc(editor.getJSON() as TiptapDoc)
+      setActiveDocDraft(editor.getJSON() as TiptapDoc)
       setSelectedImageRange({ from: insertAt, to: insertAt + imageSize })
     },
-    [editor, saveActiveDoc, selectedImageRange],
+    [editor, setActiveDocDraft, selectedImageRange],
   )
 
   const deleteSelectedImage = useCallback(() => {
     if (!editor || !selectedImageRange) return
     editor.chain().focus().deleteRange(selectedImageRange).run()
-    saveActiveDoc(editor.getJSON() as TiptapDoc)
+    setActiveDocDraft(editor.getJSON() as TiptapDoc)
     setSelectedImageRange(null)
-  }, [editor, saveActiveDoc, selectedImageRange])
+  }, [editor, setActiveDocDraft, selectedImageRange])
 
   useEffect(() => {
     const handleMove = (event: PointerEvent) => {
@@ -1036,7 +1033,7 @@ export function WorkspaceEditor() {
               const fallbackParagraph = editor.state.doc.childCount <= 1
               editor.chain().focus().deleteRange({ from: blockControls.deleteFrom, to: blockControls.deleteTo }).run()
               if (fallbackParagraph && editor.state.doc.childCount === 0) editor.chain().focus().insertContent({ type: 'paragraph' }).run()
-              saveActiveDoc(editor.getJSON() as TiptapDoc)
+              setActiveDocDraft(editor.getJSON() as TiptapDoc)
               setBlockControls((controls) => ({ ...controls, visible: false }))
             }}
             disabled={!hasSelectedBlockOrImage}
@@ -1068,7 +1065,7 @@ export function WorkspaceEditor() {
             onClick={() => pickLocalFile('image').then((node) => {
               if (!node || !editor) return
               editor.chain().focus().insertContent(node).run()
-              saveActiveDoc(editor.getJSON() as TiptapDoc)
+              setActiveDocDraft(editor.getJSON() as TiptapDoc)
             })}
             aria-label="Insert photo"
           >

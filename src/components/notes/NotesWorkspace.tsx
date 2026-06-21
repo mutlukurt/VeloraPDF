@@ -9,11 +9,19 @@ import type { RecentFile } from "../../stores/usePdfStore";
 
 export function NotesWorkspace({ onOpenRecentPdf }: { onOpenRecentPdf: (file: RecentFile) => void }) {
   const initialize = useWorkspaceStore((state) => state.initialize);
+  const ensureActivePage = useWorkspaceStore((state) => state.ensureActivePage);
+  const flushActiveDoc = useWorkspaceStore((state) => state.flushActiveDoc);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    void (async () => {
+      await initialize();
+      await ensureActivePage();
+    })();
+    return () => {
+      void flushActiveDoc();
+    };
+  }, [initialize, ensureActivePage, flushActiveDoc]);
 
   return (
     <div className="relative flex flex-1 overflow-hidden bg-[var(--background)] text-[var(--text)]">

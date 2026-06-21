@@ -4,9 +4,43 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Velora PDF</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #f7f4ef;
+        color: #1f2937;
+      }
+
+      html[data-theme="dark"],
+      html.dark {
+        background: #111827;
+        color: #f9fafb;
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      .velora-boot {
+        display: grid;
+        min-height: 100vh;
+        place-items: center;
+        font: 500 14px/1.4 Inter, system-ui, sans-serif;
+        color: #6b7280;
+      }
+
+      html[data-theme="dark"] .velora-boot,
+      html.dark .velora-boot {
+        color: #9ca3af;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="velora-boot">Loading Velora PDF…</div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

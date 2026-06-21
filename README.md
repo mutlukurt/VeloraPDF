@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.47-x64-setup.exe">
+  <a href="downloads/Velora-PDF-1.0.48-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
@@ -30,7 +30,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.47-x64-setup.exe)
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.48-x64-setup.exe)
 
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
@@ -56,20 +56,20 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 ## Download Windows EXE
 
-Download for Windows: [Velora-PDF-1.0.47-x64-setup.exe](downloads/Velora-PDF-1.0.47-x64-setup.exe)
+Download for Windows: [Velora-PDF-1.0.48-x64-setup.exe](downloads/Velora-PDF-1.0.48-x64-setup.exe)
 
-This Windows build fixes desktop import/export failures by routing PDF open/save, annotation JSON sidecars, workspace backup import/export, and archive downloads through native Rust file dialogs instead of the Tauri filesystem plugin scope.
+This Windows build fixes slow note editing and startup white-screen delays. Notes now save to SQLite only when you switch pages, search indexing updates per page instead of rebuilding the whole workspace on every keystroke, and the app shows an immediate loading shell while the UI boots.
 
 Current local build output:
 
 ```text
-C:\Users\mutlu\Desktop\Velora PDF_1.0.47_x64-setup.exe
+C:\Users\mutlu\Desktop\Velora PDF Setup 1.0.48.exe
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.47_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.48_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -571,13 +571,13 @@ The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.47-x64-setup.exe
+downloads/Velora-PDF-1.0.48-x64-setup.exe
 ```
 
 ## Current Version
 
 ```text
-1.0.47
+1.0.48
 ```
 
 Bundle identifier:
@@ -611,6 +611,18 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.48
+
+Released with faster Windows desktop startup and note editing by deferring SQLite saves until page changes.
+
+Changes:
+
+- Notes content now stays in memory while you type and persists to SQLite only when you switch pages, leave Notes, or create/archive pages.
+- Replaced full-workspace search-index rebuilds on every save with per-page search-index updates in the Rust backend.
+- Removed eager first-page loading during app startup; the home screen loads immediately while the workspace index loads in the background.
+- Added an inline loading shell in `index.html` so Tauri no longer shows a blank white window while the bundle boots.
+- Rebuilt and republished the Windows `1.0.48` x64 EXE setup installer.
 
 ### Android WebView APK v2.1.16
 

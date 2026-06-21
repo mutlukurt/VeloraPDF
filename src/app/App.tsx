@@ -25,11 +25,9 @@ export function App() {
   const undo = useAnnotationStore((state) => state.undo);
   const redo = useAnnotationStore((state) => state.redo);
 
-  const initializeWorkspace = useWorkspaceStore((state) => state.initialize);
-
   useEffect(() => {
-    initializeWorkspace();
-  }, [initializeWorkspace]);
+    void useWorkspaceStore.getState().initialize();
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

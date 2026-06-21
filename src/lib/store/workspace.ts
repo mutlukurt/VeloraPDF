@@ -13,6 +13,8 @@ type WorkspaceStore = {
   activeDoc?: TiptapDoc
   theme: ThemeMode
   saveState: SaveState
+  docDirty: boolean
+  workspaceReady: boolean
   sidebarCollapsed: boolean
   commandPaletteOpen: boolean
   settingsOpen: boolean
@@ -22,11 +24,14 @@ type WorkspaceStore = {
   pageHistory: string[]
   pageHistoryIndex: number
   initialize: () => Promise<void>
+  ensureActivePage: () => Promise<void>
   openPage: (pageId: string, pushToHistory?: boolean) => Promise<void>
   createPage: (parentId?: string | null) => Promise<Page>
   updatePage: (page: Page) => Promise<void>
   movePage: (pageId: string, targetId: string | null, placement: PageDropPlacement) => Promise<void>
   archiveActivePage: () => Promise<void>
+  setActiveDocDraft: (doc: TiptapDoc) => void
+  flushActiveDoc: () => Promise<void>
   saveActiveDoc: (doc: TiptapDoc) => Promise<void>
   refreshPages: () => Promise<void>
   setTheme: (theme: ThemeMode) => void
@@ -57,6 +62,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   pages: [],
   theme: savedTheme(),
   saveState: 'idle',
+  docDirty: false,
+  workspaceReady: false,
   sidebarCollapsed: false,
   commandPaletteOpen: false,
   settingsOpen: false,
@@ -68,12 +75,16 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   setDropTarget: (dropTarget) => set({ dropTarget }),
 
   initialize: async () => {
+    if (get().workspaceReady) return
     applyTheme(get().theme)
-    const activePageId = get().activePageId
     const [pages, dataLocation] = await Promise.all([db.listPages(), db.getDataLocation()])
-    const first = pages.find((page) => page.isFavorite) ?? pages[0]
-    set({ pages, dataLocation })
+    set({ pages, dataLocation, workspaceReady: true })
+  },
+
+  ensureActivePage: async () => {
+    const { activePageId, pages } = get()
     if (activePageId && pages.some((page) => page.id === activePageId)) return
+    const first = pages.find((page) => page.isFavorite) ?? pages[0]
     if (first) await get().openPage(first.id)
   },
 
@@ -82,13 +93,14 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   openPage: async (pageId: string, pushToHistory = true) => {
+    await get().flushActiveDoc()
     const [page, doc] = await Promise.all([db.getPage(pageId), db.loadPageContent(pageId)])
     if (!page) return
-    
+
     set((state) => {
       let nextHistory = [...state.pageHistory]
       let nextIndex = state.pageHistoryIndex
-      
+
       if (pushToHistory) {
         nextHistory = nextHistory.slice(0, nextIndex + 1)
         if (nextHistory[nextIndex] !== pageId) {
@@ -96,13 +108,14 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
           nextIndex = nextHistory.length - 1
         }
       }
-      
+
       return {
         activePageId: pageId,
         activePage: page,
         activeDoc: doc,
         pages: state.pages.map((item) => (item.id === page.id ? page : item)),
         saveState: 'saved',
+        docDirty: false,
         pageHistory: nextHistory,
         pageHistoryIndex: nextIndex,
       }
@@ -125,6 +138,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   createPage: async (parentId?: string | null) => {
+    await get().flushActiveDoc()
     const page = await db.createPage('Untitled', parentId)
     const pages = await db.listPages()
     set({ pages })
@@ -189,11 +203,22 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   archiveActivePage: async () => {
     const activePageId = get().activePageId
     if (!activePageId) return
+    await get().flushActiveDoc()
     await db.archivePage(activePageId)
     const pages = await db.listPages()
     const next = pages[0]
-    set({ pages, activePageId: undefined, activePage: undefined, activeDoc: undefined })
+    set({ pages, activePageId: undefined, activePage: undefined, activeDoc: undefined, docDirty: false })
     if (next) await get().openPage(next.id)
+  },
+
+  setActiveDocDraft: (doc: TiptapDoc) => {
+    set({ activeDoc: doc, docDirty: true, saveState: 'idle' })
+  },
+
+  flushActiveDoc: async () => {
+    const { activePageId, activeDoc, docDirty } = get()
+    if (!activePageId || !activeDoc || !docDirty) return
+    await get().saveActiveDoc(activeDoc)
   },
 
   saveActiveDoc: async (doc: TiptapDoc) => {
@@ -204,6 +229,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       const page = await db.savePageContent(pageId, doc)
       set((state) => ({
         saveState: 'saved',
+        docDirty: false,
         activePage: page,
         pages: state.pages.map((item) => (item.id === page.id ? page : item)),
       }))

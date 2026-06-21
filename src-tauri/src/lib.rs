@@ -235,7 +235,47 @@ fn replace_page_blocks(conn: &Connection, page_id: &str, doc_json: &Value) -> ru
         "UPDATE pages SET updated_at = ?1 WHERE id = ?2",
         params![timestamp, page_id],
     )?;
-    rebuild_search_index(conn)?;
+    update_search_index_for_page(conn, page_id)?;
+    Ok(())
+}
+
+fn update_search_index_for_page(conn: &Connection, page_id: &str) -> rusqlite::Result<()> {
+    conn.execute("DELETE FROM search_index WHERE page_id = ?1", params![page_id])?;
+
+    let page = page_by_id(conn, page_id)?;
+    let Some(page) = page else {
+        return Ok(());
+    };
+    if page.is_archived {
+        return Ok(());
+    }
+
+    conn.execute(
+        "INSERT INTO search_index (item_id, page_id, kind, title, body) VALUES (?1, ?1, 'page', ?2, '')",
+        params![page.id, page.title],
+    )?;
+
+    let mut blocks = conn.prepare(
+        "SELECT blocks.id, blocks.content_json
+         FROM blocks
+         WHERE blocks.page_id = ?1
+         ORDER BY blocks.sort_order ASC",
+    )?;
+    let block_rows = blocks.query_map(params![page_id], |row| {
+        Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+    })?;
+    for block in block_rows {
+        let (id, json_text) = block?;
+        let value: Value = serde_json::from_str(&json_text).unwrap_or(Value::Null);
+        let body = extract_plain_text(&value);
+        if !body.trim().is_empty() {
+            conn.execute(
+                "INSERT INTO search_index (item_id, page_id, kind, title, body) VALUES (?1, ?2, 'block', ?3, ?4)",
+                params![id, page_id, page.title, body],
+            )?;
+        }
+    }
+
     Ok(())
 }
 

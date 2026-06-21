@@ -11,6 +11,7 @@ export function EditorHeader() {
     archiveActivePage,
     createPage,
     saveState,
+    docDirty,
     openPage,
     pageHistory,
     pageHistoryIndex,
@@ -69,7 +70,13 @@ export function EditorHeader() {
         <span className="truncate font-medium text-[var(--text)]">{activePage.title || 'Untitled'}</span>
       </div>
       <span className="hidden text-xs text-[var(--text-faint)] md:inline">
-        {saveState === 'saving' ? 'Saving…' : saveState === 'error' ? 'Save issue' : `Saved locally · Edited ${formatRelativeTime(activePage.updatedAt)}`}
+        {saveState === 'saving'
+          ? 'Saving…'
+          : saveState === 'error'
+            ? 'Save issue'
+            : docDirty
+              ? 'Unsaved changes · saves when you switch pages'
+              : `Saved locally · Edited ${formatRelativeTime(activePage.updatedAt)}`}
       </span>
       <div className="flex shrink-0 items-center gap-1">
         <Button className="h-9 w-9 md:h-8 md:w-8" size="icon" onClick={() => updatePage({ ...activePage, isFavorite: !activePage.isFavorite })} icon={<Star size={15} fill={activePage.isFavorite ? 'currentColor' : 'none'} />} />
