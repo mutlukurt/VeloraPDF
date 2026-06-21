@@ -8,6 +8,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
+use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_fs::FilePath;
 use uuid::Uuid;
 
 struct DbState(Mutex<Connection>);
@@ -471,6 +473,40 @@ fn export_workspace_backup(state: State<'_, DbState>) -> Result<Value, String> {
     Ok(json!({ "version": 1, "exportedAt": now(), "pages": pages, "blocks": blocks }))
 }
 
+fn backup_blocks(backup: &Value, pages: &[Value]) -> Result<Vec<Value>, String> {
+    if let Some(blocks) = backup.get("blocks").and_then(Value::as_array) {
+        return Ok(blocks.clone());
+    }
+
+    let Some(docs) = backup.get("docs").and_then(Value::as_object) else {
+        return Ok(Vec::new());
+    };
+
+    let mut derived = Vec::new();
+    for page_value in pages {
+        let page_id = page_value
+            .get("id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| "Backup page is missing id".to_string())?;
+        let Some(doc) = docs.get(page_id) else {
+            continue;
+        };
+        let content = doc
+            .get("content")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        for (index, node) in content.into_iter().enumerate() {
+            derived.push(json!({
+                "pageId": page_id,
+                "content": node,
+                "sortOrder": index,
+            }));
+        }
+    }
+    Ok(derived)
+}
+
 #[tauri::command]
 fn import_workspace_backup(backup: Value, state: State<'_, DbState>) -> Result<(), String> {
     let conn = state.0.lock().map_err(|_| "Database is busy".to_string())?;
@@ -478,10 +514,7 @@ fn import_workspace_backup(backup: Value, state: State<'_, DbState>) -> Result<(
         .get("pages")
         .and_then(Value::as_array)
         .ok_or_else(|| "Backup is missing pages".to_string())?;
-    let blocks = backup
-        .get("blocks")
-        .and_then(Value::as_array)
-        .ok_or_else(|| "Backup is missing blocks".to_string())?;
+    let blocks = backup_blocks(&backup, pages)?;
     let timestamp = now();
 
     conn.execute_batch(
@@ -539,6 +572,121 @@ fn import_workspace_backup(backup: Value, state: State<'_, DbState>) -> Result<(
     }
 
     rebuild_search_index(&conn).map_err(|error| error.to_string())
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PickedFilePayload {
+    name: String,
+    path: String,
+    data: Vec<u8>,
+}
+
+fn file_path_to_pathbuf(file_path: FilePath) -> Result<PathBuf, String> {
+    file_path
+        .into_path()
+        .map_err(|error| format!("Selected path is not accessible: {error}"))
+}
+
+fn file_name_from_path(path: &Path) -> String {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .filter(|name| !name.trim().is_empty())
+        .unwrap_or("Untitled")
+        .to_string()
+}
+
+#[tauri::command]
+fn pick_pdf_file(app: AppHandle) -> Result<Option<PickedFilePayload>, String> {
+    let selected = app
+        .dialog()
+        .file()
+        .add_filter("PDF document", &["pdf"])
+        .blocking_pick_file();
+    let Some(file_path) = selected else {
+        return Ok(None);
+    };
+    let path = file_path_to_pathbuf(file_path)?;
+    let data = fs::read(&path).map_err(|error| format!("Could not read PDF: {error}"))?;
+    Ok(Some(PickedFilePayload {
+        name: file_name_from_path(&path),
+        path: path.display().to_string(),
+        data,
+    }))
+}
+
+#[tauri::command]
+fn read_pdf_file(path: String) -> Result<PickedFilePayload, String> {
+    let path = PathBuf::from(path);
+    if !path.is_file() {
+        return Err("PDF file not found.".to_string());
+    }
+    let data = fs::read(&path).map_err(|error| format!("Could not read PDF: {error}"))?;
+    Ok(PickedFilePayload {
+        name: file_name_from_path(&path),
+        path: path.display().to_string(),
+        data,
+    })
+}
+
+#[tauri::command]
+fn save_binary_with_dialog(
+    default_name: String,
+    data: Vec<u8>,
+    app: AppHandle,
+) -> Result<Option<String>, String> {
+    let extension = Path::new(&default_name)
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let mut dialog = app.dialog().file().set_file_name(&default_name);
+    dialog = match extension.as_str() {
+        "pdf" => dialog.add_filter("PDF document", &["pdf"]),
+        "json" => dialog.add_filter("JSON", &["json"]),
+        "zip" => dialog.add_filter("ZIP archive", &["zip"]),
+        _ => dialog,
+    };
+    let Some(file_path) = dialog.blocking_save_file() else {
+        return Ok(None);
+    };
+    let path = file_path_to_pathbuf(file_path)?;
+    fs::write(&path, data).map_err(|error| format!("Could not save file: {error}"))?;
+    Ok(Some(path.display().to_string()))
+}
+
+#[tauri::command]
+fn save_text_with_dialog(
+    default_name: String,
+    contents: String,
+    app: AppHandle,
+) -> Result<Option<String>, String> {
+    let dialog = app
+        .dialog()
+        .file()
+        .set_file_name(&default_name)
+        .add_filter("JSON", &["json"]);
+    let Some(file_path) = dialog.blocking_save_file() else {
+        return Ok(None);
+    };
+    let path = file_path_to_pathbuf(file_path)?;
+    fs::write(&path, contents.as_bytes()).map_err(|error| format!("Could not save file: {error}"))?;
+    Ok(Some(path.display().to_string()))
+}
+
+#[tauri::command]
+fn pick_json_file(app: AppHandle) -> Result<Option<String>, String> {
+    let selected = app
+        .dialog()
+        .file()
+        .add_filter("JSON", &["json"])
+        .blocking_pick_file();
+    let Some(file_path) = selected else {
+        return Ok(None);
+    };
+    let path = file_path_to_pathbuf(file_path)?;
+    fs::read_to_string(&path).map_err(|error| format!("Could not read backup file: {error}"))
+        .map(Some)
 }
 
 #[tauri::command]
@@ -655,6 +803,11 @@ pub fn run() {
             search_workspace,
             export_workspace_backup,
             import_workspace_backup,
+            pick_pdf_file,
+            read_pdf_file,
+            save_binary_with_dialog,
+            save_text_with_dialog,
+            pick_json_file,
             save_file_to_downloads,
             create_voice_recording_file,
             append_voice_recording_chunk,

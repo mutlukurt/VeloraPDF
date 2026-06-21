@@ -58,6 +58,8 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 Download for Windows: [Velora-PDF-1.0.47-x64-setup.exe](downloads/Velora-PDF-1.0.47-x64-setup.exe)
 
+This Windows build fixes desktop import/export failures by routing PDF open/save, annotation JSON sidecars, workspace backup import/export, and archive downloads through native Rust file dialogs instead of the Tauri filesystem plugin scope.
+
 Current local build output:
 
 ```text
@@ -623,7 +625,7 @@ Changes:
 
 ### 1.0.47
 
-Released with robust touch drag-and-drop improvements for touchscreens in the sidebar, and added Windows desktop target support.
+Released with robust touch drag-and-drop improvements for touchscreens in the sidebar, added Windows desktop target support, and rebuilt the Windows installer to fix desktop import/export.
 
 Changes:
 
@@ -632,6 +634,9 @@ Changes:
 - Built and published the macOS `1.0.47` Apple Silicon DMG.
 - Added full Windows compile target support using Tauri 2 and Rust.
 - Built and published the Windows `1.0.47` x64 EXE setup installer.
+- Fixed Windows desktop import/export failures for PDF open/save, annotated PDF export, Velora JSON sidecars, workspace backup import/export, and Settings archive downloads by moving file I/O to native Rust dialogs instead of the Tauri filesystem plugin scope.
+- Added Rust commands for PDF pick/read/save, JSON pick/save, and binary save dialogs used by the desktop app.
+- Made workspace backup import accept both `blocks` and legacy `docs` backup formats.
 - Resolved Windows command prompt debug console leakage by enforcing the GUI subsystem window attribute in `main.rs`.
 - Updated Android WebView APK release builds to v2.1.16 for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
 

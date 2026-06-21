@@ -50,3 +50,5 @@ Thumbs.db
 !downloads/*.dmg
 *.apk
 !downloads/*.apk
+*.exe
+!downloads/*.exe

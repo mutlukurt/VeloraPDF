@@ -1,5 +1,4 @@
-import { open, save } from "@tauri-apps/plugin-dialog";
-import { readFile, writeFile } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
 import { pickBrowserPdfFile, readBrowserRecentPdf } from "../browser/browserPdfAccess";
 
 export type PickedPdf = {
@@ -9,25 +8,29 @@ export type PickedPdf = {
   data: Uint8Array;
 };
 
+type PickedFilePayload = {
+  name: string;
+  path: string;
+  data: number[];
+};
+
 function isTauriRuntime() {
-  return Boolean("__TAURI_INTERNALS__" in window);
+  return Boolean(typeof window !== "undefined" && "__TAURI_INTERNALS__" in window);
 }
 
-function fileNameFromPath(path: string) {
-  return path.split(/[\\/]/).pop() || "Untitled.pdf";
+function payloadToPickedPdf(payload: PickedFilePayload): PickedPdf {
+  return {
+    name: payload.name,
+    path: payload.path,
+    data: new Uint8Array(payload.data),
+  };
 }
 
 export async function pickPdfFile(): Promise<PickedPdf | null> {
   if (!isTauriRuntime()) return pickBrowserPdfFile();
 
-  const selected = await open({
-    multiple: false,
-    filters: [{ name: "PDF document", extensions: ["pdf"] }],
-  });
-
-  if (typeof selected !== "string") return null;
-  const data = await readFile(selected);
-  return { name: fileNameFromPath(selected), path: selected, data };
+  const result = await invoke<PickedFilePayload | null>("pick_pdf_file");
+  return result ? payloadToPickedPdf(result) : null;
 }
 
 export async function readPdfFile(path?: string, browserId?: string): Promise<PickedPdf> {
@@ -39,8 +42,7 @@ export async function readPdfFile(path?: string, browserId?: string): Promise<Pi
 
   if (!path) throw new Error("Missing PDF file path.");
 
-  const data = await readFile(path);
-  return { name: fileNameFromPath(path), path, data };
+  return payloadToPickedPdf(await invoke<PickedFilePayload>("read_pdf_file", { path }));
 }
 
 export async function saveJsonSidecar(defaultPath: string | undefined, payload: unknown) {
@@ -57,12 +59,10 @@ export async function saveJsonSidecar(defaultPath: string | undefined, payload: 
     return;
   }
 
-  const selected = await save({
-    defaultPath: fileName,
-    filters: [{ name: "Velora annotations", extensions: ["json"] }],
+  await invoke<string | null>("save_text_with_dialog", {
+    defaultName: fileName,
+    contents: JSON.stringify(payload, null, 2),
   });
-  if (!selected) return;
-  await writeFile(selected, new TextEncoder().encode(JSON.stringify(payload, null, 2)));
 }
 
 export async function savePdfBytes(defaultName: string, bytes: Uint8Array) {
@@ -79,10 +79,13 @@ export async function savePdfBytes(defaultName: string, bytes: Uint8Array) {
     return;
   }
 
-  const selected = await save({
-    defaultPath: defaultName,
-    filters: [{ name: "PDF document", extensions: ["pdf"] }],
+  await invoke<string | null>("save_binary_with_dialog", {
+    defaultName: defaultName,
+    data: Array.from(bytes),
   });
-  if (!selected) return;
-  await writeFile(selected, bytes);
+}
+
+export async function pickJsonFile(): Promise<string | null> {
+  if (!isTauriRuntime()) return null;
+  return invoke<string | null>("pick_json_file");
 }

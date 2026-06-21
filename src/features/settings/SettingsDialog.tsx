@@ -7,6 +7,7 @@ import { exportPagesAsPdfZip } from '../../lib/export/pdf'
 import { useWorkspaceStore } from '../../lib/store/workspace'
 import { cn } from '../../lib/utils/cn'
 import { downloadBlob } from '../../lib/utils/files'
+import { pickJsonFile } from '../../lib/tauri/fileDialog'
 import { useUiStore } from '../../stores/useUiStore'
 import veloraIconUrl from '../../assets/velora-icon.png'
 import packageJson from '../../../package.json'
@@ -98,9 +99,16 @@ export function SettingsDialog() {
   }
 
   const importBackup = async (file?: File) => {
-    if (!file) return
-    const text = await file.text()
-    const backup = JSON.parse(text) as unknown
+    let backup: unknown
+    if (file) {
+      backup = JSON.parse(await file.text()) as unknown
+    } else if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+      const raw = await pickJsonFile()
+      if (!raw) return
+      backup = JSON.parse(raw) as unknown
+    } else {
+      return
+    }
     await db.importWorkspaceBackup(backup)
     await refreshPages()
     const nextPages = await db.listPages()
@@ -179,7 +187,7 @@ export function SettingsDialog() {
                   <Button variant="soft" onClick={() => exportBackup().catch((error) => setStatus(error instanceof Error ? error.message : 'Export failed.'))} icon={<Download size={15} />}>
                     Export
                   </Button>
-                  <Button variant="soft" onClick={() => fileInputRef.current?.click()} icon={<Upload size={15} />}>
+                  <Button variant="soft" onClick={() => importBackup().catch((error) => setStatus(error instanceof Error ? error.message : 'Import failed.'))} icon={<Upload size={15} />}>
                     Import
                   </Button>
                 </div>

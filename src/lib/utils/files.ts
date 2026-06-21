@@ -23,21 +23,18 @@ export async function downloadBlob(blob: Blob, filename: string) {
 
   const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   if (isTauri()) {
-    try {
-      const { invoke } = await import("@tauri-apps/api/core");
-      const buffer = new Uint8Array(await blob.arrayBuffer());
-      const path = await invoke<string>("save_file_to_downloads", {
-        filename,
-        data: Array.from(buffer),
-      });
-      alert(`Saved to: ${path}`);
-      return;
-    } catch (error) {
-      console.error("Tauri save failed, falling back to browser download:", error);
+    const { invoke } = await import("@tauri-apps/api/core");
+    const buffer = new Uint8Array(await blob.arrayBuffer());
+    const savedPath = await invoke<string | null>("save_binary_with_dialog", {
+      defaultName: filename,
+      data: Array.from(buffer),
+    });
+    if (savedPath) {
+      alert(`Saved to: ${savedPath}`);
     }
+    return;
   }
 
-  // Browser fallback
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
