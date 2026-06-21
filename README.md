@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.52-x64-setup.exe">
+  <a href="downloads/Velora-PDF-1.0.53-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
@@ -30,7 +30,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.52-x64-setup.exe)
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.53-x64-setup.exe)
 
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
@@ -56,20 +56,20 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 ## Download Windows EXE
 
-Download for Windows: [Velora-PDF-1.0.52-x64-setup.exe](downloads/Velora-PDF-1.0.52-x64-setup.exe)
+Download for Windows: [Velora-PDF-1.0.53-x64-setup.exe](downloads/Velora-PDF-1.0.53-x64-setup.exe)
 
-This Windows build saves the current note when the window is closed, in addition to saving on page changes, so an accidental click on the close button can no longer discard unsaved work. The app intercepts the window close request, flushes the active note to SQLite, and then completes the close. It keeps the instant window reveal, code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
+This Windows build makes deleting (archiving) a page instant. Archiving and renaming a page now update only that page's rows in the search index instead of rebuilding the entire index, removing the multi-second delay. It keeps the save-on-close behavior, instant window reveal, code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
 
 Current local build output:
 
 ```text
-C:\Users\mutlu\Desktop\Velora-PDF-1.0.52-x64-setup.exe
+C:\Users\mutlu\Desktop\Velora-PDF-1.0.53-x64-setup.exe
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.52_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.53_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -571,13 +571,13 @@ The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.52-x64-setup.exe
+downloads/Velora-PDF-1.0.53-x64-setup.exe
 ```
 
 ## Current Version
 
 ```text
-1.0.52
+1.0.53
 ```
 
 Bundle identifier:
@@ -611,6 +611,15 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.53
+
+Released to make page deletion instant.
+
+- Archiving (deleting) a page now updates only that page's rows in the search index via `update_search_index_for_page`, instead of running a full `rebuild_search_index`, removing the ~2 second delay.
+- Renaming and other page metadata edits use the same per-page index update, so they are faster too.
+- Full index rebuilds are now reserved for one-time operations like seeding and backup import.
+- Rebuilt and republished the Windows `1.0.53` x64 EXE setup installer.
 
 ### 1.0.52
 

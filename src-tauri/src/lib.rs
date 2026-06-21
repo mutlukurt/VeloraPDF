@@ -390,7 +390,7 @@ fn update_page_metadata(page: Page, state: State<'_, DbState>) -> Result<Page, S
         ],
     )
     .map_err(|error| error.to_string())?;
-    rebuild_search_index(&conn).map_err(|error| error.to_string())?;
+    update_search_index_for_page(&conn, &page.id).map_err(|error| error.to_string())?;
     page_by_id(&conn, &page.id)
         .map_err(|error| error.to_string())?
         .ok_or_else(|| "Page not found".to_string())
@@ -404,7 +404,9 @@ fn archive_page(page_id: String, state: State<'_, DbState>) -> Result<(), String
         params![now(), page_id],
     )
     .map_err(|error| error.to_string())?;
-    rebuild_search_index(&conn).map_err(|error| error.to_string())
+    // Only touch this page's search rows instead of rebuilding the whole
+    // index, so archiving (deleting) a page is instant.
+    update_search_index_for_page(&conn, &page_id).map_err(|error| error.to_string())
 }
 
 #[tauri::command]
