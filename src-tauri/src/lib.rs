@@ -7,7 +7,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Listener, Manager, State};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_fs::FilePath;
 use uuid::Uuid;
@@ -829,6 +829,25 @@ pub fn run() {
             let conn = Connection::open(db_path)?;
             setup_database(&conn)?;
             app.manage(DbState(Mutex::new(conn)));
+
+            // The window starts hidden to avoid a white WebView2 flash on launch.
+            // We reveal it once the frontend signals it has painted, with a
+            // guaranteed fallback timer so the window can never stay hidden.
+            if let Some(window) = app.get_webview_window("main") {
+                let ready_window = window.clone();
+                app.listen("velora-ready", move |_| {
+                    let _ = ready_window.show();
+                    let _ = ready_window.set_focus();
+                });
+
+                let fallback_window = window.clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(2500));
+                    let _ = fallback_window.show();
+                    let _ = fallback_window.set_focus();
+                });
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

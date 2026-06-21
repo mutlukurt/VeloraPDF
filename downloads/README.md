@@ -16,9 +16,9 @@ This folder contains only the current release builds:
 
 | Device | Download |
 | --- | --- |
-| Windows 10/11 x64 | [Velora-PDF-1.0.48-x64-setup.exe](Velora-PDF-1.0.48-x64-setup.exe) |
+| Windows 10/11 x64 | [Velora-PDF-1.0.49-x64-setup.exe](Velora-PDF-1.0.49-x64-setup.exe) |
 
-This Windows build saves notes when you switch pages, starts with an immediate loading shell instead of a blank white window, and updates search indexing per page for smoother editing.
+This Windows build opens straight into the app with no white flash: the window stays hidden until the themed UI has painted, then reveals instantly. It also keeps the page-change note saving and per-page search indexing from the previous release.
 
 ## Android WebView APK v2.1.16
 
@@ -35,7 +35,7 @@ For a normal Android phone or tablet, use `Velora-PDF-Android-v2.1.16-arm64-v8a.
 
 ```text
 b84436df0e99d8549e5c36dd7006667afcd0c6ce3d1b40bebe4e3e00acad865f  Velora-PDF-1.0.47-aarch64.dmg
-5a4bda64314e767922d3443887aa18935125840237cc592f7ca3064616c84033  Velora-PDF-1.0.48-x64-setup.exe
+c90029643ab081923ac02a40b304d972513c2d22ac3a1e9c05ad4987a42c57f6  Velora-PDF-1.0.49-x64-setup.exe
 26abe306c50b0358ac489df8db9b6a55212a291f8c98f877b8570f0776a96a1a  Velora-PDF-Android-v2.1.16-arm64-v8a.apk
 47c7f8e66f4c8f7d168cebf99de08f86b3c94ce62f3086e46b361e13d05b1a70  Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
 f9f01c17f1e8610b0f293e4e2c90fabfee3d7b751101250862ee04012b2e311b  Velora-PDF-Android-v2.1.16-x86.apk

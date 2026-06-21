@@ -4,19 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Velora PDF</title>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("velora:theme") || localStorage.getItem("kairnly.theme");
+          var isDark = theme === "dark";
+          var root = document.documentElement;
+          root.dataset.theme = isDark ? "dark" : "light";
+          if (isDark) root.classList.add("dark");
+          root.style.background = isDark ? "#09090b" : "#f7f7fa";
+          root.style.colorScheme = isDark ? "dark" : "light";
+        } catch (error) {
+          document.documentElement.style.background = "#f7f7fa";
+        }
+      })();
+    </script>
     <style>
       html,
       body {
         margin: 0;
         min-height: 100%;
-        background: #f7f4ef;
-        color: #1f2937;
+        background: #f7f7fa;
+        color: #666a73;
       }
 
-      html[data-theme="dark"],
-      html.dark {
-        background: #111827;
-        color: #f9fafb;
+      html.dark,
+      html[data-theme="dark"] {
+        background: #09090b;
+        color: #a1a1aa;
       }
 
       #root {
@@ -24,22 +39,49 @@
       }
 
       .velora-boot {
-        display: grid;
+        display: flex;
         min-height: 100vh;
-        place-items: center;
-        font: 500 14px/1.4 Inter, system-ui, sans-serif;
-        color: #6b7280;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: inherit;
+        font: 600 15px/1.4 Inter, system-ui, sans-serif;
+        letter-spacing: -0.01em;
       }
 
-      html[data-theme="dark"] .velora-boot,
-      html.dark .velora-boot {
-        color: #9ca3af;
+      .velora-boot-mark {
+        display: grid;
+        place-items: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 700;
+        box-shadow: 0 18px 40px rgba(79, 70, 229, 0.22);
+      }
+
+      .velora-boot-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #0e0e12;
+      }
+
+      html.dark .velora-boot-title,
+      html[data-theme="dark"] .velora-boot-title {
+        color: #ffffff;
       }
     </style>
   </head>
   <body>
     <div id="root">
-      <div class="velora-boot">Loading Velora PDF…</div>
+      <div class="velora-boot" aria-live="polite" aria-busy="true">
+        <div class="velora-boot-mark">V</div>
+        <p class="velora-boot-title">Velora PDF</p>
+      </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

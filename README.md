@@ -11,7 +11,7 @@
   <a href="downloads/Velora-PDF-1.0.47-aarch64.dmg">
     <img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-0A84FF?style=for-the-badge&logo=apple&logoColor=white">
   </a>
-  <a href="downloads/Velora-PDF-1.0.48-x64-setup.exe">
+  <a href="downloads/Velora-PDF-1.0.49-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
@@ -30,7 +30,7 @@
 
 [Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.48-x64-setup.exe)
+[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.49-x64-setup.exe)
 
 [Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
 
@@ -56,20 +56,20 @@ src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
 
 ## Download Windows EXE
 
-Download for Windows: [Velora-PDF-1.0.48-x64-setup.exe](downloads/Velora-PDF-1.0.48-x64-setup.exe)
+Download for Windows: [Velora-PDF-1.0.49-x64-setup.exe](downloads/Velora-PDF-1.0.49-x64-setup.exe)
 
-This Windows build fixes slow note editing and startup white-screen delays. Notes now save to SQLite only when you switch pages, search indexing updates per page instead of rebuilding the whole workspace on every keystroke, and the app shows an immediate loading shell while the UI boots.
+This Windows build removes the startup white flash entirely. The window now stays hidden until the themed UI has finished painting and is then revealed instantly, with a guaranteed fallback so it always appears. It keeps the page-change note saving and per-page search indexing from the previous release.
 
 Current local build output:
 
 ```text
-C:\Users\mutlu\Desktop\Velora PDF Setup 1.0.48.exe
+C:\Users\mutlu\Desktop\Velora-PDF-1.0.49-x64-setup.exe
 ```
 
 Tauri build output:
 
 ```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.48_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Velora PDF_1.0.49_x64-setup.exe
 ```
 
 ## Download Android WebView APK v2.1.16
@@ -571,13 +571,13 @@ The current copied desktop installers are:
 
 ```text
 downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.48-x64-setup.exe
+downloads/Velora-PDF-1.0.49-x64-setup.exe
 ```
 
 ## Current Version
 
 ```text
-1.0.48
+1.0.49
 ```
 
 Bundle identifier:
@@ -611,6 +611,16 @@ aarch64
 ```
 
 ## Version History
+
+### 1.0.49
+
+Released to fully eliminate the Windows startup white flash.
+
+- The main window is created hidden (`visible: false`) and stays hidden until the React UI has painted, so users never see a blank white WebView2 window.
+- The frontend emits a `velora-ready` event after first paint; the Rust layer listens for it and reveals the window instantly.
+- Added a guaranteed Rust-side fallback timer that always reveals the window, so a missed event can never leave it hidden.
+- The inline boot shell in `index.html` now applies the saved theme before paint, so the reveal matches light/dark mode with no color flash.
+- Rebuilt and republished the Windows `1.0.49` x64 EXE setup installer.
 
 ### 1.0.48
 
