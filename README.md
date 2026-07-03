@@ -1,10 +1,10 @@
+<div align="center">
+
 # Velora PDF
 
-<p align="center">
-  <strong>Private, local-first PDF reading and annotation for macOS, Windows, Android phones, and tablets.</strong>
-</p>
+**Private, local-first PDF reading, annotation, and note-taking for macOS, Windows, Linux, and Android.**
 
-<p align="center">
+<p>
   <a href="https://veloraproject.app/">
     <img alt="Website" src="https://img.shields.io/badge/Website-veloraproject.app-111827?style=for-the-badge&logo=safari&logoColor=white">
   </a>
@@ -14,541 +14,463 @@
   <a href="downloads/Velora-PDF-1.0.53-x64-setup.exe">
     <img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D4?style=for-the-badge&logo=windows&logoColor=white">
   </a>
+  <a href="downloads/Velora-PDF-1.0.53-amd64.deb">
+    <img alt="Download for Linux" src="https://img.shields.io/badge/Linux-.deb-E95420?style=for-the-badge&logo=ubuntu&logoColor=white">
+  </a>
   <a href="downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk">
     <img alt="Download for Android" src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white">
   </a>
 </p>
 
-<p align="center">
+<p>
   <img alt="Local-first" src="https://img.shields.io/badge/Local--first-No_accounts_or_cloud_sync-10B981?style=flat-square">
   <img alt="Privacy focused" src="https://img.shields.io/badge/Privacy-No_tracking_or_analytics-6366F1?style=flat-square">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-F59E0B?style=flat-square">
+  <img alt="Built with Tauri 2" src="https://img.shields.io/badge/Built_with-Tauri_2-FFC131?style=flat-square&logo=tauri&logoColor=black">
 </p>
 
 [![Buy Me a Coffee](assets/bmc-button.svg)](https://buymeacoffee.com/mutlukurt)
 
-![Velora PDF brand preview](assets/brand.webp)
+<img alt="Velora PDF brand preview" src="assets/brand.webp">
 
-[Download Velora PDF for macOS](downloads/Velora-PDF-1.0.47-aarch64.dmg)
+</div>
 
-[Download Velora PDF for Windows (x64 EXE)](downloads/Velora-PDF-1.0.53-x64-setup.exe)
+---
 
-[Download Velora PDF Android WebView APK v2.1.16 for arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk)
+## Table of Contents
 
-Velora PDF is a private, local-first PDF reader, annotation workspace, and handwritten notebook app for macOS, Windows plus an offline Android WebView APK.
+- [What Is Velora PDF?](#what-is-velora-pdf)
+- [Why Velora PDF?](#why-velora-pdf)
+- [Feature Tour](#feature-tour)
+- [Platform Support](#platform-support)
+- [Downloads & Installation](#downloads--installation)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Keyboard Shortcuts](#keyboard-shortcuts)
+- [Project Structure](#project-structure)
+- [Development Guide](#development-guide)
+- [Privacy](#privacy)
+- [Current Limitations](#current-limitations)
+- [Troubleshooting](#troubleshooting)
+- [Version History](#version-history)
+- [License](#license)
 
-It is designed for people who want a calm, premium reading and note-taking experience without accounts, subscriptions, cloud sync, tracking, analytics, or external APIs. PDFs and notebooks stay on the user’s own device, render locally, annotate locally, record local voice memos, and export locally.
+---
 
-## Download macOS DMG
+## What Is Velora PDF?
 
-Download for macOS: [Velora-PDF-1.0.47-aarch64.dmg](downloads/Velora-PDF-1.0.47-aarch64.dmg)
+### In plain language
 
-Current local build output:
+Velora PDF is a personal reading and note-taking app that lives entirely on **your** computer, tablet, or phone. You open a PDF, read it in a calm, beautifully designed workspace, mark it up with highlights, pen strokes, shapes, and sticky notes, and export an annotated copy — all without ever creating an account or sending a single byte to the internet.
 
-```text
-/Users/mutlu/Desktop/Velora PDF_1.0.47_aarch64.dmg
-```
+Beyond PDFs, Velora also gives you:
 
-Tauri build output:
+- **Velora Notes** — a Notion-style page workspace where you write documents with headings, task lists, tables, code blocks, images, and voice memos, organized in a drag-and-drop page tree.
+- **Velora Notebook** — a digital A4 paper notebook for handwriting with a stylus or finger, complete with folders, multi-page notebooks, pinch zoom, voice recordings, and PDF export.
 
-```text
-src-tauri/target/release/bundle/dmg/Velora PDF_1.0.47_aarch64.dmg
-```
+There are no subscriptions, no logins, no cloud, no ads, and no tracking. If you turn off your Wi-Fi, everything still works.
 
-## Download Windows EXE
+### In technical language
 
-Download for Windows: [Velora-PDF-1.0.53-x64-setup.exe](downloads/Velora-PDF-1.0.53-x64-setup.exe)
+Velora PDF is a cross-platform, local-first document workspace built on **Tauri 2** (Rust core) with a **React 18 + TypeScript + Vite** frontend. PDF rendering is handled client-side by **PDF.js** (`pdfjs-dist`), annotation overlays are managed in **Zustand** stores with undo/redo history, and annotated PDF export is composed with **pdf-lib**. The Notes and Notebook workspaces persist to a bundled **SQLite** database (via `rusqlite`, WAL mode, FTS5 full-text search) through typed Tauri IPC commands. A parallel native **Android** application embeds the identical Vite production bundle in a hardened `WebView` served by `WebViewAssetLoader`, shipping without the `INTERNET` permission.
 
-This Windows build makes deleting (archiving) a page instant. Archiving and renaming a page now update only that page's rows in the search index instead of rebuilding the entire index, removing the multi-second delay. It keeps the save-on-close behavior, instant window reveal, code-split bundle, on-demand PDF/editor/export libraries, and the single-transaction backup import from the previous releases.
+One codebase produces:
 
-Current local build output:
-
-```text
-C:\Users\mutlu\Desktop\Velora-PDF-1.0.53-x64-setup.exe
-```
-
-Tauri build output:
-
-```text
-src-tauri/target/release/bundle/nsis/Velora PDF_1.0.53_x64-setup.exe
-```
-
-## Download Android WebView APK v2.1.16
-
-Velora PDF Android WebView APK v2.1.16 is a real native Android APK wrapper around the same web experience used by the root VeloraPDF app. It is not a PWA. The Vite production build is embedded inside the APK and served through Android `WebViewAssetLoader`, so the app runs offline and does not request the Android `INTERNET` permission.
-
-Current Android WebView APK v2.1.16 downloads:
-
-| Device / CPU | APK |
+| Artifact | Technology |
 | --- | --- |
-| Most modern phones and tablets, 64-bit ARM | [Velora-PDF-Android-v2.1.16-arm64-v8a.apk](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk) |
-| Older 32-bit ARM phones and tablets | [Velora-PDF-Android-v2.1.16-armeabi-v7a.apk](downloads/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk) |
-| Android emulator / 32-bit x86 | [Velora-PDF-Android-v2.1.16-x86.apk](downloads/Velora-PDF-Android-v2.1.16-x86.apk) |
-| Android emulator / 64-bit x86 | [Velora-PDF-Android-v2.1.16-x86_64.apk](downloads/Velora-PDF-Android-v2.1.16-x86_64.apk) |
+| macOS `.dmg` (Apple Silicon) | Tauri 2 bundle, WKWebView |
+| Windows `.exe` (NSIS, x64) | Tauri 2 bundle, WebView2 |
+| Linux `.deb` (amd64) | Tauri 2 bundle, WebKitGTK |
+| Android `.apk` (4 ABIs) | Native Gradle project, `androidx.webkit` |
+| Web preview | Plain Vite build with browser fallbacks |
 
-For a normal Android phone, use `arm64-v8a`.
+---
 
-Current Android WebView APK v2.1.16 release build outputs:
+## Why Velora PDF?
 
-```text
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-arm64-v8a.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-x86.apk
-/Users/mutlu/Desktop/Velora-PDF-Android-APK-v2.1.16/Velora-PDF-Android-v2.1.16-x86_64.apk
+### The purpose
+
+Most PDF and note apps today are cloud services first and applications second: they require accounts, push subscriptions, sync your documents to remote servers, and quietly collect analytics. Velora PDF is built on the opposite premise — **reading and thinking are private activities**, and the software that supports them should be fast, elegant, and silent.
+
+### What you gain
+
+| Benefit | What it means for you |
+| --- | --- |
+| 🔒 **True privacy** | No login, no telemetry, no external API calls. Documents never leave your device. |
+| ⚡ **Speed** | Near-instant startup via aggressive code-splitting; heavy libraries load only when used. |
+| 📴 **Full offline operation** | Every feature — reading, annotating, notes, handwriting, voice memos, export — works with zero connectivity. The Android APK doesn't even request the `INTERNET` permission. |
+| 🗃️ **Data ownership** | Notes live in a plain SQLite file you can back up; annotations export as human-readable JSON sidecars; workspace backups are portable JSON. |
+| 🎨 **Premium feel** | A calm, macOS-inspired workspace with dark/light themes, eye-protection mode, and motion-designed panels. |
+| 💸 **Free forever** | MIT-licensed, no billing flow, no upsell. |
+
+### Design philosophy
+
+Velora aims to feel **premium, calm, local-first, fast, focused, desktop-native, minimal but capable, and private by default**. It intentionally excludes login, billing, team workspaces, analytics, remote databases, and cloud document storage — not as missing features, but as deliberate design decisions.
+
+---
+
+## Feature Tour
+
+Each feature is described twice: first for everyday users, then for engineers.
+
+### 📖 PDF Reader
+
+**Plain language:** Open any PDF from your device and read it in a distraction-free canvas. Flip pages with arrows or scroll continuously, zoom with pinch gestures or shortcuts, jump around with the thumbnail strip, and tune the view with page backgrounds, page gaps, and an eye-protection mode for long sessions.
+
+**Technical:** PDF.js documents are loaded through dynamic imports so the viewer never blocks first paint. Pages render lazily near the viewport with `IntersectionObserver`-driven canvas virtualization that unmounts off-screen canvas buffers to bound memory on large documents. Pinch zoom uses a GPU-composited preview during the gesture and defers PDF.js re-rasterization until gesture end. Scroll-position tracking keeps the current page indicator and the auto-following thumbnail panel in sync.
+
+### ✍️ Annotations
+
+**Plain language:** Mark up documents the way you would on paper — highlight passages, draw with a pen, underline or strike through text, drop rectangles, circles, and arrows, pin draggable sticky notes, add text notes, and even place your handwritten signature. Everything supports undo/redo, recoloring, duplication, and deletion, and your marks reappear automatically the next time you open the same PDF.
+
+**Technical:** An SVG/DOM overlay layer (`AnnotationLayer`) sits above each PDF.js canvas. Annotation geometry is stored with the source page render dimensions so exports scale correctly to true PDF page coordinates. State lives in a Zustand store with a full undo/redo history stack. Annotations persist automatically to local storage keyed by document identity, and can be exported explicitly as a `annotations.velora.json` sidecar. Signatures are captured on a modal canvas pad and placed as base64 vector images.
+
+### 🔍 Search
+
+**Plain language:** Search inside the PDF and jump straight to any match. In the Notes workspace, a command palette (`Ctrl/Cmd + K`) finds any page or paragraph you've ever written, instantly.
+
+**Technical:** PDF search extracts text via PDF.js `textContent` with baseline coordinate mapping to draw match-highlight overlays on the page. Workspace search runs on SQLite **FTS5** (porter + unicode61 tokenizer) with prefix matching and snippet generation, maintained incrementally per page edit rather than by full index rebuilds.
+
+### 🗂️ Side Panels
+
+**Plain language:** Five slide-out panels keep everything one click away: page **Thumbnails**, **Search**, **Bookmarks**, **Comments & Notes** (every annotation grouped by page, clickable), and **Attachments** (files you associate with the document). On phones they open as bottom drawers instead of squeezing the page.
+
+**Technical:** Panels are lazy-mounted behind a panel-level React error boundary so a panel failure degrades gracefully instead of unmounting the reader. The Comments panel aggregates the annotation store grouped by page with inline renaming and direct navigation. Attachments persist locally per document.
+
+### 📝 Velora Notes — the block workspace
+
+**Plain language:** A private, Notion-style writing space. Create pages and subpages, drag them around the sidebar tree, and write with rich blocks: headings, task lists, tables, quotes, code with syntax highlighting, colored text, images you can drag-drop and resize, and voice memos you record right inside the page. Deleting, renaming, and reorganizing are instant, and closing the window never loses unsaved work.
+
+**Technical:** The editor is **TipTap** (ProseMirror) with StarterKit plus table, task-list, image, link, highlight, color, and code-block-lowlight extensions. Documents serialize to JSON block rows in SQLite (`pages`/`blocks` schema with cascade deletes and FTS5 sync). Content is buffered in memory while typing and flushed on page switches and on a window-close intercept (`core:window:allow-close`) that saves before destroy. Voice memos stream `MediaRecorder` chunks directly to app-data files via Rust commands — no base64 blobs in the database — and play back through Tauri's asset protocol. Page/block drag-and-drop uses pointer-based movement (dnd-kit) with long-press thresholds tuned for touch.
+
+### 📓 Velora Notebook — handwriting
+
+**Plain language:** Digital paper. Organize notebooks into folders, write across multiple A4 pages with a stylus or finger, highlight, pan and pinch-zoom like real paper, drop photos onto pages and resize them from the corners, record voice notes, and export the whole notebook as a PDF.
+
+**Technical:** A canvas-based A4 multi-page surface with pressure-friendly freehand strokes, four-corner touch/mouse image transforms, and local persistence. Notebook export composes pages (including image layers) into a paginated PDF. Phone layouts get taller writing pages and responsive header tuning; rendering stays crisp after zoom via re-rasterization.
+
+### 📤 Export
+
+**Plain language:** Share your work as normal files: an annotated copy of the PDF, clean printable PDFs of your notes, or HTML and Markdown versions. Annotation data can also be saved as a small JSON file that acts as your editable "source of truth".
+
+**Technical:** Two export paths: (1) `annotations.velora.json` sidecar — lossless, editable archive; (2) best-effort annotated PDF via **pdf-lib**, drawing highlight/pen/shape/text/sticky/signature overlays into a new PDF copy at true page scale. Notes export to PDF via **html2canvas + jsPDF** with canvas-level blank-row detection for clean A4 page breaks, manually rendered list markers, and preserved hard line breaks; HTML/Markdown exports and ZIP archives (jszip) are also supported. On desktop, all file I/O goes through native Rust save dialogs; on Android, a native Downloads bridge handles exports.
+
+### ⚙️ Settings & Theming
+
+**Plain language:** Switch between light and dark themes (synced across PDF, Notes, and Notebook), enable eye-protection mode, adjust editor preferences, see exactly where your data lives on disk, and export or import a full workspace backup.
+
+**Technical:** Theming is CSS-variable driven and applied pre-paint from `localStorage` by an inline `index.html` script to avoid theme flash. The About panel detects the runtime (desktop/web/Android bridge) and reports the correct version. Workspace backup is a single JSON document; import runs in one SQLite transaction with cached prepared statements (multi-second imports reduced to sub-second).
+
+### 🏠 Home & Recent Files
+
+**Plain language:** A welcoming home screen shows your recent PDFs as cards — reopen with one click or clear them with the trash button.
+
+**Technical:** On desktop, recent files reopen by path via Rust. In browsers, `FileSystemAccessAPI` handles are persisted in IndexedDB with permission re-prompting and a cached-bytes fallback, so recent files survive reloads without re-picking.
+
+---
+
+## Platform Support
+
+| Platform | Distribution | Renderer | Min. version | Status |
+| --- | --- | --- | --- | --- |
+| **macOS** (Apple Silicon) | `.dmg` | WKWebView | macOS 12.0 | ✅ Shipping (v1.0.47) |
+| **Windows** (x64) | NSIS `.exe` | WebView2 | Windows 10 | ✅ Shipping (v1.0.53) |
+| **Linux** (amd64) | `.deb` | WebKitGTK 4.1 | Ubuntu 22.04+ / Debian 12+ | ✅ Shipping (v1.0.53) |
+| **Android** (4 ABIs) | `.apk` | Android WebView | Android 7+ | ✅ Shipping (v2.1.16) |
+| **Web preview** | Vite build | Any modern browser | — | 🧪 Development/preview |
+
+All desktop builds share the same Rust core and frontend. The Android APK is a separate native Gradle project that embeds the identical web bundle — it is a real APK, not a PWA.
+
+---
+
+## Downloads & Installation
+
+### 🐧 Linux (Ubuntu / Debian)
+
+Download: [Velora-PDF-1.0.53-amd64.deb](downloads/Velora-PDF-1.0.53-amd64.deb)
+
+```bash
+sudo apt install ./Velora-PDF-1.0.53-amd64.deb
 ```
 
-Android WebView APK project source:
+`apt` resolves the two runtime dependencies (`libwebkit2gtk-4.1-0`, `libgtk-3-0`) automatically — both ship in standard Ubuntu/Debian repositories. After installation, launch **Velora PDF** from your application menu or run `velora-pdf` in a terminal.
 
-```text
-VeloraPDF Android APK v2/
+Your data lives at `~/.local/share/com.mutlukurt.velorapdf/` (XDG data directory).
+
+To remove:
+
+```bash
+sudo apt remove velora-pdf
 ```
 
-Android WebView APK v2.1.16 includes:
+### 🍎 macOS (Apple Silicon)
 
-- The root VeloraPDF mobile web UI embedded directly inside the APK.
-- Offline startup and app usage without the Android `INTERNET` permission.
-- Local bundled fonts and Velora icon assets so home, sidebar, and settings artwork render correctly offline.
-- Android-native microphone recording bridge for voice memos.
-- Android-native Downloads bridge for Settings exports and generated archives.
-- PDF, HTML, and Markdown exports preserve pasted line breaks; PDF export uses stable rendered list markers.
-- Settings theme controls sync across PDF, Notes, and Notebook views.
-- PDF Search, Thumbnails, Bookmarks, Comments, and Attachments panels include fully wired action states.
-- Notes block controls use the same bottom action bar on desktop, browser, tablet, and phone instead of hover-only floating controls.
-- Notes bottom action pill scrolls horizontally on narrow phones and tablets so every editor action remains reachable without viewport overflow.
-- Drag-and-drop photo import works inside Notes pages and handwritten Notebook pages, with mouse and touch corner resizing.
-- Window-level image drops land directly in the active Notes editor on browser and desktop builds.
-- Selected images can be deleted from the bottom action bar or by right-clicking the image.
-- Block insert and selected-image action panels open above the bottom pill on browser, DMG, tablet, phone, and Android WebView builds.
-- Clicking a Notes image exposes move up, move down, and delete controls in the same bottom-pill panel system.
-- Android-specific top spacing for the Notes workspace and PDF editor so status bar/camera areas do not cover controls.
-- Phone-specific notebook responsive tuning so headers, controls, and handwritten pages fit narrow Android screens without horizontal document overflow.
-- Taller phone writing pages for more comfortable stylus handwriting.
-- Smoother Android PDF editor gestures with native WebView momentum scrolling, two-finger pinch zoom, and crisp canvas re-rendering after zoom.
-- Hardware-accelerated WebView PDF rendering for clearer page movement on phones and tablets.
-- Mobile settings modal scrolling and positioning tuned for Android screens.
-- ABI-specific release APKs for `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`.
+Download: [Velora-PDF-1.0.47-aarch64.dmg](downloads/Velora-PDF-1.0.47-aarch64.dmg)
 
-## Android WebView APK Screenshots
+This build is unsigned (distributed outside the App Store without an Apple Developer ID), so Gatekeeper may warn that the developer "cannot be verified" or claim the app "is damaged". The DMG itself is perfectly valid; the message comes from Apple's quarantine flag on unsigned downloads.
 
-These screenshots show the offline Android WebView APK using phone and tablet viewport captures of the embedded web experience.
-
-### Phone
-
-| Home | Notes workspace |
-| --- | --- |
-| <img src="assets/screenshots/android-v2/velora-android-v2-phone-home.png" alt="Velora PDF Android APK v2 phone home screen" width="260"> | <img src="assets/screenshots/android-v2/velora-android-v2-phone-workspace.png" alt="Velora PDF Android APK v2 phone notes workspace" width="260"> |
-
-| PDF editor | Settings |
-| --- | --- |
-| <img src="assets/screenshots/android-v2/velora-android-v2-phone-pdf-editor.png" alt="Velora PDF Android APK v2 phone PDF editor" width="260"> | <img src="assets/screenshots/android-v2/velora-android-v2-phone-settings-about.png" alt="Velora PDF Android APK v2 phone settings about screen" width="260"> |
-
-### Tablet
-
-| Home | Notes workspace |
-| --- | --- |
-| <img src="assets/screenshots/android-v2/velora-android-v2-tablet-home.png" alt="Velora PDF Android APK v2 tablet home screen" width="360"> | <img src="assets/screenshots/android-v2/velora-android-v2-tablet-workspace.png" alt="Velora PDF Android APK v2 tablet notes workspace" width="360"> |
-
-| PDF editor | Settings |
-| --- | --- |
-| <img src="assets/screenshots/android-v2/velora-android-v2-tablet-pdf-editor.png" alt="Velora PDF Android APK v2 tablet PDF editor" width="360"> | <img src="assets/screenshots/android-v2/velora-android-v2-tablet-settings-about.png" alt="Velora PDF Android APK v2 tablet settings about screen" width="360"> |
-
-## Important
-
-### macOS Security Warning
-
-This build is unsigned and distributed outside the Apple App Store without an Apple Developer ID certificate. Because of that, macOS Gatekeeper may block the app or show a warning such as:
-
-```text
-“Velora PDF” cannot be opened because the developer cannot be verified.
-```
-
-or:
-
-```text
-“Velora PDF” is damaged and cannot be opened.
-```
-
-The DMG generated by this project is physically valid. The warning is caused by Apple’s quarantine and signing checks for unsigned local builds.
-
-To open it on your Mac:
-
-1. Open the DMG.
-2. Drag `Velora PDF.app` into the Applications folder.
-3. Open Terminal and run:
+1. Open the DMG and drag `Velora PDF.app` into **Applications**.
+2. Clear the quarantine flag:
 
 ```bash
 xattr -cr "/Applications/Velora PDF.app"
 ```
 
-4. Launch Velora PDF from Applications.
+3. Launch Velora PDF from Applications. (Alternatively: right-click the app → **Open** → confirm **Open**.)
 
-Alternatively, right-click or Control-click the app in Finder, choose `Open`, then confirm `Open` again.
+### 🪟 Windows (x64)
 
-## What Velora PDF Does
+Download: [Velora-PDF-1.0.53-x64-setup.exe](downloads/Velora-PDF-1.0.53-x64-setup.exe)
 
-In plain language:
+Run the NSIS installer and follow the prompts. Windows SmartScreen may show an "unknown publisher" notice for the unsigned installer — choose **More info → Run anyway**.
 
-Velora PDF is a personal PDF reader and annotation app. You can open a local PDF, read it in a clean macOS-style workspace, zoom in and out, navigate pages, inspect thumbnails, search text, draw highlights and pen marks, save annotations as a JSON sidecar, and export a best-effort annotated PDF.
+### 🤖 Android
 
-For users, this means:
+Real native APK — installs offline, requests no `INTERNET` permission.
 
-- Open PDF files from your Mac.
-- Read documents in a polished dark or light workspace.
-- Navigate pages with thumbnails and page controls.
-- Zoom in, zoom out, and return to fit-width scale.
-- Search document text and jump to matching pages.
-- Add highlight and pen annotations.
-- Add rectangle, circle, arrow, text, and sticky-note annotations.
-- Save annotation data as a local `.json` sidecar.
-- Export an annotated copy of the PDF.
-- Keep recent files on the device.
-- Work fully offline.
+| Device / CPU | APK |
+| --- | --- |
+| Most modern phones & tablets (64-bit ARM) | [arm64-v8a](downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk) |
+| Older 32-bit ARM devices | [armeabi-v7a](downloads/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk) |
+| Emulator / 32-bit x86 | [x86](downloads/Velora-PDF-Android-v2.1.16-x86.apk) |
+| Emulator / 64-bit x86 | [x86_64](downloads/Velora-PDF-Android-v2.1.16-x86_64.apk) |
 
-For developers, this means:
+For a normal Android phone, use **arm64-v8a**. Enable "Install unknown apps" for your browser/file manager when prompted.
 
-- Tauri 2 desktop shell.
-- React and Vite frontend.
-- TypeScript strict mode.
-- Tailwind CSS with CSS variables for theming.
-- Zustand stores for PDF, UI, and annotation state.
-- PDF.js rendering through `pdfjs-dist`.
-- `pdf-lib` best-effort PDF export.
-- Tauri dialog and filesystem plugins for native file open/save.
-- Browser fallback for development preview mode.
+<details>
+<summary><strong>📱 Android screenshots (phone & tablet)</strong></summary>
 
-## Product Philosophy
+#### Phone
 
-Velora PDF is built around a simple idea: PDF reading should feel fast, private, and elegant.
+| Home | Notes workspace |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-phone-home.png" alt="Velora PDF Android phone home screen" width="260"> | <img src="assets/screenshots/android-v2/velora-android-v2-phone-workspace.png" alt="Velora PDF Android phone notes workspace" width="260"> |
 
-The interface aims to feel:
+| PDF editor | Settings |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-phone-pdf-editor.png" alt="Velora PDF Android phone PDF editor" width="260"> | <img src="assets/screenshots/android-v2/velora-android-v2-phone-settings-about.png" alt="Velora PDF Android phone settings" width="260"> |
 
-- Premium
-- Calm
-- Local-first
-- Fast
-- Focused
-- Desktop-native
-- Minimal but capable
-- Private by default
+#### Tablet
 
-Velora PDF is not a cloud SaaS app. It intentionally does not include login, billing, subscriptions, team workspaces, analytics, remote databases, or cloud document storage.
+| Home | Notes workspace |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-tablet-home.png" alt="Velora PDF Android tablet home screen" width="360"> | <img src="assets/screenshots/android-v2/velora-android-v2-tablet-workspace.png" alt="Velora PDF Android tablet notes workspace" width="360"> |
+
+| PDF editor | Settings |
+| --- | --- |
+| <img src="assets/screenshots/android-v2/velora-android-v2-tablet-pdf-editor.png" alt="Velora PDF Android tablet PDF editor" width="360"> | <img src="assets/screenshots/android-v2/velora-android-v2-tablet-settings-about.png" alt="Velora PDF Android tablet settings" width="360"> |
+
+</details>
+
+---
+
+## Architecture
+
+Velora PDF is organized in four layers. The first three form the desktop application; the fourth wraps the same frontend for Android.
+
+```text
+┌───────────────────────────────────────────────────────────────┐
+│                     Frontend (src/)                           │
+│   React 18 · TypeScript · Vite · Tailwind · Zustand           │
+│   PDF viewer · Annotation overlay · Notes (TipTap) ·          │
+│   Notebook canvas · Panels · Theming · Command palette        │
+├───────────────────────────────────────────────────────────────┤
+│                  Tauri IPC (typed commands)                   │
+├───────────────────────────────────────────────────────────────┤
+│                  Rust Core (src-tauri/)                       │
+│   SQLite (rusqlite, WAL, FTS5) · Native file dialogs ·        │
+│   Voice-recording disk streaming · Backup import/export ·     │
+│   Window lifecycle (hidden-until-painted reveal)              │
+├───────────────────────────────────────────────────────────────┤
+│              OS WebView + Bundler                             │
+│   WKWebView (macOS·dmg) · WebView2 (Windows·nsis) ·           │
+│   WebKitGTK (Linux·deb)                                       │
+└───────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│        Android wrapper (VeloraPDF Android APK v2/)            │
+│   Native Gradle app · WebViewAssetLoader serves the same      │
+│   Vite bundle from APK assets · JS bridges for microphone     │
+│   (VeloraAndroidRecorder) and Downloads (VeloraAndroidFiles)  │
+│   · ABI-split release APKs · no INTERNET permission           │
+└───────────────────────────────────────────────────────────────┘
+```
+
+### 1. Desktop shell (`src-tauri/`)
+
+- Tauri 2 window management: the main window starts hidden and is revealed by a `velora-ready` event emitted from an inline `index.html` script as soon as the boot shell paints — with a Rust-side fallback timer — eliminating white-flash startup on every OS.
+- Capability-scoped security: only dialog, scoped filesystem, and window-close permissions are granted (`capabilities/default.json`). The asset protocol is limited to the local `voice-recordings` folder.
+- Bundle targets: `dmg` (macOS), `nsis` (Windows), `deb` (Linux) from a single config.
+
+### 2. Rust core (`src-tauri/src/lib.rs`)
+
+- **SQLite** database (`velora_notes.sqlite3`) opened in WAL mode with foreign keys; schema covers `pages`, `blocks`, `page_links`, `tags`, `page_tags`, and an FTS5 `search_index`.
+- ~20 typed IPC commands: page/block CRUD, incremental per-page search-index updates, workspace backup import (single transaction, prepared statements), native PDF/JSON/binary file dialogs, Downloads-folder saves, and chunked voice-recording file streaming with path validation.
+- Entirely platform-agnostic: zero `#[cfg(target_os)]` branches — all paths resolve through Tauri's `app_data_dir()` / `download_dir()` abstractions.
+
+### 3. Frontend (`src/`)
+
+- **State:** Zustand stores per domain (`usePdfStore`, `useAnnotationStore`, `useUiStore`, `useBookmarkStore`, `useAttachmentStore`) plus a workspace store for Notes.
+- **Performance:** `manualChunks` code-splitting (startup JS ~60 KB; React vendor chunk trimmed to ~143 KB), `Suspense`-lazy heavy views, dynamic imports for `pdfjs-dist` and export libraries, canvas virtualization for large PDFs.
+- **Dual-runtime design:** every native capability (file dialogs, voice recording, persistence) has a browser fallback (`FileSystemAccessAPI`, IndexedDB, `MediaRecorder`), so the same bundle runs in Tauri, plain browsers, and the Android WebView.
+
+### 4. Android wrapper (`VeloraPDF Android APK v2/`)
+
+- A native Android module (`androidx.webkit`) serving the embedded Vite production build through `WebViewAssetLoader` — fully offline, hardware-accelerated rendering, native momentum scrolling and pinch zoom.
+- JavaScript bridges expose native microphone recording and Downloads-folder export to the web layer.
+- Release builds are ABI-split (`armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`).
+
+### Where your data lives
+
+| OS | Location |
+| --- | --- |
+| macOS | `~/Library/Application Support/com.mutlukurt.velorapdf/` |
+| Windows | `%APPDATA%\com.mutlukurt.velorapdf\` |
+| Linux | `~/.local/share/com.mutlukurt.velorapdf/` |
+| Android | App-private storage inside the APK sandbox |
+
+The Notes database is the single file `velora_notes.sqlite3`; voice memos live beside it in `voice-recordings/`. The Settings dialog shows the exact path on your machine.
+
+---
 
 ## Tech Stack
 
-Core:
+| Layer | Technology |
+| --- | --- |
+| Desktop shell | Tauri 2, Rust (edition 2021) |
+| Database | SQLite via `rusqlite` (bundled), WAL, FTS5 |
+| Frontend framework | React 18, TypeScript (strict), Vite 6 |
+| Styling | Tailwind CSS + CSS variables (light/dark theming), `tailwind-merge`, `clsx` |
+| State | Zustand |
+| Rich text | TipTap 3 (ProseMirror) + lowlight syntax highlighting |
+| PDF rendering | PDF.js (`pdfjs-dist`) |
+| PDF composition | `pdf-lib`, jsPDF, html2canvas |
+| Archives | JSZip |
+| Drag & drop | dnd-kit |
+| Icons / motion | Lucide React, Framer Motion |
+| Native plugins | `@tauri-apps/plugin-dialog`, `@tauri-apps/plugin-fs` |
+| Android | Gradle, `androidx.webkit`, `WebViewAssetLoader`, JS bridges |
+| Build tooling | Tauri CLI, PostCSS, Autoprefixer |
 
-- Tauri 2
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Zustand
-- PDF.js via `pdfjs-dist`
-- `pdf-lib`
-
-Desktop integration:
-
-- `@tauri-apps/api`
-- `@tauri-apps/plugin-dialog`
-- `@tauri-apps/plugin-fs`
-- Rust Tauri shell
-- macOS DMG bundle target
-- Windows NSIS bundle target
-
-Android APK v2 integration:
-
-- Native Android application module.
-- Android WebView with `androidx.webkit`.
-- `WebViewAssetLoader` serving embedded Vite assets from APK storage.
-- Android JavaScript bridge for native microphone recording.
-- ABI split APK release outputs for 32-bit and 64-bit Android targets.
-- No Android `INTERNET` permission.
-
-UI and interaction:
-
-- Lucide React icons
-- Framer Motion for lightweight panel transitions
-- CSS variables for light and dark themes
-- Custom reusable UI primitives
-
-Build tooling:
-
-- Tauri CLI
-- Vite
-- TypeScript
-- PostCSS
-- Autoprefixer
-
-## Architecture Overview
-
-Velora PDF has three main layers.
-
-### 1. Desktop Shell
-
-The desktop shell lives in `src-tauri/`.
-
-It provides:
-
-- Native macOS desktop window through Tauri.
-- Application metadata and bundle configuration.
-- macOS DMG build target.
-- App icon and platform icon assets.
-- Tauri permissions for dialog and local filesystem access.
-- Dialog and filesystem plugins.
-
-Important files:
-
-- `src-tauri/src/lib.rs`
-- `src-tauri/src/main.rs`
-- `src-tauri/tauri.conf.json`
-- `src-tauri/capabilities/default.json`
-- `src-tauri/icons/*`
-
-### 2. Frontend App
-
-The frontend lives in `src/`.
-
-It provides:
-
-- Premium app shell.
-- Home screen.
-- Top toolbar.
-- Left vertical rail.
-- Thumbnail and search side panels.
-- PDF workspace.
-- Right inspector panel.
-- Dark/light theme system.
-- Eye protection mode.
-- Annotation UI and overlay interactions.
-
-Important files:
-
-- `src/app/App.tsx`
-- `src/components/layout/AppShell.tsx`
-- `src/components/layout/TopToolbar.tsx`
-- `src/components/layout/LeftRail.tsx`
-- `src/components/layout/RightInspector.tsx`
-- `src/components/home/HomeScreen.tsx`
-- `src/components/pdf/PdfViewer.tsx`
-- `src/components/pdf/PdfPage.tsx`
-- `src/components/pdf/AnnotationLayer.tsx`
-
-### 3. Local PDF and Annotation Layer
-
-The PDF and local file logic lives in `src/lib/` and `src/stores/`.
-
-It provides:
-
-- PDF file selection.
-- Native Tauri read/write operations.
-- Browser fallback for Vite preview.
-- PDF.js document loading.
-- PDF text search.
-- Annotation state management.
-- JSON sidecar save.
-- Best-effort annotated PDF export with `pdf-lib`.
-- Recent files stored locally.
-
-Important files:
-
-- `src/lib/tauri/fileDialog.ts`
-- `src/lib/pdf/loadPdf.ts`
-- `src/lib/pdf/searchPdf.ts`
-- `src/lib/pdf/exportPdf.ts`
-- `src/stores/usePdfStore.ts`
-- `src/stores/useAnnotationStore.ts`
-- `src/stores/useUiStore.ts`
-
-## Main Features
-
-### Local-First PDF Reader
-
-- Opens local PDF files.
-- Uses PDF.js for rendering.
-- Does not upload files anywhere.
-- Does not require an account.
-- Does not call external APIs.
-- Works offline.
-
-### Premium Desktop Workspace
-
-- macOS-style app window.
-- Dark and light themes.
-- Soft PDF canvas background.
-- Floating tool controls.
-- Left vertical icon rail.
-- Right inspector panel.
-- Recent files home screen.
-- Custom Velora PDF app icon.
-
-### PDF Navigation
-
-- Page rendering.
-- Page indicator.
-- Previous and next page navigation.
-- Scroll-based current page tracking.
-- Zoom in and zoom out.
-- Fit-width reset.
-- Thumbnail panel.
-- Click thumbnail to jump to page.
-
-### Search
-
-- Search panel.
-- Text extraction through PDF.js text content.
-- Page-based result list.
-- Click search result to jump to page.
-
-### Annotation MVP
-
-Velora PDF includes a real annotation overlay layer. Annotations are stored in local React/Zustand state and can be saved as a JSON sidecar.
-
-Supported annotation types:
-
-- Highlight
-- Freehand pen
-- Rectangle
-- Circle
-- Arrow
-- Text note
-- Sticky note
-
-Annotation interactions:
-
-- Drag to create highlights.
-- Draw freehand pen strokes.
-- Draw shapes.
-- Add text notes.
-- Add sticky notes.
-- Select annotation.
-- Change annotation color.
-- Duplicate annotation.
-- Delete annotation.
-- Undo and redo annotation changes.
-
-### Export
-
-Velora PDF supports two export paths:
-
-1. JSON sidecar export
-
-```text
-annotations.velora.json
-```
-
-This is the safest editable archive for annotation data.
-
-2. Best-effort PDF export
-
-Velora PDF uses `pdf-lib` to draw supported annotation overlays into a new PDF copy. Highlight, pen, rectangle, circle, text, and sticky note exports are supported as an MVP. Complex future annotation types may require richer PDF annotation embedding.
+---
 
 ## Keyboard Shortcuts
 
-- `Cmd + O`: Open PDF
-- `Cmd + F`: Open search panel
-- `Cmd + +`: Zoom in
-- `Cmd + -`: Zoom out
-- `Cmd + 0`: Reset zoom
-- `Cmd + Z`: Undo annotation change
-- `Cmd + Shift + Z`: Redo annotation change
-- `Arrow Right`: Next page
-- `Arrow Left`: Previous page
-- `Space`: Hand tool
-- `Esc`: Close right panel
+`Cmd` on macOS, `Ctrl` on Windows and Linux — both are accepted everywhere.
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd/Ctrl + O` | Open PDF |
+| `Cmd/Ctrl + F` | Open search panel |
+| `Cmd/Ctrl + K` | Command palette (Notes) |
+| `Cmd/Ctrl + +` / `-` | Zoom in / out |
+| `Cmd/Ctrl + 0` | Reset zoom (fit width) |
+| `Cmd/Ctrl + Z` | Undo annotation change |
+| `Cmd/Ctrl + Shift + Z` | Redo annotation change |
+| `←` / `→` | Previous / next page |
+| `PageUp` / `PageDown` | Page navigation (single-page mode) |
+| `Space` | Hand tool |
+| `Esc` | Close right panel |
+
+---
 
 ## Project Structure
 
 ```text
 velora-pdf/
-  src/
-    app/
-      App.tsx
-    components/
-      annotations/
-      brand/
-      home/
-      layout/
-      pdf/
-      ui/
-    lib/
-      pdf/
-      tauri/
-      utils/
-    stores/
-    styles/
-  src-tauri/
-    capabilities/
-    icons/
-    src/
-    tauri.conf.json
-  VeloraPDF Android APK v2/
-    app/
-      src/main/
-        assets/web/
-        java/
-        res/
-      build.gradle
-  public/
-  package.json
-  README.md
+├── src/                          # React frontend
+│   ├── app/App.tsx               # Root component
+│   ├── components/
+│   │   ├── layout/               # AppShell, TopToolbar, LeftRail, RightInspector
+│   │   ├── pdf/                  # PdfViewer, PdfPage, AnnotationLayer, side panels
+│   │   ├── annotations/          # Annotation toolbar & UI
+│   │   ├── home/                 # Home screen, recent-files grid
+│   │   ├── notes/                # Notes workspace shell
+│   │   ├── notebook/             # Handwritten notebook workspace
+│   │   ├── ui/                   # Button, Modal, Tooltip, primitives
+│   │   └── brand/                # Velora logo
+│   ├── features/
+│   │   ├── editor/               # TipTap editor, block menu, audio recorder, notebook paper
+│   │   ├── sidebar/              # Page tree, drag & drop
+│   │   ├── search/               # Command palette
+│   │   └── settings/             # Settings dialog
+│   ├── lib/
+│   │   ├── pdf/                  # PDF.js loading, search, pdf-lib export, annotation storage
+│   │   ├── tauri/                # Native dialogs, voice-recording streaming
+│   │   ├── export/               # PDF/HTML/Markdown document export
+│   │   ├── db/                   # SQLite IPC client + browser fallback
+│   │   ├── store/                # Workspace state
+│   │   ├── browser/              # FileSystemAccessAPI fallback
+│   │   └── utils/                # Shortcuts, text utils, helpers
+│   ├── stores/                   # Zustand stores (pdf, annotation, ui, bookmark, attachment)
+│   └── styles/                   # Tailwind + CSS variables
+├── src-tauri/                    # Rust desktop core
+│   ├── src/lib.rs                # IPC commands, SQLite, window lifecycle
+│   ├── tauri.conf.json           # Window, security, bundle config (dmg/nsis/deb)
+│   ├── capabilities/default.json # Scoped permissions
+│   └── icons/                    # All platform icons
+├── VeloraPDF Android APK v2/     # Native Android WebView wrapper (Gradle)
+├── downloads/                    # Published installers (.dmg, .exe, .deb, .apk)
+├── assets/                       # Brand images & screenshots
+└── public/                       # Static assets (fonts)
 ```
 
-## Installation
+---
 
-Install JavaScript dependencies:
+## Development Guide
+
+### Prerequisites
+
+- **Node.js** 18+ and npm
+- **Rust** (stable) — install via [rustup](https://rustup.rs)
+- Platform toolchains:
+  - **macOS:** Xcode Command Line Tools
+  - **Windows:** Microsoft C++ Build Tools + WebView2 runtime
+  - **Linux (Ubuntu/Debian):**
+
+    ```bash
+    sudo apt install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev \
+      build-essential curl wget file libssl-dev pkg-config
+    ```
+
+  - **Android:** Android Studio / SDK (only for the APK wrapper)
+
+### Run in development
 
 ```bash
 npm install
-```
 
-## Development
+# Full desktop app (native dialogs, SQLite, real behavior)
+npm run tauri:dev
 
-Run the Tauri desktop app:
-
-```bash
-npm run tauri dev
-```
-
-Run browser-only development preview:
-
-```bash
+# Browser-only preview (UI work; uses browser fallbacks)
 npm run dev
 ```
 
-Browser preview is useful for UI work. Native file dialogs and filesystem behavior should be tested through Tauri.
+Browser preview is convenient for UI iteration, but native file dialogs, SQLite persistence, and voice-recording disk streaming should be tested through Tauri.
 
-## Production Build
-
-Build the frontend:
+### Production builds
 
 ```bash
+# Frontend bundle only
 npm run build
+
+# Desktop build for the current OS (dmg on macOS / nsis exe on Windows)
+npm run tauri:build
+
+# Linux .deb specifically
+npm run tauri:build:deb
 ```
 
-Build the macOS app and DMG:
-
-```bash
-npm run tauri build
-```
-
-The generated DMG is located at:
+Output locations:
 
 ```text
-src-tauri/target/release/bundle/dmg/
+src-tauri/target/release/bundle/dmg/    Velora PDF_<version>_aarch64.dmg      (macOS)
+src-tauri/target/release/bundle/nsis/   Velora PDF_<version>_x64-setup.exe    (Windows)
+src-tauri/target/release/bundle/deb/    Velora PDF_<version>_amd64.deb        (Linux)
 ```
 
-Build the Windows app and EXE installer:
-
-```bash
-npm run tauri build
-```
-
-The generated EXE is located at:
-
-```text
-src-tauri/target/release/bundle/nsis/
-```
-
-Build the Android WebView APK app:
+### Android APK build
 
 ```bash
 npm run build
@@ -558,59 +480,95 @@ cp -R dist/. "VeloraPDF Android APK v2/app/src/main/assets/web/"
 "./VeloraPDF Android APK v2/gradlew" -p "VeloraPDF Android APK v2" assembleRelease
 ```
 
-The Android WebView APK v2.1.16 release outputs are copied to:
+ABI-split release APKs are written to the Gradle `outputs` directory and copied into `downloads/`.
 
-```text
-downloads/Velora-PDF-Android-v2.1.16-armeabi-v7a.apk
-downloads/Velora-PDF-Android-v2.1.16-arm64-v8a.apk
-downloads/Velora-PDF-Android-v2.1.16-x86.apk
-downloads/Velora-PDF-Android-v2.1.16-x86_64.apk
+### Release metadata
+
+| Field | Value |
+| --- | --- |
+| Current desktop version | `1.0.53` |
+| Current Android version | `2.1.16` |
+| Bundle identifier | `com.mutlukurt.velorapdf` |
+| Product name | `Velora PDF` |
+| Desktop bundle targets | `dmg`, `nsis`, `deb` |
+
+---
+
+## Privacy
+
+Velora PDF is designed as an offline, local application. It contains **no**:
+
+- Login or user accounts
+- Cloud sync or remote database
+- Analytics, tracking, or telemetry
+- Advertising SDKs
+- Subscription or billing flow
+- External AI or OCR API calls
+
+PDFs are opened from local file paths and processed entirely on your device. The Android APK does not request the `INTERNET` permission, making network access impossible at the OS level.
+
+---
+
+## Current Limitations
+
+Velora PDF is a focused product, not a full Acrobat replacement. Deliberately out of scope for now:
+
+- Editing existing PDF text content
+- OCR of scanned documents
+- Cryptographic digital-signature workflows
+- Page reorder / delete / merge tools
+- A full PDF-spec annotation engine — annotated PDF export is best-effort overlay drawing; the JSON sidecar remains the lossless source of truth
+- Search-match overlays are baseline-mapped rather than a full text-layer overlay
+
+These boundaries keep the app fast, local, and reliable.
+
+---
+
+## Troubleshooting
+
+### macOS blocks the app ("developer cannot be verified" / "damaged")
+
+The build is unsigned; clear the quarantine flag and reopen:
+
+```bash
+xattr -cr "/Applications/Velora PDF.app"
 ```
 
-The current copied desktop installers are:
+### Linux: `.deb` install reports missing dependencies
 
-```text
-downloads/Velora-PDF-1.0.47-aarch64.dmg
-downloads/Velora-PDF-1.0.53-x64-setup.exe
+Install through `apt` (not `dpkg -i` directly) so dependencies resolve automatically:
+
+```bash
+sudo apt install ./Velora-PDF-1.0.53-amd64.deb
 ```
 
-## Current Version
+### File dialogs don't work in browser preview
 
-```text
-1.0.53
-```
+Native open/save requires the Tauri shell — run `npm run tauri:dev`. The browser preview intentionally falls back to browser file pickers.
 
-Bundle identifier:
+### Vite warns about large chunks
 
-```text
-com.mutlukurt.velorapdf
-```
+PDF.js ships a large worker; chunks above 500 kB after minification are expected for the PDF vendor bundles and do not block production builds.
 
-Product name:
+### An exported PDF is missing advanced annotation detail
 
-```text
-Velora PDF
-```
+Keep the `annotations.velora.json` sidecar as your editable archive. PDF export is a best-effort visual composition intended for sharing, not a complete PDF annotation-spec implementation.
 
-macOS minimum version:
-
-```text
-12.0
-```
-
-Current bundle target:
-
-```text
-dmg
-```
-
-Current architecture build:
-
-```text
-aarch64
-```
+---
 
 ## Version History
+
+The complete, day-one-to-today changelog. Desktop releases (`1.0.x`) and Android WebView APK releases (`v2.1.x`) are listed in reverse chronological order.
+
+### 1.0.53 — Linux .deb release
+
+Released to bring Velora PDF to Linux desktops.
+
+- Added the `deb` bundle target and a dedicated `npm run tauri:build:deb` script; the existing macOS `dmg` and Windows `nsis` targets are unchanged.
+- Published the first Ubuntu/Debian package: `downloads/Velora-PDF-1.0.53-amd64.deb` (amd64, WebKitGTK 4.1 runtime, ~7 MB).
+- Registered sized hicolor icons (32–512 px) and a desktop launcher entry so the app integrates with Linux application menus.
+- Verified the packaged binary launches and persists data under `~/.local/share/com.mutlukurt.velorapdf/`.
+- No application code changes were required — the Rust core and frontend were already platform-agnostic.
 
 ### 1.0.53
 
@@ -1387,94 +1345,11 @@ Included:
 - Best-effort annotated PDF export.
 - macOS app icon and DMG build.
 
-## Privacy
 
-Velora PDF is designed as an offline local app.
-
-It does not include:
-
-- Login
-- User accounts
-- Cloud sync
-- Analytics
-- Tracking
-- Telemetry
-- Advertising SDKs
-- Remote database
-- Subscription or billing flow
-- External AI or OCR API calls
-
-PDFs are opened from local file paths and processed on the user’s device.
-
-## Current Limitations
-
-Velora PDF v1 is a practical MVP. It is intentionally focused on PDF reading and lightweight annotation.
-
-Current limitations:
-
-- It is not a full PDF editor.
-- It does not edit existing PDF text.
-- It does not include OCR.
-- It does not include digital signature workflows.
-- It does not include page reorder/delete/merge tools.
-- Annotation export is best-effort, not a full Acrobat-style PDF annotation engine.
-- Search result highlighting on the PDF page is not yet a full text-layer match overlay.
-- Large PDFs may need future virtualization improvements.
-
-These limitations are deliberate so the first version can stay fast, local, and reliable.
-
-## Troubleshooting
-
-### The app cannot be opened on macOS
-
-If macOS blocks the app because it is unsigned, run:
-
-```bash
-xattr -cr "/Applications/Velora PDF.app"
-```
-
-Then open the app again.
-
-### File dialogs do not work in browser preview
-
-Use:
-
-```bash
-npm run tauri dev
-```
-
-The Vite browser preview includes a browser file picker fallback, but native macOS open/save behavior requires Tauri.
-
-### PDF worker warning or large bundle warning
-
-PDF.js includes a large worker file. Vite may warn that some chunks are larger than 500 kB after minification. This is expected for the current PDF.js-based MVP and does not block production builds.
-
-### A PDF export is missing some advanced annotation behavior
-
-Save the JSON sidecar as the editable source of truth. PDF export is best-effort in v1 and is intended for practical sharing, not as a complete PDF annotation standard implementation.
-
-## Build Verification
-
-The latest local build was verified with:
-
-```bash
-npm install
-npm run build
-npm run tauri build
-```
-
-The final DMG was produced successfully and copied to:
-
-```text
-/Users/mutlu/Desktop/Velora PDF.dmg
-```
+---
 
 ## License
 
-Velora PDF is released under the MIT License.
+Velora PDF is released under the [MIT License](LICENSE).
 
-See:
-
-```text
-LICENSE
-```
+Copyright (c) Mutlu Kurt
